@@ -20,8 +20,7 @@ export const CATEGORY_GROUPS: Record<
       "Explore custom packaging solutions tailored to cosmetics, food, CBD, retail, apparel, and more — engineered for protection, presentation, and brand impact.",
     browseLabel: "Browse Industries",
     href: "/industries",
-    heroImage:
-      "https://packaginghype.com/wp-content/uploads/2025/02/slider-top-brands-1.webp",
+    heroImage: "/images/hero-packaging.jpg",
   },
   materials: {
     title: "Box by Material",
@@ -31,8 +30,7 @@ export const CATEGORY_GROUPS: Record<
       "From kraft and corrugated to rigid board and barrier pouches — pick the material that fits your product weight, shelf look, and shipping needs.",
     browseLabel: "Browse Materials",
     href: "/box-by-material",
-    heroImage:
-      "https://packaginghype.com/wp-content/uploads/2025/03/cusrom-packaging-boxes.webp",
+    heroImage: "/images/reliable-packaging-boxes.jpg",
   },
   shapes: {
     title: "Shapes & Styles",
@@ -42,7 +40,6 @@ export const CATEGORY_GROUPS: Record<
       "Mailers, rigid boxes, gift structures, display packs, and specialty formats — browse styles designed for shipping, retail, and premium presentation.",
     browseLabel: "Browse Shapes & Styles",
     href: "/shapes-styles",
-    heroImage:
-      "https://packaginghype.com/wp-content/uploads/2025/02/cosmetic-packaging.png",
+    heroImage: "/images/hero-packaging.jpg",
   },
 };

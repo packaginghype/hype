@@ -58,7 +58,7 @@ export const metadata: Metadata = {
       "Premier custom box manufacturer. Free 3D dieline proofs, low 100 unit MOQ, and free doorstep shipping across the United States.",
     images: [
       {
-        url: "https://packaginghype.com/wp-content/uploads/2025/02/slider-top-brands-1.webp",
+        url: "/images/hero-packaging.jpg",
         width: 1200,
         height: 630,
         alt: "Packaging Hype Custom Box Manufacturer",
@@ -70,7 +70,7 @@ export const metadata: Metadata = {
     title: "Packaging Hype | Custom Packaging Boxes Manufacturer",
     description:
       "Wholesale custom printed boxes, mailers, and folding cartons. Low MOQ 100 with free USA shipping.",
-    images: ["https://packaginghype.com/wp-content/uploads/2025/02/slider-top-brands-1.webp"],
+    images: ["/images/hero-packaging.jpg"],
   },
   robots: {
     index: true,

@@ -63,7 +63,7 @@ export function HeroSection() {
                   className="absolute inset-x-[8%] bottom-[6%] h-[18%] rounded-[50%] bg-[#0B1220]/10 blur-2xl"
                 />
                 <Image
-                  src="https://packaginghype.com/wp-content/uploads/2025/02/slider-top-brands-1.webp"
+                  src="/images/hero-packaging.jpg"
                   alt="Custom branded packaging boxes, mailers, and tubs"
                   fill
                   sizes="(max-width: 1024px) 100vw, 55vw"
