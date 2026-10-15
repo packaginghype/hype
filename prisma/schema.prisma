@@ -1,0 +1,162 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([email])
+}
+
+model Category {
+  id             String            @id @default(cuid())
+  name           String
+  slug           String            @unique
+  description    String?           @db.Text
+  imageUrl       String?
+  seoTitle       String?
+  seoDescription String?           @db.Text
+  sortOrder      Int               @default(0)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  products       ProductCategory[]
+
+  @@index([slug])
+}
+
+model Product {
+  id               String            @id @default(cuid())
+  wpId             Int?              @unique
+  name             String
+  slug             String            @unique
+  shortDescription String?           @db.Text
+  fullDescription  String?           @db.Text
+  sku              String?           @unique
+  startingPrice    Decimal?          @db.Decimal(10, 2)
+  priceUnit        String?           @default("per unit")
+  minQuantity      Int               @default(100)
+  leadTimeDays     String?           @default("8-10 Business Days")
+  
+  // Custom Packaging Attributes (JSON/Arrays stored or documented)
+  materialsAvailable String[]        @default([])
+  finishesAvailable  String[]        @default([])
+
+  seoTitle         String?
+  seoDescription   String?           @db.Text
+  isPublished      Boolean           @default(true)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  categories       ProductCategory[]
+  images           ProductImage[]
+  faqs             ProductFaq[]
+  quotes           QuoteRequest[]
+
+  @@index([slug])
+  @@index([isPublished])
+}
+
+model ProductCategory {
+  productId  String
+  categoryId String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([productId, categoryId])
+  @@index([categoryId])
+  @@index([productId])
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  imageUrl  String
+  altText   String   @default("")
+  sortOrder Int      @default(0)
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+}
+
+model ProductFaq {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  question  String
+  answer    String   @db.Text
+  sortOrder Int      @default(0)
+
+  @@index([productId])
+}
+
+model BlogPost {
+  id             String   @id @default(cuid())
+  title          String
+  slug           String   @unique
+  excerpt        String?  @db.Text
+  content        String   @db.Text
+  featuredImage  String?
+  author         String   @default("Packaging Hype Team")
+  publishedDate  DateTime @default(now())
+  seoTitle       String?
+  seoDescription String?  @db.Text
+  isPublished    Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([slug])
+  @@index([isPublished])
+}
+
+enum QuoteStatus {
+  PENDING
+  REVIEWED
+  PRICED
+  SENT
+  ACCEPTED
+  DECLINED
+}
+
+model QuoteRequest {
+  id              String      @id @default(cuid())
+  quoteNumber     String?     @unique
+  contactName     String
+  email           String
+  phone           String
+  
+  productId       String?
+  product         Product?    @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productName     String?     // Denormalized name in case product is custom or unlisted
+  
+  quantity        Int
+  length          Float?
+  width           Float?
+  depth           Float?
+  dimensionsUnit  String      @default("inch") // "inch" | "cm" | "mm"
+  
+  colors          String?     // e.g. "1-Color", "4/4 Full Color"
+  materialStock   String?     // e.g. "16 PT C1S", "Kraft Stock", "Corrugated"
+  message         String?     @db.Text
+  attachmentUrls  String[]    @default([])
+  
+  status          QuoteStatus @default(PENDING)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([email])
+  @@index([status])
+}

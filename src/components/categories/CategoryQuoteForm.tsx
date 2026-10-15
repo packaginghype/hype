@@ -1,0 +1,368 @@
+"use client";
+
+import React, { useState } from "react";
+import {
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  ChevronDown,
+} from "lucide-react";
+import { AddToCartButton } from "@/components/cart/AddToCartButton";
+
+interface CategoryQuoteFormProps {
+  productName: string;
+  cartItem: {
+    id: string;
+    slug: string;
+    name: string;
+    imageUrl?: string;
+    unitPrice?: number | null;
+    href?: string;
+  };
+}
+
+const fieldClass =
+  "h-11 w-full rounded-[6px] border border-[#E6E8EC] bg-[#F5F6F8] px-3.5 text-[13.5px] text-[#172455] outline-none transition-colors placeholder:text-[#9AA3AF] focus:border-[#FF5548] focus:bg-white";
+
+const selectClass =
+  "h-11 w-full appearance-none rounded-[6px] border border-[#E6E8EC] bg-[#F5F6F8] px-3.5 pr-10 text-[13.5px] text-[#172455] outline-none transition-colors focus:border-[#FF5548] focus:bg-white";
+
+export function CategoryQuoteForm({ productName, cartItem }: CategoryQuoteFormProps) {
+  const [formData, setFormData] = useState({
+    contactName: "",
+    email: "",
+    phone: "",
+    quantity: "",
+    length: "",
+    width: "",
+    depth: "",
+    colors: "1-Color",
+    materialStock: "12 PT",
+    message: "",
+  });
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">(
+    "idle"
+  );
+  const [statusMessage, setStatusMessage] = useState("");
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
+  };
+
+  const validate = () => {
+    const next: Record<string, string> = {};
+    if (!formData.contactName.trim()) next.contactName = "Required";
+    if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      next.email = "Valid email required";
+    }
+    if (!formData.phone.trim()) next.phone = "Required";
+    const qty = Number(formData.quantity);
+    if (!formData.quantity || qty < 100) next.quantity = "Min 100";
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    setIsSubmitting(true);
+    setSubmitStatus("idle");
+
+    try {
+      const res = await fetch("/api/quotes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contactName: formData.contactName,
+          email: formData.email,
+          phone: formData.phone,
+          productName,
+          quantity: Number(formData.quantity),
+          length: formData.length ? Number(formData.length) : undefined,
+          width: formData.width ? Number(formData.width) : undefined,
+          depth: formData.depth ? Number(formData.depth) : undefined,
+          dimensionsUnit: "inch",
+          colors: formData.colors,
+          materialStock: formData.materialStock,
+          message: formData.message,
+          fileName: selectedFile?.name,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSubmitStatus("success");
+        setStatusMessage(data.message || "Quote request received successfully!");
+      } else {
+        setSubmitStatus("error");
+        setStatusMessage(data.error || "Failed to submit. Please try again.");
+      }
+    } catch {
+      setSubmitStatus("error");
+      setStatusMessage("Network error. Please try again or call us directly.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (submitStatus === "success") {
+    return (
+      <div className="overflow-hidden rounded-[10px] bg-white shadow-[0_10px_40px_rgba(15,23,42,0.10)]">
+        <div className="flex h-14 items-center bg-[#FF5548] px-5 sm:px-6">
+          <h2 className="text-lg font-bold text-white">Get Custom Quote</h2>
+        </div>
+        <div className="px-5 py-12 text-center sm:px-8">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#eaf7f6] text-[#21AAA5]">
+            <CheckCircle2 className="h-8 w-8" />
+          </div>
+          <h3 className="mt-4 text-xl font-bold text-[#172455]">Quote Request Received!</h3>
+          <p className="mx-auto mt-2 max-w-md text-sm text-gray-600">{statusMessage}</p>
+          <button
+            type="button"
+            onClick={() => {
+              setSubmitStatus("idle");
+              setSelectedFile(null);
+            }}
+            className="mt-6 h-11 rounded-[6px] border border-[#172455] px-5 text-sm font-semibold text-[#172455] hover:bg-[#172455] hover:text-white"
+          >
+            Submit Another Quote
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-hidden rounded-[12px] border border-black/[0.04] bg-white shadow-[0_14px_40px_-12px_rgba(15,23,42,0.18)]">
+      {/* Coral header — fixed compact height like reference */}
+      <div className="flex min-h-[52px] flex-col justify-center gap-2.5 bg-[#FF5548] px-4 py-3 sm:h-[52px] sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-5 sm:py-0">
+        <h2 className="shrink-0 text-[16px] font-bold leading-none text-white sm:text-[17px]">
+          Get Custom Quote
+        </h2>
+
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 sm:justify-end">
+          <p className="text-[12.5px] leading-none text-white/95 sm:text-[13px]">
+            Starting from <span className="font-bold">Contact</span> per box
+          </p>
+          <p className="text-[12.5px] leading-none text-white/95 sm:text-[13px]">
+            Availability <span className="font-bold">In Stock</span>
+          </p>
+          <AddToCartButton
+            item={{
+              ...cartItem,
+              quantity: Math.max(1, Number(formData.quantity) || 1),
+            }}
+            showIcon={false}
+            className="h-8 rounded-[5px] bg-[#172455] px-3.5 text-[12.5px] font-bold hover:bg-[#0f1839]"
+          />
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit} className="bg-white px-4 py-4 sm:px-5 sm:py-5">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:gap-3.5">
+          <div>
+            <input
+              name="contactName"
+              value={formData.contactName}
+              onChange={handleChange}
+              placeholder="Name"
+              className={fieldClass}
+              aria-label="Name"
+            />
+            {errors.contactName && (
+              <p className="mt-1 text-[11px] text-[#FF5548]">{errors.contactName}</p>
+            )}
+          </div>
+          <div>
+            <input
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Email"
+              className={fieldClass}
+              aria-label="Email"
+            />
+            {errors.email && (
+              <p className="mt-1 text-[11px] text-[#FF5548]">{errors.email}</p>
+            )}
+          </div>
+          <div>
+            <input
+              name="phone"
+              type="tel"
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder="+1 123-123-1234"
+              className={fieldClass}
+              aria-label="Phone"
+            />
+            {errors.phone && (
+              <p className="mt-1 text-[11px] text-[#FF5548]">{errors.phone}</p>
+            )}
+          </div>
+          <div>
+            <input
+              name="quantity"
+              type="number"
+              min={100}
+              value={formData.quantity}
+              onChange={handleChange}
+              placeholder="Quantity"
+              className={fieldClass}
+              aria-label="Quantity"
+            />
+            {errors.quantity && (
+              <p className="mt-1 text-[11px] text-[#FF5548]">{errors.quantity}</p>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:mt-3.5 lg:grid-cols-4 lg:gap-3.5">
+          <input
+            name="length"
+            type="number"
+            step="0.01"
+            value={formData.length}
+            onChange={handleChange}
+            placeholder="Length"
+            className={fieldClass}
+            aria-label="Length"
+          />
+          <input
+            name="width"
+            type="number"
+            step="0.01"
+            value={formData.width}
+            onChange={handleChange}
+            placeholder="Width"
+            className={fieldClass}
+            aria-label="Width"
+          />
+          <input
+            name="depth"
+            type="number"
+            step="0.01"
+            value={formData.depth}
+            onChange={handleChange}
+            placeholder="Depth"
+            className={fieldClass}
+            aria-label="Depth"
+          />
+          <div className="relative">
+            <select
+              name="colors"
+              value={formData.colors}
+              onChange={handleChange}
+              className={selectClass}
+              aria-label="Colors"
+            >
+              <option>1-Color</option>
+              <option>2-Color</option>
+              <option>4/0 Full Color</option>
+              <option>4/4 Full Color Both Sides</option>
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9AA3AF]" />
+          </div>
+        </div>
+
+        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:mt-3.5 lg:grid-cols-4 lg:gap-3.5">
+          <label className="flex h-11 cursor-pointer items-center justify-center rounded-[6px] border border-[#E6E8EC] bg-[#F5F6F8] px-3.5 text-[13.5px] text-[#9AA3AF] transition-colors hover:border-[#FF5548] hover:text-[#172455]">
+            <span className="truncate">
+              {selectedFile ? selectedFile.name : "Choose File"}
+            </span>
+            <input
+              type="file"
+              className="sr-only"
+              accept=".pdf,.ai,.psd,.png,.jpg,.jpeg,.zip"
+              onChange={(e) => {
+                const file = e.target.files?.[0] || null;
+                if (file && file.size > 25 * 1024 * 1024) {
+                  setErrors((prev) => ({ ...prev, file: "Max 25 MB" }));
+                  setSelectedFile(null);
+                  return;
+                }
+                setErrors((prev) => {
+                  const next = { ...prev };
+                  delete next.file;
+                  return next;
+                });
+                setSelectedFile(file);
+              }}
+            />
+          </label>
+
+          <div className="relative">
+            <select
+              name="materialStock"
+              value={formData.materialStock}
+              onChange={handleChange}
+              className={selectClass}
+              aria-label="Material"
+            >
+              <option>12 PT</option>
+              <option>14 PT</option>
+              <option>16 PT</option>
+              <option>18 PT</option>
+              <option>Corrugated E-Flute</option>
+              <option>Corrugated B-Flute</option>
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9AA3AF]" />
+          </div>
+
+          <div className="sm:col-span-2 lg:col-span-2">
+            <input
+              name="message"
+              value={formData.message}
+              onChange={handleChange}
+              placeholder="Type a message"
+              className={fieldClass}
+              aria-label="Message"
+            />
+          </div>
+        </div>
+
+        {errors.file && (
+          <p className="mt-2 text-[11px] text-[#FF5548]">{errors.file}</p>
+        )}
+
+        {submitStatus === "error" && (
+          <div className="mt-3 flex items-start gap-2 rounded-[6px] border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>{statusMessage}</span>
+          </div>
+        )}
+
+        <div className="mt-5">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="inline-flex h-11 items-center justify-center rounded-[6px] bg-[#FF5548] px-7 text-sm font-bold text-white transition-colors hover:bg-[#e04337] disabled:opacity-60"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Submitting...
+              </>
+            ) : (
+              "Get A Quote"
+            )}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
