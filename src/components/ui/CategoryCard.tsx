@@ -21,7 +21,7 @@ export function CategoryCard({ category }: CategoryCardProps) {
             alt={`${category.name} custom packaging`}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            className="object-contain p-4 transition-transform duration-300 group-hover:scale-105"
+            className="object-contain p-4"
             loading="lazy"
           />
         ) : (
@@ -45,7 +45,7 @@ export function CategoryCard({ category }: CategoryCardProps) {
 
         <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#21AAA5] group-hover:text-[#172455] transition-colors">
           <span>Explore Options</span>
-          <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
+          <ArrowRight className="w-4 h-4" />
         </div>
       </div>
     </Link>

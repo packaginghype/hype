@@ -110,20 +110,20 @@ export function IndustrySolutionsSection({ items }: { items: IndustryItem[] }) {
                     <Link
                       key={item.id}
                       href={`/categories/${item.slug}`}
-                      className="group block focus:outline-none"
+                      className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#21AAA5] focus-visible:ring-offset-2"
                     >
-                      <div className="relative aspect-square overflow-hidden rounded-xl bg-[#F0EBE3]">
+                      <div className="relative aspect-square overflow-hidden bg-[#F0EBE3]">
                         {item.imageUrl ? (
                           <Image
                             src={item.imageUrl}
                             alt={item.label}
                             fill
                             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 25vw"
-                            className="object-contain p-5 sm:p-6"
+                            className="object-cover object-center"
                           />
                         ) : null}
                       </div>
-                      <p className="mt-3.5 text-center text-sm sm:text-[15px] font-semibold text-[#172455]">
+                      <p className="mt-3 text-center text-sm font-semibold leading-snug text-[#172455] transition-colors group-hover:text-[#FF5548] sm:text-[15px]">
                         {item.label}
                       </p>
                     </Link>

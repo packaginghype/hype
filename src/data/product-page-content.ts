@@ -9,9 +9,7 @@ export function getProductAboutContent(product: ProductItem) {
   const category = product.categoryName;
 
   return {
-    intro:
-      product.fullDescription ||
-      `At Packaging Hype, every customization option we offer — from structure and material through to print and finish — is there to make sure your ${name.toLowerCase()} reflects exactly what is inside. You choose what fits your product and brand. We execute it to a standard your customer feels before they read a single word.`,
+    intro: `At Packaging Hype, every customization option we offer — from structure and material through to print and finish — is there to make sure your ${name.toLowerCase()} reflects exactly what is inside. You choose what fits your product and brand. We execute it to a standard your customer feels before they read a single word.`,
     heading: `Custom ${name} Styles for Every Format and Price Point`,
     body: `The structure of the box changes how the product feels before it is even opened. The right style depends on where the product is sold, who is buying it, and what kind of opening experience you want to create. Box styles we offer for ${category.toLowerCase()}:`,
     styles: [

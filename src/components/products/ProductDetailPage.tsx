@@ -11,12 +11,14 @@ import { Container } from "@/components/ui/Container";
 import { CategoryProductCard } from "@/components/categories/CategoryProductCard";
 import ProductHero from "@/components/products/ProductHero";
 import { ProductFaq } from "@/components/products/ProductFaq";
+import { RichText } from "@/components/ui/RichText";
 import {
   getProductAboutContent,
   getProductFaqs,
   PRODUCT_TRUST_BADGES,
 } from "@/data/product-page-content";
 import { formatMoney } from "@/lib/cart";
+import { isEmptyHtml } from "@/lib/html";
 import type { ProductItem } from "@/types";
 
 const trustIcons = {
@@ -111,18 +113,29 @@ export default function ProductDetailPage({
             </div>
 
             <div className="reliable-scroll h-[420px] min-h-0 overflow-y-auto pr-3 sm:h-[460px] lg:h-full">
-              <p className="text-[15px] leading-[1.7] text-[#555]">{about.intro}</p>
-              <h2 className="mt-6 text-[1.45rem] font-semibold leading-snug tracking-tight text-[#FF5548] sm:text-[1.7rem]">
-                {about.heading}
-              </h2>
-              <p className="mt-4 text-[15px] leading-[1.7] text-[#555]">
-                {about.body}
-              </p>
-              <ul className="mt-4 list-disc space-y-1.5 pl-5 text-[15px] text-[#444]">
-                {about.styles.map((style) => (
-                  <li key={style}>{style}</li>
-                ))}
-              </ul>
+              {!isEmptyHtml(product.fullDescription || "") ? (
+                <RichText
+                  html={product.fullDescription || ""}
+                  className="text-[15px] leading-[1.7] text-[#555]"
+                />
+              ) : (
+                <>
+                  <p className="text-[15px] leading-[1.7] text-[#555]">
+                    {about.intro}
+                  </p>
+                  <h2 className="mt-6 text-[1.45rem] font-semibold leading-snug tracking-tight text-[#FF5548] sm:text-[1.7rem]">
+                    {about.heading}
+                  </h2>
+                  <p className="mt-4 text-[15px] leading-[1.7] text-[#555]">
+                    {about.body}
+                  </p>
+                  <ul className="mt-4 list-disc space-y-1.5 pl-5 text-[15px] text-[#444]">
+                    {about.styles.map((style) => (
+                      <li key={style}>{style}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
             </div>
           </div>
         </Container>

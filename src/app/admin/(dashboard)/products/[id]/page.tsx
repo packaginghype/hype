@@ -13,7 +13,9 @@ export default async function EditProductPage({ params }: Props) {
       where: { id },
       include: {
         categories: true,
-        images: { where: { isPrimary: true }, take: 1 },
+        images: {
+          orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }],
+        },
       },
     }),
     prisma.category.findMany({
@@ -24,8 +26,10 @@ export default async function EditProductPage({ params }: Props) {
 
   if (!product) notFound();
 
+  const primary = product.images.find((img) => img.isPrimary) || product.images[0];
+
   return (
-    <div className="space-y-6">
+    <div className="w-full max-w-none space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-[#172455]">Edit Product</h2>
         <p className="mt-1 text-sm text-gray-500">{product.name}</p>
@@ -39,6 +43,9 @@ export default async function EditProductPage({ params }: Props) {
           shortDescription: product.shortDescription,
           fullDescription: product.fullDescription,
           sku: product.sku,
+          startingPrice: product.startingPrice
+            ? Number(product.startingPrice)
+            : null,
           minQuantity: product.minQuantity,
           leadTimeDays: product.leadTimeDays,
           materialsAvailable: product.materialsAvailable,
@@ -47,8 +54,13 @@ export default async function EditProductPage({ params }: Props) {
           seoDescription: product.seoDescription,
           isPublished: product.isPublished,
           categoryIds: product.categories.map((c) => c.categoryId),
-          imageUrl: product.images[0]?.imageUrl || "",
-          imageAlt: product.images[0]?.altText || "",
+          imageUrl: primary?.imageUrl || "",
+          imageAlt: primary?.altText || "",
+          images: product.images.map((img) => ({
+            imageUrl: img.imageUrl,
+            altText: img.altText,
+            isPrimary: img.isPrimary,
+          })),
         }}
       />
     </div>

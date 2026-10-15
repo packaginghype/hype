@@ -14,7 +14,7 @@ export function HeroSection() {
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute -right-24 top-1/2 h-[420px] w-[420px] -translate-y-1/2 rounded-full bg-[#FF5548]/10 blur-3xl hero-pulse"
+          className="pointer-events-none absolute -right-24 top-1/2 h-[420px] w-[420px] -translate-y-1/2 rounded-full bg-[#FF5548]/10 blur-3xl"
         />
         <div
           aria-hidden
@@ -22,52 +22,47 @@ export function HeroSection() {
         />
 
         <Container className="relative py-12 sm:py-16 lg:py-20 xl:py-24">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
-            <div className="lg:col-span-6 xl:col-span-5 flex flex-col items-start text-left hero-fade-up">
-              <h1 className="font-heading text-[2rem] leading-[1.12] sm:text-4xl lg:text-[2.75rem] xl:text-5xl font-extrabold tracking-tight text-[#0B1220]">
+          <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-8">
+            <div className="flex flex-col items-start text-left lg:col-span-6 xl:col-span-5">
+              <h1 className="font-heading text-[2rem] font-extrabold leading-[1.12] tracking-tight text-[#0B1220] sm:text-4xl lg:text-[2.75rem] xl:text-5xl">
                 Custom Packaging Boxes Designed for{" "}
                 <span className="text-[#FF5548]">Your Brand</span>
               </h1>
 
-              <p className="mt-5 text-base sm:text-lg text-[#1F2A37]/80 leading-relaxed max-w-xl">
+              <p className="mt-5 max-w-xl text-base leading-relaxed text-[#1F2A37]/80 sm:text-lg">
                 Create packaging that protects your products and makes your brand
                 stand out — tailored sizes, premium materials, custom printing,
                 and finishes that match your product.
               </p>
 
-              <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 w-full sm:w-auto">
-                <Button
-                  href="/quote"
-                  variant="primary"
-                  size="lg"
-                  className="group shadow-lg shadow-[#FF5548]/25 hover:shadow-xl hover:shadow-[#FF5548]/30 hover:-translate-y-0.5"
-                >
+              <div className="mt-8 flex w-full flex-col items-stretch gap-3.5 sm:w-auto sm:flex-row sm:items-center">
+                <Button href="/quote" variant="primary" size="lg">
                   <span>Get Free Quote</span>
-                  <ArrowRight className="w-4 h-4 ml-1.5 transition-transform group-hover:translate-x-0.5" />
+                  <ArrowRight className="ml-1.5 h-4 w-4" />
                 </Button>
                 <Button
                   href="/products"
                   variant="outline"
                   size="lg"
-                  className="border-[#0B1220]/20 bg-white/50 backdrop-blur-sm hover:bg-white hover:border-[#0B1220]"
+                  className="border-[#0B1220]/20 bg-white/50 backdrop-blur-sm hover:border-[#0B1220] hover:bg-white"
                 >
                   Explore Products
                 </Button>
               </div>
             </div>
 
-            <div className="lg:col-span-6 xl:col-span-7 relative hero-fade-up-delay">
-              <div className="relative mx-auto w-full max-w-xl lg:max-w-none aspect-[5/4] lg:aspect-[4/3]">
+            <div className="relative lg:col-span-6 xl:col-span-7">
+              <div className="relative mx-auto aspect-[5/4] w-full max-w-xl lg:aspect-[16/11] lg:max-w-none">
                 <div
                   aria-hidden
-                  className="absolute inset-x-[8%] bottom-[6%] h-[18%] rounded-[50%] bg-[#0B1220]/10 blur-2xl"
+                  className="absolute inset-x-[10%] bottom-[4%] h-[16%] rounded-[50%] bg-[#0B1220]/10 blur-2xl"
                 />
                 <Image
-                  src="/images/hero-packaging.jpg"
-                  alt="Custom branded packaging boxes, mailers, and tubs"
+                  src="/images/hero-brands-collage.webp"
+                  alt="Custom branded packaging boxes for leading brands"
                   fill
                   sizes="(max-width: 1024px) 100vw, 55vw"
-                  className="object-contain object-bottom drop-shadow-[0_28px_40px_rgba(11,18,32,0.18)] hero-float"
+                  className="object-contain object-center drop-shadow-[0_28px_40px_rgba(11,18,32,0.18)]"
                   priority
                 />
               </div>

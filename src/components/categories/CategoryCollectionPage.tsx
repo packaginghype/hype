@@ -103,21 +103,21 @@ export function CategoryCollectionPage({
               No matches for “{query}”. Try another keyword.
             </p>
           ) : (
-            <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7">
+            <div className="mt-10 grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-4">
               {filtered.map((category) => (
                 <Link
                   key={category.id}
                   href={`/categories/${category.slug}`}
-                  className="group block focus:outline-none"
+                  className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#21AAA5] focus-visible:ring-offset-2"
                 >
-                  <div className="relative aspect-square overflow-hidden rounded-xl bg-[#F0EBE3]">
+                  <div className="relative aspect-square overflow-hidden bg-[#F0EBE3]">
                     {category.imageUrl ? (
                       <Image
                         src={category.imageUrl}
                         alt={category.name}
                         fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                        className="object-contain p-5"
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        className="object-cover object-center"
                       />
                     ) : (
                       <div className="flex h-full items-center justify-center text-slate-300">
@@ -125,7 +125,7 @@ export function CategoryCollectionPage({
                       </div>
                     )}
                   </div>
-                  <p className="mt-3.5 text-center text-sm sm:text-[15px] font-semibold text-[#172455] group-hover:text-[#FF5548] transition-colors">
+                  <p className="mt-3 text-center text-sm font-semibold leading-snug text-[#172455] transition-colors group-hover:text-[#FF5548] sm:text-[15px]">
                     Custom {category.name.replace(/^Custom\s+/i, "")}
                   </p>
                   {typeof category.productCount === "number" ? (

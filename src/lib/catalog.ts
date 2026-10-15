@@ -1,5 +1,6 @@
 import { unstable_noStore as noStore } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { stripHtml } from "@/lib/html";
 import type { CategoryGroupKey } from "@/data/category-groups";
 import type { CategoryItem, ProductItem } from "@/types";
 
@@ -64,7 +65,7 @@ function toProductItem(
     categoryName: primaryCategory?.name || "Custom Packaging",
     description:
       product.shortDescription ||
-      product.fullDescription ||
+      stripHtml(product.fullDescription || "") ||
       `${product.name} custom packaging manufactured by Packaging Hype.`,
     fullDescription: product.fullDescription || undefined,
     imageUrl: imageUrls[0] || "",
@@ -202,39 +203,81 @@ export async function getPublishedProductCount() {
   return prisma.product.count({ where: { isPublished: true } });
 }
 
+function productListWhere(options?: { categorySlug?: string; query?: string }) {
+  const q = options?.query?.trim();
+  return {
+    isPublished: true,
+    ...(options?.categorySlug
+      ? {
+          categories: {
+            some: { category: { slug: options.categorySlug } },
+          },
+        }
+      : {}),
+    ...(q
+      ? {
+          OR: [
+            { name: { contains: q, mode: "insensitive" as const } },
+            { shortDescription: { contains: q, mode: "insensitive" as const } },
+            { slug: { contains: q, mode: "insensitive" as const } },
+          ],
+        }
+      : {}),
+  };
+}
+
 export async function getAllProducts(options?: {
   categorySlug?: string;
   query?: string;
   limit?: number;
 }): Promise<ProductItem[]> {
   noStore();
-  const q = options?.query?.trim();
   const products = await prisma.product.findMany({
-    where: {
-      isPublished: true,
-      ...(options?.categorySlug
-        ? {
-            categories: {
-              some: { category: { slug: options.categorySlug } },
-            },
-          }
-        : {}),
-      ...(q
-        ? {
-            OR: [
-              { name: { contains: q, mode: "insensitive" } },
-              { shortDescription: { contains: q, mode: "insensitive" } },
-              { slug: { contains: q, mode: "insensitive" } },
-            ],
-          }
-        : {}),
-    },
+    where: productListWhere(options),
     orderBy: { updatedAt: "desc" },
     take: options?.limit,
     include: productInclude,
   });
 
   return products.map(toProductItem);
+}
+
+export async function getProductsPaged(options?: {
+  categorySlug?: string;
+  query?: string;
+  page?: number;
+  pageSize?: number;
+}): Promise<{
+  products: ProductItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}> {
+  noStore();
+  const pageSize = Math.min(48, Math.max(1, options?.pageSize ?? 16));
+  const requestedPage = Math.max(1, options?.page ?? 1);
+  const where = productListWhere(options);
+
+  const total = await prisma.product.count({ where });
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const page = Math.min(requestedPage, totalPages);
+
+  const products = await prisma.product.findMany({
+    where,
+    orderBy: { updatedAt: "desc" },
+    skip: (page - 1) * pageSize,
+    take: pageSize,
+    include: productInclude,
+  });
+
+  return {
+    products: products.map(toProductItem),
+    total,
+    page,
+    pageSize,
+    totalPages,
+  };
 }
 
 export async function getFeaturedProducts(limit = 6): Promise<ProductItem[]> {

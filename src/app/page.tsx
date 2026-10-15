@@ -1,38 +1,28 @@
 import { HeroSection } from "@/components/home/HeroSection";
-import { ReliablePackagingSection } from "@/components/home/ReliablePackagingSection";
+import { TrustBenefitsBar } from "@/components/home/TrustBenefitsBar";
 import { IndustrySolutions } from "@/components/home/IndustrySolutions";
-import { WhyChooseUs } from "@/components/home/WhyChooseUs";
+import { AboutWhoWeAre } from "@/components/home/AboutWhoWeAre";
 import { FeaturedProducts } from "@/components/home/FeaturedProducts";
-import { HowItWorks } from "@/components/home/HowItWorks";
+import { CategoryShowcase } from "@/components/home/CategoryShowcase";
+import { ReviewsSlider } from "@/components/home/ReviewsSlider";
+import { ReliablePackagingSection } from "@/components/home/ReliablePackagingSection";
 import { FaqSection } from "@/components/home/FaqSection";
-import { QuoteCTA } from "@/components/ui/QuoteCTA";
+import { BlogPreviewSection } from "@/components/home/BlogPreviewSection";
 
 export default function HomePage() {
   return (
     <>
-      {/* 1. Hero Banner */}
       <HeroSection />
-
-      {/* 2. Industry solutions carousel */}
+      <TrustBenefitsBar />
       <IndustrySolutions />
-
-      {/* 3. Brand reliability story */}
-      <ReliablePackagingSection />
-
-      {/* 3. B2B Manufacturing Value Propositions */}
-      <WhyChooseUs />
-
-      {/* 4. Verified Featured Products */}
+      <AboutWhoWeAre />
       <FeaturedProducts />
-
-      {/* 5. 4-Step Packaging Workflow */}
-      <HowItWorks />
-
-      {/* 6. Frequently Asked Questions */}
+      <CategoryShowcase />
+      <ReviewsSlider />
+      <ReliablePackagingSection />
       <FaqSection />
-
-      {/* 7. High-Converting Quote Request CTA */}
-      <QuoteCTA />
+      <BlogPreviewSection />
+      {/* Small quote band sits above footer via AppShell FooterQuoteCta */}
     </>
   );
 }
