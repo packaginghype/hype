@@ -11,6 +11,8 @@ import { AddToCartButton } from "@/components/cart/AddToCartButton";
 
 interface CategoryQuoteFormProps {
   productName: string;
+  startingFrom?: string;
+  fullWidthSubmit?: boolean;
   cartItem: {
     id: string;
     slug: string;
@@ -22,12 +24,17 @@ interface CategoryQuoteFormProps {
 }
 
 const fieldClass =
-  "h-11 w-full rounded-[6px] border border-[#E6E8EC] bg-[#F5F6F8] px-3.5 text-[13.5px] text-[#172455] outline-none transition-colors placeholder:text-[#9AA3AF] focus:border-[#FF5548] focus:bg-white";
+  "h-10 w-full rounded-[4px] border border-[#D9DDE3] bg-white px-3 text-[13px] text-[#222] outline-none transition-colors placeholder:text-[#9AA3AF] focus:border-[#FF5548] sm:h-11";
 
 const selectClass =
-  "h-11 w-full appearance-none rounded-[6px] border border-[#E6E8EC] bg-[#F5F6F8] px-3.5 pr-10 text-[13.5px] text-[#172455] outline-none transition-colors focus:border-[#FF5548] focus:bg-white";
+  "h-10 w-full appearance-none rounded-[4px] border border-[#D9DDE3] bg-white px-3 pr-9 text-[13px] text-[#222] outline-none transition-colors focus:border-[#FF5548] sm:h-11";
 
-export function CategoryQuoteForm({ productName, cartItem }: CategoryQuoteFormProps) {
+export function CategoryQuoteForm({
+  productName,
+  cartItem,
+  startingFrom = "Contact",
+  fullWidthSubmit = false,
+}: CategoryQuoteFormProps) {
   const [formData, setFormData] = useState({
     contactName: "",
     email: "",
@@ -146,18 +153,22 @@ export function CategoryQuoteForm({ productName, cartItem }: CategoryQuoteFormPr
   }
 
   return (
-    <div className="overflow-hidden rounded-[12px] border border-black/[0.04] bg-white shadow-[0_14px_40px_-12px_rgba(15,23,42,0.18)]">
-      {/* Coral header — fixed compact height like reference */}
-      <div className="flex min-h-[52px] flex-col justify-center gap-2.5 bg-[#FF5548] px-4 py-3 sm:h-[52px] sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-5 sm:py-0">
-        <h2 className="shrink-0 text-[16px] font-bold leading-none text-white sm:text-[17px]">
+    <div className="overflow-hidden rounded-[8px] border border-[#E8EAEF] bg-white shadow-[0_8px_28px_-10px_rgba(15,23,42,0.14)]">
+      {/* Coral header — exact reference bar */}
+      <div className="flex flex-col gap-2.5 bg-[#FF5548] px-3 py-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-3 sm:gap-y-2 sm:px-3.5 sm:py-2.5 lg:flex-nowrap">
+        <h2 className="shrink-0 text-[15px] font-extrabold leading-none text-white sm:text-[16px]">
           Get Custom Quote
         </h2>
 
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 sm:justify-end">
-          <p className="text-[12.5px] leading-none text-white/95 sm:text-[13px]">
-            Starting from <span className="font-bold">Contact</span> per box
+        <div className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1.5 sm:justify-end sm:gap-x-3">
+          <p className="whitespace-nowrap text-[11px] leading-none text-white sm:text-[12px]">
+            Starting from{" "}
+            <span className="text-[13px] font-extrabold sm:text-[14px]">
+              {startingFrom}
+            </span>{" "}
+            per box
           </p>
-          <p className="text-[12.5px] leading-none text-white/95 sm:text-[13px]">
+          <p className="whitespace-nowrap text-[11px] leading-none text-white sm:text-[12px]">
             Availability <span className="font-bold">In Stock</span>
           </p>
           <AddToCartButton
@@ -166,13 +177,17 @@ export function CategoryQuoteForm({ productName, cartItem }: CategoryQuoteFormPr
               quantity: Math.max(1, Number(formData.quantity) || 1),
             }}
             showIcon={false}
-            className="h-8 rounded-[5px] bg-[#172455] px-3.5 text-[12.5px] font-bold hover:bg-[#0f1839]"
+            label="Add to Cart ›"
+            className="h-8 shrink-0 rounded-[4px] bg-[#172455] px-3 text-[12px] font-bold hover:bg-[#0f1839]"
           />
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white px-4 py-4 sm:px-5 sm:py-5">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:gap-3.5">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-[#F3F4F6] px-3.5 py-3.5 sm:px-4 sm:py-4"
+      >
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-3">
           <div>
             <input
               name="contactName"
@@ -192,7 +207,7 @@ export function CategoryQuoteForm({ productName, cartItem }: CategoryQuoteFormPr
               type="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="Email"
+              placeholder="emailsample@"
               className={fieldClass}
               aria-label="Email"
             />
@@ -231,7 +246,7 @@ export function CategoryQuoteForm({ productName, cartItem }: CategoryQuoteFormPr
           </div>
         </div>
 
-        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:mt-3.5 lg:grid-cols-4 lg:gap-3.5">
+        <div className="mt-2.5 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:mt-3 lg:grid-cols-4 lg:gap-3">
           <input
             name="length"
             type="number"
@@ -275,14 +290,17 @@ export function CategoryQuoteForm({ productName, cartItem }: CategoryQuoteFormPr
               <option>4/0 Full Color</option>
               <option>4/4 Full Color Both Sides</option>
             </select>
-            <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9AA3AF]" />
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9AA3AF]" />
           </div>
         </div>
 
-        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:mt-3.5 lg:grid-cols-4 lg:gap-3.5">
-          <label className="flex h-11 cursor-pointer items-center justify-center rounded-[6px] border border-[#E6E8EC] bg-[#F5F6F8] px-3.5 text-[13.5px] text-[#9AA3AF] transition-colors hover:border-[#FF5548] hover:text-[#172455]">
-            <span className="truncate">
-              {selectedFile ? selectedFile.name : "Choose File"}
+        <div className="mt-2.5 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:mt-3 lg:grid-cols-4 lg:gap-3">
+          <label className="flex h-11 cursor-pointer items-center gap-2.5">
+            <span className="inline-flex h-9 shrink-0 items-center rounded-[4px] border border-[#C9CDD4] bg-[#EEF0F3] px-3 text-[12.5px] font-medium text-[#222] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+              Choose File
+            </span>
+            <span className="min-w-0 truncate text-[12.5px] text-[#666]">
+              {selectedFile ? selectedFile.name : "No file chosen"}
             </span>
             <input
               type="file"
@@ -320,7 +338,7 @@ export function CategoryQuoteForm({ productName, cartItem }: CategoryQuoteFormPr
               <option>Corrugated E-Flute</option>
               <option>Corrugated B-Flute</option>
             </select>
-            <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9AA3AF]" />
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9AA3AF]" />
           </div>
 
           <div className="sm:col-span-2 lg:col-span-2">
@@ -346,11 +364,16 @@ export function CategoryQuoteForm({ productName, cartItem }: CategoryQuoteFormPr
           </div>
         )}
 
-        <div className="mt-5">
+        <div className="mt-4">
           <button
             type="submit"
             disabled={isSubmitting}
-            className="inline-flex h-11 items-center justify-center rounded-[6px] bg-[#FF5548] px-7 text-sm font-bold text-white transition-colors hover:bg-[#e04337] disabled:opacity-60"
+            data-quote-submit
+            className={
+              fullWidthSubmit
+                ? "inline-flex h-11 w-full items-center justify-center rounded-[5px] bg-[#FF5548] px-7 text-[14px] font-extrabold uppercase tracking-wide text-white transition-colors hover:bg-[#e04337] disabled:opacity-60 sm:h-12 sm:text-[15px]"
+                : "inline-flex h-11 items-center justify-center rounded-[5px] bg-[#FF5548] px-7 text-sm font-bold text-white transition-colors hover:bg-[#e04337] disabled:opacity-60"
+            }
           >
             {isSubmitting ? (
               <>

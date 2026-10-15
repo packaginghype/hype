@@ -14,7 +14,9 @@ export interface ProductItem {
   categorySlug: string;
   categoryName: string;
   description: string;
+  fullDescription?: string;
   imageUrl: string;
+  imageUrls?: string[];
   startingPrice?: number | null;
   minQuantity: number;
   leadTime: string;

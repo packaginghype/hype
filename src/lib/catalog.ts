@@ -54,6 +54,8 @@ function toProductItem(
         ? product.startingPrice
         : product.startingPrice.toNumber();
 
+  const imageUrls = product.images.map((img) => img.imageUrl).filter(Boolean);
+
   return {
     id: product.id,
     name: product.name,
@@ -64,7 +66,9 @@ function toProductItem(
       product.shortDescription ||
       product.fullDescription ||
       `${product.name} custom packaging manufactured by Packaging Hype.`,
-    imageUrl: product.images[0]?.imageUrl || "",
+    fullDescription: product.fullDescription || undefined,
+    imageUrl: imageUrls[0] || "",
+    imageUrls,
     startingPrice: price,
     minQuantity: product.minQuantity,
     leadTime: product.leadTimeDays || "8-10 Business Days",
@@ -244,7 +248,7 @@ export async function getProductBySlug(slug: string): Promise<ProductItem | null
     include: {
       images: {
         orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }],
-        take: 1,
+        take: 20,
       },
       categories: {
         include: { category: true },
@@ -253,6 +257,25 @@ export async function getProductBySlug(slug: string): Promise<ProductItem | null
   });
 
   return product ? toProductItem(product) : null;
+}
+
+export async function getRelatedProducts(
+  categorySlug: string,
+  excludeSlug: string,
+  limit = 8
+): Promise<ProductItem[]> {
+  noStore();
+  const products = await prisma.product.findMany({
+    where: {
+      isPublished: true,
+      slug: { not: excludeSlug },
+      categories: { some: { category: { slug: categorySlug } } },
+    },
+    orderBy: { updatedAt: "desc" },
+    take: limit,
+    include: productInclude,
+  });
+  return products.map(toProductItem);
 }
 
 export async function getIndustryShowcaseCategories(limit = 10): Promise<CategoryItem[]> {
