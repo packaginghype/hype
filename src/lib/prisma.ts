@@ -5,23 +5,40 @@ const globalForPrisma = globalThis as unknown as {
   prismaUrl: string | undefined;
 };
 
-/** Keep Prisma's pool small so Supabase session pooler doesn't exhaust. */
+/**
+ * Vercel/serverless needs Supabase *transaction* pooler (:6543) + tiny Prisma pools.
+ * Session mode (:5432) caps at pool_size (~15) and throws EMAXCONNSESSION under load.
+ */
 function resolveDatabaseUrl(raw: string | undefined): string | undefined {
   if (!raw) return undefined;
   try {
     const url = new URL(raw);
-    if (!url.searchParams.has("connection_limit")) {
-      url.searchParams.set(
-        "connection_limit",
-        process.env.NODE_ENV === "production" ? "5" : "3"
-      );
+    const onVercel = process.env.VERCEL === "1";
+    const isProd = onVercel || process.env.NODE_ENV === "production";
+
+    // Safety net if Vercel still has session-mode URL
+    if (
+      onVercel &&
+      url.hostname.includes("pooler.supabase.com") &&
+      url.port === "5432"
+    ) {
+      url.port = "6543";
     }
+
+    if (url.port === "6543") {
+      url.searchParams.set("pgbouncer", "true");
+    }
+
+    // One connection per serverless isolate; small pool locally
+    url.searchParams.set("connection_limit", isProd ? "1" : "3");
+
     if (!url.searchParams.has("pool_timeout")) {
       url.searchParams.set("pool_timeout", "20");
     }
     if (!url.searchParams.has("connect_timeout")) {
       url.searchParams.set("connect_timeout", "30");
     }
+
     return url.toString();
   } catch {
     return raw;
@@ -52,7 +69,6 @@ export const prisma =
     log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
   });
 
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
-  globalForPrisma.prismaUrl = databaseUrl;
-}
+// Reuse across hot reloads (dev) and warm serverless instances (prod)
+globalForPrisma.prisma = prisma;
+globalForPrisma.prismaUrl = databaseUrl;
