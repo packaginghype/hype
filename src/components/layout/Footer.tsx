@@ -54,10 +54,18 @@ function FooterLink({
   return (
     <Link
       href={href}
-      className="text-[13.5px] text-white/65 transition-colors hover:text-white"
+      className="text-[13.5px] text-[#C8D0E8] transition-colors hover:text-white"
     >
       {children}
     </Link>
+  );
+}
+
+function FooterHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <h4 className="text-[11.5px] font-bold uppercase tracking-[0.14em] text-white">
+      {children}
+    </h4>
   );
 }
 
@@ -66,26 +74,26 @@ export function Footer({ categories }: { categories: CategoryItem[] }) {
   const popular = categories.slice(0, 7);
 
   return (
-    <footer className="bg-[#172455] text-white">
+    <footer className="bg-[#0F1839] text-white">
       {/* Trust strip */}
-      <div className="border-b border-white/10 bg-[#132048]">
+      <div className="border-b border-white/10 bg-[#152456]">
         <Container className="py-3.5">
           <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 sm:justify-between sm:gap-x-4">
             {TRUST_ITEMS.map(({ icon: Icon, label }) => (
               <li
                 key={label}
-                className="inline-flex items-center gap-2 text-[12.5px] font-medium text-white/80"
+                className="inline-flex items-center gap-2 text-[12.5px] font-medium text-[#D5DCEF]"
               >
-                <Icon className="h-3.5 w-3.5 shrink-0 text-[#21AAA5]" aria-hidden />
+                <Icon className="h-3.5 w-3.5 shrink-0 text-[#3BC4BF]" aria-hidden />
                 <span>{label}</span>
               </li>
             ))}
             <li className="hidden lg:block">
               <a
                 href={`tel:${VERIFIED_BUSINESS_INFO.phoneRaw}`}
-                className="inline-flex items-center gap-2 text-[12.5px] font-semibold text-white transition-colors hover:text-[#FF5548]"
+                className="inline-flex items-center gap-2 text-[12.5px] font-semibold text-white transition-colors hover:text-[#FF6B5E]"
               >
-                <Phone className="h-3.5 w-3.5 text-[#FF5548]" aria-hidden />
+                <Phone className="h-3.5 w-3.5 text-[#FF6B5E]" aria-hidden />
                 {VERIFIED_BUSINESS_INFO.phone}
               </a>
             </li>
@@ -94,19 +102,19 @@ export function Footer({ categories }: { categories: CategoryItem[] }) {
       </div>
 
       <Container className="py-12 sm:py-14 lg:py-16">
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-12 lg:gap-8">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-x-10 lg:gap-y-0">
           {/* Brand + CTA */}
-          <div className="lg:col-span-4">
+          <div className="sm:col-span-2 lg:col-span-1">
             <Link href="/" className="inline-block">
               <Image
                 src="/logo.png"
                 alt="Packaging Hype"
                 width={180}
                 height={56}
-                className="h-10 w-auto sm:h-11"
+                className="h-10 w-auto brightness-0 invert sm:h-11"
               />
             </Link>
-            <p className="mt-4 max-w-sm text-[13.5px] leading-relaxed text-white/65">
+            <p className="mt-4 max-w-sm text-[13.5px] leading-relaxed text-[#B8C2DC]">
               Custom packaging boxes built for protection, shelf presence, and
               unboxing — from kraft and corrugated to rigid and specialty packs.
             </p>
@@ -114,16 +122,16 @@ export function Footer({ categories }: { categories: CategoryItem[] }) {
             <div className="mt-5 space-y-2.5">
               <a
                 href={`tel:${VERIFIED_BUSINESS_INFO.phoneRaw}`}
-                className="flex items-center gap-2.5 text-[13.5px] font-semibold text-white transition-colors hover:text-[#FF5548]"
+                className="flex items-center gap-2.5 text-[13.5px] font-semibold text-white transition-colors hover:text-[#FF6B5E]"
               >
-                <Phone className="h-4 w-4 shrink-0 text-[#21AAA5]" aria-hidden />
+                <Phone className="h-4 w-4 shrink-0 text-[#3BC4BF]" aria-hidden />
                 {VERIFIED_BUSINESS_INFO.phone}
               </a>
               <a
                 href={`mailto:${VERIFIED_BUSINESS_INFO.email}`}
-                className="flex items-center gap-2.5 text-[13.5px] text-white/75 transition-colors hover:text-white"
+                className="flex items-center gap-2.5 text-[13.5px] text-[#C8D0E8] transition-colors hover:text-white"
               >
-                <Mail className="h-4 w-4 shrink-0 text-[#21AAA5]" aria-hidden />
+                <Mail className="h-4 w-4 shrink-0 text-[#3BC4BF]" aria-hidden />
                 {VERIFIED_BUSINESS_INFO.email}
               </a>
             </div>
@@ -138,10 +146,8 @@ export function Footer({ categories }: { categories: CategoryItem[] }) {
           </div>
 
           {/* Shop */}
-          <div className="lg:col-span-2">
-            <h4 className="text-[12px] font-bold uppercase tracking-[0.12em] text-white">
-              Shop
-            </h4>
+          <div>
+            <FooterHeading>Shop</FooterHeading>
             <ul className="mt-4 space-y-2.5">
               {SHOP_LINKS.map((link) => (
                 <li key={link.href}>
@@ -152,10 +158,8 @@ export function Footer({ categories }: { categories: CategoryItem[] }) {
           </div>
 
           {/* Popular categories */}
-          <div className="lg:col-span-3">
-            <h4 className="text-[12px] font-bold uppercase tracking-[0.12em] text-white">
-              Popular Categories
-            </h4>
+          <div>
+            <FooterHeading>Popular Categories</FooterHeading>
             <ul className="mt-4 space-y-2.5">
               {popular.map((cat) => (
                 <li key={cat.id}>
@@ -168,7 +172,7 @@ export function Footer({ categories }: { categories: CategoryItem[] }) {
                 <li>
                   <Link
                     href="/categories"
-                    className="text-[13.5px] font-semibold text-[#21AAA5] transition-colors hover:text-white"
+                    className="text-[13.5px] font-semibold text-[#3BC4BF] transition-colors hover:text-white"
                   >
                     View all categories
                   </Link>
@@ -178,10 +182,8 @@ export function Footer({ categories }: { categories: CategoryItem[] }) {
           </div>
 
           {/* Company */}
-          <div className="lg:col-span-3">
-            <h4 className="text-[12px] font-bold uppercase tracking-[0.12em] text-white">
-              Company
-            </h4>
+          <div>
+            <FooterHeading>Company</FooterHeading>
             <ul className="mt-4 space-y-2.5">
               {COMPANY_LINKS.map((link) => (
                 <li key={link.href}>
@@ -194,9 +196,9 @@ export function Footer({ categories }: { categories: CategoryItem[] }) {
       </Container>
 
       {/* Bottom bar */}
-      <div className="border-t border-white/10">
+      <div className="border-t border-white/10 bg-[#0C1430]">
         <Container className="flex flex-col gap-3 py-5 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-center text-[12px] text-white/45 sm:text-left">
+          <p className="text-center text-[12px] text-[#8A95B5] sm:text-left">
             © {currentYear} {VERIFIED_BUSINESS_INFO.name}. All rights reserved.
           </p>
           <nav aria-label="Legal">
@@ -205,7 +207,7 @@ export function Footer({ categories }: { categories: CategoryItem[] }) {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-[12px] text-white/45 transition-colors hover:text-white"
+                    className="text-[12px] text-[#8A95B5] transition-colors hover:text-white"
                   >
                     {link.label}
                   </Link>
