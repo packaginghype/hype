@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getAdminSession } from "@/lib/admin-auth";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { AdminHeader } from "@/components/admin/AdminHeader";
 
 export default async function AdminDashboardLayout({
   children,
@@ -14,14 +15,10 @@ export default async function AdminDashboardLayout({
 
   return (
     <div className="flex min-h-screen bg-[#F6F8FA]">
-      <AdminSidebar adminName={session.name} />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="border-b border-gray-200 bg-white px-6 py-4">
-          <h1 className="text-sm font-semibold text-gray-500">
-            Content & catalog management
-          </h1>
-        </header>
-        <main className="w-full min-w-0 flex-1 overflow-auto p-4 sm:p-6">
+      <AdminSidebar adminName={session.name} role={session.role} />
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+        <AdminHeader adminName={session.name} />
+        <main className="admin-surface w-full min-w-0 flex-1 overflow-y-auto p-4 sm:p-6">
           {children}
         </main>
       </div>

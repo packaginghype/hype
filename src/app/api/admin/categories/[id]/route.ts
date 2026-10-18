@@ -1,17 +1,12 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getAdminSession } from "@/lib/admin-auth";
-
-const categorySchema = z.object({
-  name: z.string().min(1),
-  slug: z.string().min(1).regex(/^[a-z0-9-]+$/),
-  description: z.string().optional().nullable(),
-  imageUrl: z.string().url().optional().nullable().or(z.literal("")),
-  seoTitle: z.string().optional().nullable(),
-  seoDescription: z.string().optional().nullable(),
-  sortOrder: z.coerce.number().int().default(0),
-});
+import {
+  adminCategorySchema,
+  categoryWriteData,
+} from "@/lib/admin-category-schema";
+import { revalidateCatalog } from "@/lib/cache";
+import { logAdminActivity } from "@/lib/admin-activity";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -20,39 +15,74 @@ async function guard() {
 }
 
 export async function PUT(request: Request, { params }: Params) {
-  if (!(await guard())) {
+  const session = await guard();
+  if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { id } = await params;
-  const parsed = categorySchema.safeParse(await request.json());
+  const parsed = adminCategorySchema.safeParse(await request.json());
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
   const data = parsed.data;
-  const category = await prisma.category.update({
-    where: { id },
-    data: {
-      name: data.name,
-      slug: data.slug,
-      description: data.description || null,
-      imageUrl: data.imageUrl || null,
-      seoTitle: data.seoTitle || null,
-      seoDescription: data.seoDescription || null,
-      sortOrder: data.sortOrder,
-    },
+  const faqs = (data.faqs || []).filter((f) => f.question.trim());
+
+  const category = await prisma.$transaction(async (tx) => {
+    await tx.categoryFaq.deleteMany({ where: { categoryId: id } });
+    return tx.category.update({
+      where: { id },
+      data: {
+        ...categoryWriteData(data),
+        faqs: {
+          create: faqs.map((faq, index) => ({
+            question: faq.question.trim(),
+            answer: faq.answer || "",
+            sortOrder: index,
+          })),
+        },
+      },
+    });
   });
 
+  await logAdminActivity(session, {
+    action: "UPDATE",
+    entityType: "category",
+    entityId: category.id,
+    entityLabel: category.name,
+    summary: `${session.name} updated category "${category.name}"`,
+  });
+
+  revalidateCatalog();
   return NextResponse.json({ category });
 }
 
 export async function DELETE(_request: Request, { params }: Params) {
-  if (!(await guard())) {
+  const session = await guard();
+  if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { id } = await params;
+  const existing = await prisma.category.findUnique({
+    where: { id },
+    select: { id: true, name: true },
+  });
+  if (!existing) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
   await prisma.category.delete({ where: { id } });
-  return NextResponse.json({ ok: true });
+
+  await logAdminActivity(session, {
+    action: "DELETE",
+    entityType: "category",
+    entityId: existing.id,
+    entityLabel: existing.name,
+    summary: `${session.name} deleted category "${existing.name}"`,
+  });
+
+  revalidateCatalog();
+  return NextResponse.json({ success: true });
 }

@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     "Browse our verified catalog of custom packaging boxes, folding cartons, corrugated mailers, and flexible barrier packaging. Wholesale pricing with low 100 MOQ.",
 };
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 const PAGE_SIZE = 16;
 

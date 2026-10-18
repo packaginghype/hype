@@ -3,8 +3,23 @@ import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
+import type { HomePageData } from "@/lib/home-page-schema";
+import { HOME_PAGE_DEFAULTS } from "@/lib/home-page-schema";
 
-export function HeroSection() {
+type Props = Pick<
+  HomePageData,
+  "heroHeading" | "heroHighlight" | "heroSubtext" | "heroBtnLabel" | "heroBtnHref" | "heroImageUrl" | "heroImageAlt"
+>;
+
+export function HeroSection({
+  heroHeading = HOME_PAGE_DEFAULTS.heroHeading,
+  heroHighlight = HOME_PAGE_DEFAULTS.heroHighlight,
+  heroSubtext = HOME_PAGE_DEFAULTS.heroSubtext,
+  heroBtnLabel = HOME_PAGE_DEFAULTS.heroBtnLabel,
+  heroBtnHref = HOME_PAGE_DEFAULTS.heroBtnHref,
+  heroImageUrl = HOME_PAGE_DEFAULTS.heroImageUrl,
+  heroImageAlt = HOME_PAGE_DEFAULTS.heroImageAlt,
+}: Partial<Props> = {}) {
   return (
     <section className="relative overflow-hidden">
       <div className="relative isolate overflow-hidden bg-[#D8EDE3] rounded-br-[3rem] sm:rounded-br-[4.5rem] lg:rounded-br-[6rem]">
@@ -21,32 +36,24 @@ export function HeroSection() {
           className="pointer-events-none absolute -left-16 -bottom-20 h-64 w-64 rounded-full bg-white/40 blur-2xl"
         />
 
-        <Container className="relative py-12 sm:py-16 lg:py-20 xl:py-24">
-          <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-8">
+        <Container className="relative py-5 sm:py-6 lg:py-7 xl:py-8">
+          <div className="grid grid-cols-1 items-center gap-5 lg:grid-cols-12 lg:gap-6">
             <div className="flex flex-col items-start text-left lg:col-span-6 xl:col-span-5">
               <h1 className="font-heading text-[2rem] font-extrabold leading-[1.12] tracking-tight text-[#0B1220] sm:text-4xl lg:text-[2.75rem] xl:text-5xl">
-                Custom Packaging Boxes Designed for{" "}
-                <span className="text-[#FF5548]">Your Brand</span>
+                {heroHeading}{" "}
+                <span className="text-[#FF5548]">{heroHighlight}</span>
               </h1>
 
-              <p className="mt-5 max-w-xl text-base leading-relaxed text-[#1F2A37]/80 sm:text-lg">
-                Create packaging that protects your products and makes your brand
-                stand out — tailored sizes, premium materials, custom printing,
-                and finishes that match your product.
-              </p>
+              {heroSubtext && (
+                <p className="mt-3 max-w-xl text-base leading-relaxed text-[#1F2A37]/80 sm:mt-4 sm:text-lg">
+                  {heroSubtext}
+                </p>
+              )}
 
-              <div className="mt-8 flex w-full flex-col items-stretch gap-3.5 sm:w-auto sm:flex-row sm:items-center">
-                <Button href="/quote" variant="primary" size="lg">
-                  <span>Get Free Quote</span>
+              <div className="mt-5 sm:mt-6">
+                <Button href={heroBtnHref || "/quote"} variant="primary" size="lg">
+                  <span>{heroBtnLabel || "Get Free Quote"}</span>
                   <ArrowRight className="ml-1.5 h-4 w-4" />
-                </Button>
-                <Button
-                  href="/products"
-                  variant="outline"
-                  size="lg"
-                  className="border-[#0B1220]/20 bg-white/50 backdrop-blur-sm hover:border-[#0B1220] hover:bg-white"
-                >
-                  Explore Products
                 </Button>
               </div>
             </div>
@@ -58,8 +65,8 @@ export function HeroSection() {
                   className="absolute inset-x-[10%] bottom-[4%] h-[16%] rounded-[50%] bg-[#0B1220]/10 blur-2xl"
                 />
                 <Image
-                  src="/images/hero-brands-collage.webp"
-                  alt="Custom branded packaging boxes for leading brands"
+                  src={heroImageUrl || "/images/hero-brands-collage.webp"}
+                  alt={heroImageAlt || "Custom branded packaging boxes"}
                   fill
                   sizes="(max-width: 1024px) 100vw, 55vw"
                   className="object-contain object-center drop-shadow-[0_28px_40px_rgba(11,18,32,0.18)]"

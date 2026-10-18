@@ -8,15 +8,51 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum AdminRole {
+  SUPER_ADMIN
+  STAFF
+}
+
 model AdminUser {
-  id           String   @id @default(cuid())
-  email        String   @unique
+  id           String    @id @default(cuid())
+  email        String    @unique
   name         String
   passwordHash String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  role         AdminRole @default(STAFF)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  activityLogs ActivityLog[]
 
   @@index([email])
+  @@index([role])
+}
+
+model ActivityLog {
+  id          String     @id @default(cuid())
+  actorId     String?
+  actor       AdminUser? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  actorName   String
+  actorEmail  String
+  action      String
+  entityType  String
+  entityId    String?
+  entityLabel String?
+  summary     String     @db.Text
+  meta        Json?
+  createdAt   DateTime   @default(now())
+
+  @@index([createdAt])
+  @@index([actorId])
+  @@index([entityType])
+  @@index([action])
+}
+
+enum CategoryGroup {
+  categories
+  industries
+  materials
+  shapes
 }
 
 model Category {
@@ -27,13 +63,70 @@ model Category {
   imageUrl       String?
   seoTitle       String?
   seoDescription String?           @db.Text
+  group          CategoryGroup     @default(categories)
   sortOrder      Int               @default(0)
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 
+  // Pricing
+  originalPrice    Decimal?        @db.Decimal(10, 2)
+  discountedPrice  Decimal?        @db.Decimal(10, 2)
+  inStock          Boolean         @default(true)
+
+  // Banner
+  bannerEnabled       Boolean      @default(true)
+  bannerQuoteEnabled  Boolean      @default(true)
+  bannerHeading       String?      @db.Text
+  bannerDescription   String?      @db.Text
+  bannerImageUrl      String?
+  bannerImageAlt      String?
+  bannerImageTitle    String?
+
+  // Thumbnail / card image meta
+  imageAlt         String?
+  imageTitle       String?
+
+  // Widgets + listing
+  widgetsContent   String?         @db.Text
+  listingHeading   String?
+  listingText      String?         @db.Text
+
+  // Page modules
+  navbarEnabled       Boolean      @default(true)
+  featureEnabled      Boolean      @default(true)
+  pageScrollEnabled   Boolean      @default(true)
+  pageScrollImageUrl  String?
+  pageScrollImageAlt  String?
+  pageScrollImageTitle String?
+  pageScrollContent   String?      @db.Text
+
+  // FAQs block
+  faqsHeading      String?
+  faqsSubheading   String?
+
+  // SEO extras
+  seoEnabled       Boolean         @default(true)
+  seoKeywords      String?         @db.Text
+  seoScript        String?         @db.Text
+  isPublished      Boolean         @default(true)
+
   products       ProductCategory[]
+  faqs           CategoryFaq[]
 
   @@index([slug])
+  @@index([group])
+  @@index([isPublished])
+}
+
+model CategoryFaq {
+  id         String   @id @default(cuid())
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  question   String
+  answer     String   @db.Text
+  sortOrder  Int      @default(0)
+
+  @@index([categoryId])
 }
 
 model Product {
@@ -48,13 +141,67 @@ model Product {
   priceUnit        String?           @default("per unit")
   minQuantity      Int               @default(100)
   leadTimeDays     String?           @default("8-10 Business Days")
-  
+
   // Custom Packaging Attributes (JSON/Arrays stored or documented)
   materialsAvailable String[]        @default([])
   finishesAvailable  String[]        @default([])
 
+  // Pricing CMS
+  originalPrice      Decimal?        @db.Decimal(10, 2)
+  discountedPrice    Decimal?        @db.Decimal(10, 2)
+  inStock            Boolean         @default(true)
+  materialCategoryId String?
+  breadcrumbCategoryId String?
+  breadcrumbCategoryIds String[] @default([])
+
+  // Thumbnail
+  thumbnailUrl            String?
+  thumbnailAlt            String?
+  thumbnailTitle          String?
+  thumbnailSubDescription String?    @db.Text
+
+  // Video
+  videoUrl           String?
+  videoThumbnailUrl  String?
+  videoDescription   String?         @db.Text
+
+  // Product detail block
+  detailHeading           String?
+  detailShortDescription  String?    @db.Text
+
+  // Specifications block
+  specsHeading       String?
+  specsDescription   String?         @db.Text
+  specsTableHeading  String?
+
+  // Widgets + related
+  widgetsContent                String? @db.Text
+  relevantProductsHeading       String?
+  relevantProductsDescription   String? @db.Text
+  relatedBlogsHeading           String? @default("Related Articles & Packaging Guides")
+  relatedBlogsDescription       String? @db.Text
+  relatedBlogIds                String[] @default([])
+
+  // Page scroll
+  pageScrollEnabled     Boolean      @default(true)
+  pageScrollImageUrl    String?
+  pageScrollImageAlt    String?
+  pageScrollImageTitle  String?
+  pageScrollContent     String?      @db.Text
+
+  // FAQs + modules
+  faqsHeading      String?
+  faqsSubheading   String?
+  merchantImageUrls String[]         @default([])
+  navbarEnabled    Boolean           @default(true)
+  featureEnabled   Boolean           @default(true)
+
+  // SEO
+  seoEnabled       Boolean           @default(true)
   seoTitle         String?
+  seoKeywords      String?           @db.Text
   seoDescription   String?           @db.Text
+  seoScript        String?           @db.Text
   isPublished      Boolean           @default(true)
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
@@ -62,6 +209,9 @@ model Product {
   categories       ProductCategory[]
   images           ProductImage[]
   faqs             ProductFaq[]
+  specs            ProductSpec[]
+  relatedFrom      ProductRelated[]  @relation("ProductRelatedFrom")
+  relatedTo        ProductRelated[]  @relation("ProductRelatedTo")
   quotes           QuoteRequest[]
 
   @@index([slug])
@@ -85,11 +235,34 @@ model ProductImage {
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   imageUrl  String
   altText   String   @default("")
+  title     String   @default("")
   sortOrder Int      @default(0)
   isPrimary Boolean  @default(false)
   createdAt DateTime @default(now())
 
   @@index([productId])
+}
+
+model ProductSpec {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  heading   String
+  details   String  @db.Text
+  sortOrder Int     @default(0)
+
+  @@index([productId])
+}
+
+model ProductRelated {
+  productId        String
+  relatedProductId String
+  product          Product @relation("ProductRelatedFrom", fields: [productId], references: [id], onDelete: Cascade)
+  relatedProduct   Product @relation("ProductRelatedTo", fields: [relatedProductId], references: [id], onDelete: Cascade)
+  sortOrder        Int     @default(0)
+
+  @@id([productId, relatedProductId])
+  @@index([relatedProductId])
 }
 
 model ProductFaq {
@@ -104,22 +277,33 @@ model ProductFaq {
 }
 
 model BlogPost {
-  id             String   @id @default(cuid())
-  title          String
-  slug           String   @unique
-  excerpt        String?  @db.Text
-  content        String   @db.Text
-  featuredImage  String?
-  author         String   @default("Packaging Hype Team")
-  publishedDate  DateTime @default(now())
-  seoTitle       String?
-  seoDescription String?  @db.Text
-  isPublished    Boolean  @default(true)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id                   String   @id @default(cuid())
+  title                String
+  slug                 String   @unique
+  excerpt              String?  @db.Text
+  content              String   @db.Text
+  featuredEnabled      Boolean  @default(false)
+  featuredImage        String?
+  bannerImageUrl       String?
+  bannerImageAlt       String?
+  bannerImageTitle     String?
+  thumbnailImageUrl    String?
+  thumbnailImageAlt    String?
+  thumbnailImageTitle  String?
+  author               String   @default("Packaging Hype Team")
+  publishedDate        DateTime @default(now())
+  seoTitle             String?
+  seoKeywords          String?  @db.Text
+  seoDescription       String?  @db.Text
+  seoScript            String?  @db.Text
+  isPublished          Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 
   @@index([slug])
   @@index([isPublished])
+  @@index([featuredEnabled])
+  @@index([publishedDate])
 }
 
 enum QuoteStatus {
@@ -159,4 +343,15 @@ model QuoteRequest {
 
   @@index([email])
   @@index([status])
+}
+
+/// Generic key-value CMS store for static pages (home, about, etc.)
+/// `key` is the page identifier e.g. "home", `data` is JSON blob.
+model SitePage {
+  id        String   @id @default(cuid())
+  key       String   @unique  // e.g. "home"
+  data      Json     @default("{}")
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
 }

@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Mail, Phone, Truck, Package, Clock } from "lucide-react";
+import { ArrowRight, Mail, Phone } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { VERIFIED_BUSINESS_INFO } from "@/data/verified-data";
 import type { CategoryItem } from "@/types";
@@ -29,21 +29,6 @@ const LEGAL_LINKS = [
   { label: "Returns", href: "/refund-return-policy" },
 ] as const;
 
-const TRUST_ITEMS = [
-  {
-    icon: Package,
-    label: `MOQ ${VERIFIED_BUSINESS_INFO.moq}`,
-  },
-  {
-    icon: Clock,
-    label: VERIFIED_BUSINESS_INFO.turnaround,
-  },
-  {
-    icon: Truck,
-    label: VERIFIED_BUSINESS_INFO.shipping,
-  },
-] as const;
-
 function FooterLink({
   href,
   children,
@@ -54,7 +39,7 @@ function FooterLink({
   return (
     <Link
       href={href}
-      className="text-[13.5px] text-[#C8D0E8] transition-colors hover:text-white"
+      className="text-[13.5px] text-[#2F3A4F]/75 transition-colors hover:text-[#FF5548]"
     >
       {children}
     </Link>
@@ -63,7 +48,7 @@ function FooterLink({
 
 function FooterHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h4 className="text-[11.5px] font-bold uppercase tracking-[0.14em] text-white">
+    <h4 className="text-[11.5px] font-bold uppercase tracking-[0.14em] text-[#172455]">
       {children}
     </h4>
   );
@@ -74,34 +59,21 @@ export function Footer({ categories }: { categories: CategoryItem[] }) {
   const popular = categories.slice(0, 7);
 
   return (
-    <footer className="bg-[#0F1839] text-white">
-      {/* Trust strip */}
-      <div className="border-b border-white/10 bg-[#152456]">
-        <Container className="py-3.5">
-          <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 sm:justify-between sm:gap-x-4">
-            {TRUST_ITEMS.map(({ icon: Icon, label }) => (
-              <li
-                key={label}
-                className="inline-flex items-center gap-2 text-[12.5px] font-medium text-[#D5DCEF]"
-              >
-                <Icon className="h-3.5 w-3.5 shrink-0 text-[#3BC4BF]" aria-hidden />
-                <span>{label}</span>
-              </li>
-            ))}
-            <li className="hidden lg:block">
-              <a
-                href={`tel:${VERIFIED_BUSINESS_INFO.phoneRaw}`}
-                className="inline-flex items-center gap-2 text-[12.5px] font-semibold text-white transition-colors hover:text-[#FF6B5E]"
-              >
-                <Phone className="h-3.5 w-3.5 text-[#FF6B5E]" aria-hidden />
-                {VERIFIED_BUSINESS_INFO.phone}
-              </a>
-            </li>
-          </ul>
-        </Container>
-      </div>
+    <footer className="relative overflow-hidden text-[#172455]">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_15%_20%,rgba(255,255,255,0.55),transparent_55%),radial-gradient(ellipse_50%_45%_at_90%_70%,rgba(255,85,72,0.1),transparent_60%),linear-gradient(160deg,#E4F4EB_0%,#D8EDE3_45%,#C9E4D4_100%)]"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-24 top-1/3 h-[360px] w-[360px] rounded-full bg-[#FF5548]/10 blur-3xl"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-white/45 blur-2xl"
+      />
 
-      <Container className="py-12 sm:py-14 lg:py-16">
+      <Container className="relative py-12 sm:py-14 lg:py-16">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-x-10 lg:gap-y-0">
           {/* Brand + CTA */}
           <div className="sm:col-span-2 lg:col-span-1">
@@ -111,10 +83,10 @@ export function Footer({ categories }: { categories: CategoryItem[] }) {
                 alt="Packaging Hype"
                 width={180}
                 height={56}
-                className="h-10 w-auto brightness-0 invert sm:h-11"
+                className="h-10 w-auto sm:h-11"
               />
             </Link>
-            <p className="mt-4 max-w-sm text-[13.5px] leading-relaxed text-[#B8C2DC]">
+            <p className="mt-4 max-w-sm text-[13.5px] leading-relaxed text-[#2F3A4F]/80">
               Custom packaging boxes built for protection, shelf presence, and
               unboxing — from kraft and corrugated to rigid and specialty packs.
             </p>
@@ -122,16 +94,16 @@ export function Footer({ categories }: { categories: CategoryItem[] }) {
             <div className="mt-5 space-y-2.5">
               <a
                 href={`tel:${VERIFIED_BUSINESS_INFO.phoneRaw}`}
-                className="flex items-center gap-2.5 text-[13.5px] font-semibold text-white transition-colors hover:text-[#FF6B5E]"
+                className="flex items-center gap-2.5 text-[13.5px] font-semibold text-[#172455] transition-colors hover:text-[#FF5548]"
               >
-                <Phone className="h-4 w-4 shrink-0 text-[#3BC4BF]" aria-hidden />
+                <Phone className="h-4 w-4 shrink-0 text-[#21AAA5]" aria-hidden />
                 {VERIFIED_BUSINESS_INFO.phone}
               </a>
               <a
                 href={`mailto:${VERIFIED_BUSINESS_INFO.email}`}
-                className="flex items-center gap-2.5 text-[13.5px] text-[#C8D0E8] transition-colors hover:text-white"
+                className="flex items-center gap-2.5 text-[13.5px] text-[#2F3A4F]/80 transition-colors hover:text-[#172455]"
               >
-                <Mail className="h-4 w-4 shrink-0 text-[#3BC4BF]" aria-hidden />
+                <Mail className="h-4 w-4 shrink-0 text-[#21AAA5]" aria-hidden />
                 {VERIFIED_BUSINESS_INFO.email}
               </a>
             </div>
@@ -161,18 +133,24 @@ export function Footer({ categories }: { categories: CategoryItem[] }) {
           <div>
             <FooterHeading>Popular Categories</FooterHeading>
             <ul className="mt-4 space-y-2.5">
-              {popular.map((cat) => (
-                <li key={cat.id}>
-                  <FooterLink href={`/categories/${cat.slug}`}>
-                    {cat.name}
-                  </FooterLink>
+              {popular.length > 0 ? (
+                popular.map((cat) => (
+                  <li key={cat.id}>
+                    <FooterLink href={`/categories/${cat.slug}`}>
+                      {cat.name}
+                    </FooterLink>
+                  </li>
+                ))
+              ) : (
+                <li className="text-[13px] text-[#2F3A4F]/60">
+                  No categories added yet
                 </li>
-              ))}
+              )}
               {categories.length > popular.length ? (
                 <li>
                   <Link
                     href="/categories"
-                    className="text-[13.5px] font-semibold text-[#3BC4BF] transition-colors hover:text-white"
+                    className="text-[13.5px] font-semibold text-[#21AAA5] transition-colors hover:text-[#FF5548]"
                   >
                     View all categories
                   </Link>
@@ -196,9 +174,9 @@ export function Footer({ categories }: { categories: CategoryItem[] }) {
       </Container>
 
       {/* Bottom bar */}
-      <div className="border-t border-white/10 bg-[#0C1430]">
+      <div className="relative border-t border-[#B9D6C6]/70 bg-white/30">
         <Container className="flex flex-col gap-3 py-5 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-center text-[12px] text-[#8A95B5] sm:text-left">
+          <p className="text-center text-[12px] text-[#4B5568] sm:text-left">
             © {currentYear} {VERIFIED_BUSINESS_INFO.name}. All rights reserved.
           </p>
           <nav aria-label="Legal">
@@ -207,7 +185,7 @@ export function Footer({ categories }: { categories: CategoryItem[] }) {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-[12px] text-[#8A95B5] transition-colors hover:text-white"
+                    className="text-[12px] text-[#4B5568] transition-colors hover:text-[#FF5548]"
                   >
                     {link.label}
                   </Link>

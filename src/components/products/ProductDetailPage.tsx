@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   Award,
   Headphones,
@@ -19,7 +20,7 @@ import {
 } from "@/data/product-page-content";
 import { formatMoney } from "@/lib/cart";
 import { isEmptyHtml } from "@/lib/html";
-import type { ProductItem } from "@/types";
+import type { ProductItem, RelatedBlogItem } from "@/types";
 
 const trustIcons = {
   badge: Award,
@@ -32,16 +33,23 @@ const trustIcons = {
 export default function ProductDetailPage({
   product,
   related,
+  relatedBlogs = [],
 }: {
   product: ProductItem;
   related: ProductItem[];
+  relatedBlogs?: RelatedBlogItem[];
 }) {
   const about = getProductAboutContent(product);
   const faqs = getProductFaqs(product);
+  const cms = product.cms;
   const startingFrom = product.startingPrice
     ? formatMoney(product.startingPrice)
     : "Contact";
   const contentWidth = "max-w-[1180px]";
+  const detailHtml =
+    cms?.detailShortDescription || product.fullDescription || "";
+  const scrollOn = cms?.pageScrollEnabled !== false;
+  const specs = cms?.specs || [];
 
   return (
     <div className="bg-white">
@@ -51,14 +59,18 @@ export default function ProductDetailPage({
             product={product}
             startingFrom={startingFrom}
             breadcrumbs={[
-              {
-                label: product.categoryName
-                  .toLowerCase()
-                  .startsWith("custom ")
-                  ? product.categoryName
-                  : `Custom ${product.categoryName}`,
-                href: `/categories/${product.categorySlug}`,
-              },
+              ...(product.breadcrumbs && product.breadcrumbs.length > 0
+                ? product.breadcrumbs
+                : [
+                    {
+                      label: product.categoryName
+                        .toLowerCase()
+                        .startsWith("custom ")
+                        ? product.categoryName
+                        : `Custom ${product.categoryName}`,
+                      href: `/categories/${product.categorySlug}`,
+                    },
+                  ]),
               { label: product.name },
             ]}
           />
@@ -95,12 +107,18 @@ export default function ProductDetailPage({
 
       <section className="bg-white py-10 sm:py-14">
         <Container className={contentWidth}>
+          {cms?.detailHeading ? (
+            <h2 className="mb-6 font-heading text-2xl font-extrabold tracking-tight text-[#172455] sm:text-3xl">
+              {cms.detailHeading}
+            </h2>
+          ) : null}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8 lg:h-[480px] xl:h-[520px]">
             <div className="relative aspect-[5/4] min-h-0 overflow-hidden rounded-[16px] bg-[#F3F1EE] lg:aspect-auto lg:h-full">
               {product.imageUrl ? (
                 <Image
                   src={product.imageUrl}
-                  alt={product.name}
+                  alt={cms?.thumbnailAlt || product.name}
+                  title={cms?.thumbnailTitle || product.name}
                   fill
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   className="object-cover object-center"
@@ -113,9 +131,9 @@ export default function ProductDetailPage({
             </div>
 
             <div className="reliable-scroll h-[420px] min-h-0 overflow-y-auto pr-3 sm:h-[460px] lg:h-full">
-              {!isEmptyHtml(product.fullDescription || "") ? (
+              {!isEmptyHtml(detailHtml) ? (
                 <RichText
-                  html={product.fullDescription || ""}
+                  html={detailHtml}
                   className="text-[15px] leading-[1.7] text-[#555]"
                 />
               ) : (
@@ -129,44 +147,225 @@ export default function ProductDetailPage({
                   <p className="mt-4 text-[15px] leading-[1.7] text-[#555]">
                     {about.body}
                   </p>
-                  <ul className="mt-4 list-disc space-y-1.5 pl-5 text-[15px] text-[#444]">
-                    {about.styles.map((style) => (
-                      <li key={style}>{style}</li>
-                    ))}
-                  </ul>
                 </>
               )}
+              {!isEmptyHtml(cms?.thumbnailSubDescription || "") ? (
+                <div className="mt-6">
+                  <RichText
+                    html={cms!.thumbnailSubDescription!}
+                    className="text-[15px] leading-[1.7] text-[#555]"
+                  />
+                </div>
+              ) : null}
             </div>
           </div>
         </Container>
       </section>
 
-      <section className="bg-[#F6F8FA] py-12 sm:py-16">
-        <Container className={contentWidth}>
-          <div className="mx-auto max-w-3xl text-center">
-            <h2 className="font-heading text-2xl font-extrabold tracking-tight text-[#111] sm:text-3xl">
-              Frequently Asked Questions
-            </h2>
-            <p className="mt-2 text-sm text-[#888] sm:text-[15px]">
-              Here are some common questions about {product.name.toLowerCase()}.
-            </p>
-          </div>
-          <div className="mx-auto mt-8 max-w-3xl">
-            <ProductFaq items={faqs} />
-          </div>
-        </Container>
-      </section>
+      {cms?.videoUrl ? (
+        <section className="bg-[#F6F8FA] py-12 sm:py-16">
+          <Container className={contentWidth}>
+            <div className="grid gap-6 lg:grid-cols-2 lg:items-center">
+              <div className="overflow-hidden rounded-[12px] bg-black">
+                <video
+                  controls
+                  poster={cms.videoThumbnailUrl || undefined}
+                  className="aspect-video w-full"
+                  preload="metadata"
+                >
+                  <source src={cms.videoUrl} type="video/mp4" />
+                </video>
+              </div>
+              {cms.videoDescription ? (
+                <p className="text-[15px] leading-relaxed text-[#555]">
+                  {cms.videoDescription}
+                </p>
+              ) : null}
+            </div>
+          </Container>
+        </section>
+      ) : null}
 
-      {related.length > 0 ? (
+      {(cms?.specsHeading || specs.length > 0) && (
         <section className="bg-white py-12 sm:py-16">
           <Container className={contentWidth}>
+            {cms?.specsHeading ? (
+              <h2 className="font-heading text-2xl font-extrabold tracking-tight text-[#172455] sm:text-3xl">
+                {cms.specsHeading}
+              </h2>
+            ) : null}
+            {!isEmptyHtml(cms?.specsDescription || "") ? (
+              <div className="mt-4 max-w-3xl">
+                <RichText
+                  html={cms!.specsDescription!}
+                  className="text-[15px] leading-[1.7] text-[#555]"
+                />
+              </div>
+            ) : null}
+            {cms?.specsTableHeading ? (
+              <h3 className="mt-8 text-lg font-bold text-[#172455]">
+                {cms.specsTableHeading}
+              </h3>
+            ) : null}
+            {specs.length > 0 ? (
+              <div className="mt-4 overflow-hidden rounded-[8px] border border-[#E5E7EB]">
+                <table className="min-w-full text-left text-sm">
+                  <tbody>
+                    {specs.map((row) => (
+                      <tr
+                        key={`${row.heading}-${row.details.slice(0, 12)}`}
+                        className="border-b border-[#E5E7EB] last:border-b-0"
+                      >
+                        <th className="w-[34%] bg-[#F6F8FA] px-4 py-3 font-bold text-[#172455]">
+                          {row.heading}
+                        </th>
+                        <td className="px-4 py-3 text-[#4B5563]">{row.details}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : null}
+          </Container>
+        </section>
+      )}
+
+      {scrollOn &&
+      (cms?.pageScrollImageUrl || !isEmptyHtml(cms?.pageScrollContent || "")) ? (
+        <section className="bg-[#F6F8FA] py-12 sm:py-16">
+          <Container className={contentWidth}>
+            <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
+              {cms?.pageScrollImageUrl ? (
+                <div className="relative aspect-[616/479] overflow-hidden rounded-[12px] bg-white">
+                  <Image
+                    src={cms.pageScrollImageUrl}
+                    alt={cms.pageScrollImageAlt || product.name}
+                    title={cms.pageScrollImageTitle || product.name}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                  />
+                </div>
+              ) : null}
+              {!isEmptyHtml(cms?.pageScrollContent || "") ? (
+                <RichText
+                  html={cms!.pageScrollContent!}
+                  className="text-[15px] leading-[1.7] text-[#555]"
+                />
+              ) : null}
+            </div>
+          </Container>
+        </section>
+      ) : null}
+
+      {faqs.length > 0 ? (
+        <section className="bg-white py-12 sm:py-16">
+          <Container className={contentWidth}>
+            <div className="mx-auto max-w-3xl text-center">
+              <h2 className="font-heading text-2xl font-extrabold tracking-tight text-[#111] sm:text-3xl">
+                {cms?.faqsHeading || "Frequently Asked Questions"}
+              </h2>
+              <p className="mt-2 text-sm text-[#888] sm:text-[15px]">
+                {cms?.faqsSubheading ||
+                  `Here are some common questions about ${product.name.toLowerCase()}.`}
+              </p>
+            </div>
+            <div className="mx-auto mt-8 max-w-3xl">
+              <ProductFaq items={faqs} />
+            </div>
+          </Container>
+        </section>
+      ) : null}
+
+      {related.length > 0 ? (
+        <section className="bg-[#F6F8FA] py-12 sm:py-16">
+          <Container className={contentWidth}>
             <h2 className="text-center font-heading text-2xl font-extrabold tracking-tight text-[#111] sm:text-3xl">
-              Related Products
+              {cms?.relevantProductsHeading || "Related Products"}
             </h2>
+            {cms?.relevantProductsDescription ? (
+              <p className="mx-auto mt-2 max-w-2xl text-center text-sm text-[#666]">
+                {cms.relevantProductsDescription}
+              </p>
+            ) : null}
             <div className="mt-8 grid grid-cols-2 gap-5 sm:gap-6 lg:grid-cols-4">
               {related.slice(0, 4).map((item) => (
                 <CategoryProductCard key={item.id} product={item} />
               ))}
+            </div>
+          </Container>
+        </section>
+      ) : null}
+
+      {relatedBlogs.length > 0 ? (
+        <section className="border-t border-gray-100 bg-white py-12 sm:py-16">
+          <Container className={contentWidth}>
+            <div className="flex flex-col items-center text-center">
+              <span className="text-xs font-bold uppercase tracking-[0.14em] text-[#21AAA5]">
+                Packaging Guides & Insights
+              </span>
+              <h2 className="mt-2 font-heading text-2xl font-extrabold tracking-tight text-[#111] sm:text-3xl">
+                {cms?.relatedBlogsHeading || "Related Articles & Packaging Guides"}
+              </h2>
+              {cms?.relatedBlogsDescription ? (
+                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#666] sm:text-[15px]">
+                  {cms.relatedBlogsDescription}
+                </p>
+              ) : null}
+            </div>
+
+            <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {relatedBlogs.map((blog) => {
+                const img =
+                  blog.thumbnailImageUrl ||
+                  blog.featuredImage ||
+                  "/images/blog-mailer-boxes.jpg";
+                return (
+                  <article
+                    key={blog.id}
+                    className="group flex flex-col overflow-hidden rounded-[14px] border border-[#E8EAEF] bg-white shadow-sm transition-all duration-300 hover:border-[#FF5548]/40 hover:shadow-md"
+                  >
+                    <Link
+                      href={`/blog/${blog.slug}`}
+                      className="relative aspect-[16/10] w-full overflow-hidden bg-[#F6F8FA]"
+                    >
+                      <Image
+                        src={img}
+                        alt={blog.title}
+                        fill
+                        className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                        unoptimized={img.startsWith("http")}
+                      />
+                    </Link>
+
+                    <div className="flex flex-1 flex-col p-4 sm:p-5">
+                      <p className="text-[11px] font-bold uppercase tracking-wider text-[#FF5548]">
+                        Guide
+                      </p>
+                      <h3 className="mt-1.5 text-[15px] font-bold leading-snug text-[#172455] transition-colors group-hover:text-[#FF5548]">
+                        <Link href={`/blog/${blog.slug}`} className="focus:outline-none">
+                          {blog.title}
+                        </Link>
+                      </h3>
+                      {blog.excerpt ? (
+                        <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-gray-500">
+                          {blog.excerpt}
+                        </p>
+                      ) : null}
+
+                      <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
+                        <Link
+                          href={`/blog/${blog.slug}`}
+                          className="inline-flex cursor-pointer items-center gap-1 text-xs font-bold text-[#172455] transition-colors hover:text-[#FF5548]"
+                        >
+                          Read Article →
+                        </Link>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           </Container>
         </section>

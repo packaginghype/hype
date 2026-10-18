@@ -3,22 +3,36 @@ import { jwtVerify } from "jose";
 
 const ADMIN_COOKIE = "ph_admin_session";
 
+const SUPER_ADMIN_PREFIXES = [
+  "/admin/users",
+  "/admin/activity-logs",
+  "/admin/quotes",
+];
+
 function getSecret() {
   const secret = process.env.ADMIN_SESSION_SECRET;
   if (!secret || secret.length < 16) return null;
   return new TextEncoder().encode(secret);
 }
 
-async function hasValidSession(request: NextRequest) {
+async function readSession(request: NextRequest) {
   const token = request.cookies.get(ADMIN_COOKIE)?.value;
   const secret = getSecret();
-  if (!token || !secret) return false;
+  if (!token || !secret) return null;
 
   try {
-    await jwtVerify(token, secret);
-    return true;
+    const { payload } = await jwtVerify(token, secret);
+    if (!payload.sub) return null;
+    // null role = older cookie; page-level DB check still enforces access
+    const role =
+      payload.role === "SUPER_ADMIN"
+        ? "SUPER_ADMIN"
+        : payload.role === "STAFF"
+          ? "STAFF"
+          : null;
+    return { role };
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -29,17 +43,27 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  const session = await readSession(request);
+
   if (pathname === "/admin/login") {
-    if (await hasValidSession(request)) {
+    if (session) {
       return NextResponse.redirect(new URL("/admin", request.url));
     }
     return NextResponse.next();
   }
 
-  if (!(await hasValidSession(request))) {
+  if (!session) {
     const loginUrl = new URL("/admin/login", request.url);
     loginUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(loginUrl);
+  }
+
+  const needsSuper = SUPER_ADMIN_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
+
+  if (needsSuper && session.role === "STAFF") {
+    return NextResponse.redirect(new URL("/admin", request.url));
   }
 
   return NextResponse.next();

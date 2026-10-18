@@ -76,17 +76,94 @@ const DEFAULT_MATERIALS: Omit<CategoryMaterialItem, "imageUrl">[] = [
   },
 ];
 
+export const CANONICAL_MATERIAL_IMAGES = [
+  "/images/materials/white-stock.jpg",
+  "/images/materials/natural-kraft.jpg",
+  "/images/materials/coated-board.jpg",
+  "/images/materials/recycled-corrugated.jpg",
+];
+
+export const CANONICAL_DESIGN_IMAGES = [
+  "/images/designs/tuck-end-box.jpg",
+  "/images/designs/sleeve-tray-box.jpg",
+  "/images/designs/mailer-box.jpg",
+];
+
+export function getCategoryMaterialSection(
+  category: CategoryItem,
+  products: ProductItem[]
+) {
+  const name = cleanName(category.name);
+  const heroTitle = category.name.toLowerCase().startsWith("custom")
+    ? category.name
+    : `Custom ${name}`;
+  const defaultHeading = `Explore the Material For ${heroTitle}`;
+  const defaultDesc = `Discover premium materials like natural kraft, corrugated, and eco-friendly options for durable, sustainable, and customizable ${category.name.toLowerCase()}.`;
+
+  let heading = defaultHeading;
+  let description = defaultDesc;
+  let items: CategoryMaterialItem[] = [];
+
+  if (category.cms?.widgetsContent) {
+    try {
+      const parsed = JSON.parse(category.cms.widgetsContent);
+      if (parsed?.materialsHeading) heading = parsed.materialsHeading;
+      if (parsed?.materialsDescription) description = parsed.materialsDescription;
+      if (Array.isArray(parsed?.materials) && parsed.materials.length > 0) {
+        items = parsed.materials.map((m: any, index: number) => ({
+          title: m.title || "",
+          description: m.description || "",
+          bestFor: m.bestFor || "",
+          imageUrl:
+            typeof m.imageUrl === "string" && m.imageUrl.trim() !== ""
+              ? m.imageUrl
+              : CANONICAL_MATERIAL_IMAGES[index % CANONICAL_MATERIAL_IMAGES.length],
+        }));
+      }
+    } catch {}
+  }
+
+  if (items.length === 0) {
+    items = getCategoryMaterials(category, products);
+  }
+
+  return { heading, description, items };
+}
+
 export function getCategoryMaterials(
   category: CategoryItem,
   products: ProductItem[]
 ): CategoryMaterialItem[] {
+  // Use admin-defined material options if set via widgetsContent JSON
+  if (category.cms?.widgetsContent) {
+    try {
+      const parsed = JSON.parse(category.cms.widgetsContent);
+      if (Array.isArray(parsed?.materials) && parsed.materials.length > 0) {
+        return (parsed.materials as {
+          title: string;
+          description: string;
+          bestFor: string;
+          imageUrl?: string;
+        }[]).map((m, index) => ({
+          title: m.title,
+          description: m.description,
+          bestFor: m.bestFor,
+          imageUrl:
+            typeof m.imageUrl === "string" && m.imageUrl.trim() !== ""
+              ? m.imageUrl
+              : CANONICAL_MATERIAL_IMAGES[index % CANONICAL_MATERIAL_IMAGES.length],
+        }));
+      }
+    } catch {}
+  }
+
+  // Fallback: hardcoded defaults with canonical material images
   const name = cleanName(category.name);
-  const images = products.map((p) => p.imageUrl).filter(Boolean);
 
   return DEFAULT_MATERIALS.map((item, index) => ({
     ...item,
     title: item.title.replace("Boxes", name),
-    imageUrl: images[index] || category.imageUrl,
+    imageUrl: CANONICAL_MATERIAL_IMAGES[index % CANONICAL_MATERIAL_IMAGES.length],
   }));
 }
 
@@ -95,18 +172,37 @@ export function getCategoryDesignOptions(
   products: ProductItem[]
 ) {
   const name = cleanName(category.name);
-  const images = products
-    .map((p) => p.imageUrl)
-    .filter(Boolean)
-    .slice(0, 3);
+  const defaultHeading = `Design Options for ${name}`;
+  const defaultDesc = `Choose from tuck-end, sleeve, mailer, window, and handle designs to create custom ${name.toLowerCase()} that match your brand.`;
 
-  while (images.length < 3 && category.imageUrl) {
-    images.push(category.imageUrl);
+  let heading = defaultHeading;
+  let description = defaultDesc;
+  let customImages: string[] = [];
+
+  if (category.cms?.widgetsContent) {
+    try {
+      const parsed = JSON.parse(category.cms.widgetsContent);
+      if (parsed?.designHeading) heading = parsed.designHeading;
+      if (parsed?.designDescription) description = parsed.designDescription;
+      if (Array.isArray(parsed?.designImages) && parsed.designImages.length > 0) {
+        customImages = parsed.designImages.filter(
+          (img: any) => typeof img === "string" && img.trim() !== ""
+        );
+      }
+    } catch {}
+  }
+
+  if (customImages.length > 0) {
+    return {
+      heading,
+      description,
+      images: customImages,
+    };
   }
 
   return {
-    heading: `Design Options for ${name}`,
-    description: `Choose from tuck-end, sleeve, mailer, window, and handle designs to create custom ${name.toLowerCase()} that match your brand.`,
-    images,
+    heading,
+    description,
+    images: [...CANONICAL_DESIGN_IMAGES],
   };
 }

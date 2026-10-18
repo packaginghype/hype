@@ -2,14 +2,46 @@ import { Metadata } from "next";
 import { Container } from "@/components/ui/Container";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { QuoteRequestForm } from "@/components/forms/QuoteRequestForm";
-import { ShieldCheck, Truck, Clock, Palette } from "lucide-react";
-import { VERIFIED_BUSINESS_INFO } from "@/data/verified-data";
+import {
+  ShieldCheck,
+  Truck,
+  Clock,
+  Palette,
+} from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Request a Custom Packaging Quote",
+  title: "Request a Custom Packaging Quote | Packaging Hype",
   description:
-    "Get instant wholesale manufacturing pricing on custom printed boxes, mailers, and folding cartons. Free 3D proofs and free USA delivery.",
+    "Get instant wholesale manufacturing pricing on custom printed boxes, mailers, and folding cartons. Free 3D digital proofs, fast 8-10 days turnaround, and free USA delivery.",
 };
+
+const VALUE_PROPS = [
+  {
+    icon: Palette,
+    title: "Free 3D Digital Proofing",
+    description:
+      "Accurate 3D structural mockup and dieline verification before production begins.",
+  },
+  {
+    icon: Clock,
+    title: "8–10 Days Turnaround",
+    description:
+      "Fast commercial manufacturing timelines to keep your product launch strictly on schedule.",
+  },
+  {
+    icon: Truck,
+    title: "Free USA Delivery",
+    description:
+      "Doorstep freight shipping across the continental United States with zero hidden fees.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Zero Die or Plate Fees",
+    description:
+      "Transparent all-inclusive manufacturing pricing with no separate tooling charges.",
+  },
+];
+
 
 export default async function QuotePage({
   searchParams,
@@ -19,84 +51,50 @@ export default async function QuotePage({
   const { product } = await searchParams;
 
   return (
-    <div className="bg-[#F6F8FA] py-10 sm:py-16">
+    <div className="min-h-screen bg-[#F6F8FA] pb-20 pt-8 sm:pb-24 sm:pt-10">
       <Container>
         <Breadcrumbs items={[{ label: "Request a Quote" }]} />
 
-        <div className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-          {/* Left Column: Heading & Value Prop */}
-          <div className="lg:col-span-5 space-y-6">
-            <span className="inline-block px-3 py-1 text-xs font-bold uppercase tracking-wider bg-[#eaf7f6] text-[#21AAA5] rounded-full">
-              Custom Box Quotation
-            </span>
+        {/* Hero Header */}
+        <div className="mx-auto mt-6 max-w-3xl text-center">
+          <h1 className="mt-3.5 font-heading text-3xl font-extrabold tracking-tight text-[#172455] sm:text-4xl lg:text-[2.65rem] lg:leading-[1.18]">
+            Get a Free Custom Packaging Quote
+          </h1>
 
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-[#172455] tracking-tight leading-tight">
-              Get an Instant Wholesale Packaging Quote
-            </h1>
+          <p className="mt-3.5 text-sm leading-relaxed text-[#4B5563] sm:text-base">
+            Specify your box dimensions, preferred stock, and quantity below. Our packaging
+            specialists will deliver a formal wholesale quote and complimentary 3D digital proof
+            within 24 hours.
+          </p>
+        </div>
 
-            <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-              Fill out your box specifications below. Our structural packaging team will review your dielines and dimensions to deliver a formal quote and complimentary 3D digital proof.
-            </p>
+        {/* Main Quote Form Section */}
+        <div className="mx-auto mt-10 max-w-4xl">
+          <QuoteRequestForm initialProductName={product || ""} />
+        </div>
 
-            <div className="pt-4 space-y-4">
-              <div className="flex items-start gap-3 bg-white p-4 rounded-xl border border-gray-200">
-                <div className="w-10 h-10 rounded-lg bg-[#eaf7f6] text-[#21AAA5] flex items-center justify-center shrink-0">
-                  <Palette className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-[#172455]">Free 3D Digital Proofing</h4>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    Receive an accurate 3D preview and dieline mockup before production commences.
+        {/* Trust Badges 4-Grid */}
+        <div className="mx-auto mt-14 max-w-5xl">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {VALUE_PROPS.map((prop, idx) => {
+              const Icon = prop.icon;
+              return (
+                <div
+                  key={idx}
+                  className="rounded-[12px] border border-[#E5E7EB] bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+                >
+                  <div className="flex h-11 w-11 items-center justify-center rounded-[8px] bg-[#E8F7F5] text-[#21AAA5]">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="mt-3.5 text-sm font-bold text-[#172455]">
+                    {prop.title}
+                  </h3>
+                  <p className="mt-1.5 text-xs leading-relaxed text-[#6B7280]">
+                    {prop.description}
                   </p>
                 </div>
-              </div>
-
-              <div className="flex items-start gap-3 bg-white p-4 rounded-xl border border-gray-200">
-                <div className="w-10 h-10 rounded-lg bg-[#eaf7f6] text-[#21AAA5] flex items-center justify-center shrink-0">
-                  <Clock className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-[#172455]">8–10 Days Turnaround</h4>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    Fast commercial manufacturing timelines to keep your product launches on schedule.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 bg-white p-4 rounded-xl border border-gray-200">
-                <div className="w-10 h-10 rounded-lg bg-[#eaf7f6] text-[#21AAA5] flex items-center justify-center shrink-0">
-                  <Truck className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-[#172455]">Free USA Shipping</h4>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    Doorstep freight delivery across the continental United States with zero hidden freight fees.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 bg-white p-4 rounded-xl border border-gray-200">
-                <div className="w-10 h-10 rounded-lg bg-[#eaf7f6] text-[#21AAA5] flex items-center justify-center shrink-0">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-[#172455]">No Die or Setup Fees</h4>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    Transparent, all-inclusive pricing with zero separate die-cutting or plate setup charges.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 rounded-xl bg-[#172455] text-white text-xs">
-              <span className="font-bold block text-sm mb-1">Prefer to speak directly?</span>
-              <p className="text-slate-300">Call our direct packaging line: <a href={`tel:${VERIFIED_BUSINESS_INFO.phoneRaw}`} className="text-[#21AAA5] font-bold underline">{VERIFIED_BUSINESS_INFO.phone}</a></p>
-            </div>
-          </div>
-
-          {/* Right Column: Quote Form */}
-          <div className="lg:col-span-7">
-            <QuoteRequestForm initialProductName={product || ""} />
+              );
+            })}
           </div>
         </div>
       </Container>

@@ -5,17 +5,19 @@ import { AppShell } from "@/components/layout/AppShell";
 import { getNavCategories } from "@/lib/catalog";
 
 const poppins = Poppins({
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
   variable: "--font-poppins",
   display: "swap",
+  preload: true,
 });
 
 const raleway = Raleway({
-  weight: ["600", "700", "800"],
+  weight: ["700", "800"],
   subsets: ["latin"],
   variable: "--font-raleway",
   display: "swap",
+  preload: true,
 });
 
 export const viewport: Viewport = {
@@ -89,9 +91,10 @@ export default async function RootLayout({
     <html lang="en" className={`${poppins.variable} ${raleway.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-white text-gray-800">
         <AppShell
+          categories={nav.categories.map((c) => ({ name: c.name, slug: c.slug }))}
           industries={nav.industries.map((c) => ({ name: c.name, slug: c.slug }))}
           materials={nav.materials.map((c) => ({ name: c.name, slug: c.slug }))}
-          footerCategories={nav.all}
+          footerCategories={nav.categories}
         >
           {children}
         </AppShell>

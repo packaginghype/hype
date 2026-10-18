@@ -5,6 +5,7 @@ import {
   authenticateAdmin,
   createAdminSessionToken,
 } from "@/lib/admin-auth";
+import { logAdminActivity } from "@/lib/admin-activity";
 
 const bodySchema = z.object({
   email: z.string().email(),
@@ -25,9 +26,17 @@ export async function POST(request: Request) {
     }
 
     const token = await createAdminSessionToken(admin);
+    await logAdminActivity(admin, {
+      action: "LOGIN",
+      entityType: "session",
+      entityId: admin.sub,
+      entityLabel: admin.email,
+      summary: `${admin.name} signed in`,
+    });
+
     const response = NextResponse.json({
       ok: true,
-      admin: { email: admin.email, name: admin.name },
+      admin: { email: admin.email, name: admin.name, role: admin.role },
     });
 
     response.cookies.set(ADMIN_COOKIE, token, {

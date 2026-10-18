@@ -1,33 +1,12 @@
-import { unstable_noStore as noStore } from "next/cache";
+import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { stripHtml } from "@/lib/html";
+import { CACHE_TAGS, CATALOG_REVALIDATE } from "@/lib/cache";
 import type { CategoryGroupKey } from "@/data/category-groups";
-import type { CategoryItem, ProductItem } from "@/types";
+import type { CategoryItem, ProductItem, RelatedBlogItem } from "@/types";
 
 export type { CategoryGroupKey } from "@/data/category-groups";
-
-const MATERIAL_SLUGS = [
-  "kraft-boxes",
-  "corrugated-boxes",
-  "rigid-boxes",
-  "mailer-boxes",
-  "mylar-bags",
-  "display-boxes",
-] as const;
-
-const SHAPE_SLUGS = [
-  "mailer-boxes",
-  "rigid-boxes",
-  "gift-boxes",
-  "treat-boxes",
-  "display-boxes",
-  "vape-boxes",
-  "bottle-boxes",
-  "apparel-boxes",
-] as const;
-
-const MATERIAL_SLUG_SET = new Set<string>(MATERIAL_SLUGS);
-const SHAPE_SLUG_SET = new Set<string>(SHAPE_SLUGS);
 
 function toProductItem(
   product: {
@@ -86,13 +65,15 @@ function toCategoryItem(category: {
   imageUrl: string | null;
   _count?: { products: number };
 }): CategoryItem {
+  const plainDescription =
+    stripHtml(category.description || "") ||
+    `Custom ${category.name} manufactured with premium materials and printing.`;
+
   return {
     id: category.id,
     name: category.name,
     slug: category.slug,
-    description:
-      category.description ||
-      `Custom ${category.name} manufactured with premium materials and printing.`,
+    description: plainDescription,
     imageUrl: category.imageUrl || undefined,
     productCount: category._count?.products,
   };
@@ -109,99 +90,185 @@ const productInclude = {
   },
 };
 
-export async function getAllCategories(): Promise<CategoryItem[]> {
-  noStore();
-  const categories = await prisma.category.findMany({
-    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
-    include: { _count: { select: { products: true } } },
-  });
-  return categories.map(toCategoryItem);
-}
-
-async function getCategoriesWithImages(): Promise<CategoryItem[]> {
-  noStore();
-  const categories = await prisma.category.findMany({
-    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+const categoryImageInclude = {
+  _count: { select: { products: true } },
+  products: {
+    take: 1,
     include: {
-      _count: { select: { products: true } },
-      products: {
-        take: 1,
+      product: {
         include: {
-          product: {
-            include: {
-              images: {
-                orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }],
-                take: 1,
-              },
-            },
+          images: {
+            orderBy: [{ isPrimary: "desc" as const }, { sortOrder: "asc" as const }],
+            take: 1,
           },
         },
       },
     },
-  });
+  },
+};
 
-  return categories.map((category) => {
-    const item = toCategoryItem(category);
-    if (!item.imageUrl) {
-      item.imageUrl = category.products[0]?.product.images[0]?.imageUrl || undefined;
-    }
-    return item;
-  });
+function mapCategoryWithFallbackImage(category: {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  imageUrl: string | null;
+  _count?: { products: number };
+  products?: {
+    product: { images: { imageUrl: string }[] };
+  }[];
+}): CategoryItem {
+  const item = toCategoryItem(category);
+  if (!item.imageUrl) {
+    item.imageUrl = category.products?.[0]?.product.images[0]?.imageUrl || undefined;
+  }
+  return item;
 }
 
-export async function getNavCategories() {
-  noStore();
-  const categories = await getCategoriesWithImages();
-  return {
-    industries: categories.filter((c) => !MATERIAL_SLUG_SET.has(c.slug)),
-    materials: categories.filter((c) => MATERIAL_SLUG_SET.has(c.slug)),
-    all: categories,
-  };
+export const getAllCategories = unstable_cache(
+  async (): Promise<CategoryItem[]> => {
+    const categories = await prisma.category.findMany({
+      where: { isPublished: true },
+      orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+      include: { _count: { select: { products: true } } },
+    });
+    return categories.map(toCategoryItem);
+  },
+  ["all-categories"],
+  { revalidate: CATALOG_REVALIDATE, tags: [CACHE_TAGS.categories] }
+);
+
+async function fetchCategoriesWithImages(
+  group?: CategoryGroupKey
+): Promise<CategoryItem[]> {
+  const categories = await prisma.category.findMany({
+    where: {
+      isPublished: true,
+      ...(group ? { group } : {}),
+    },
+    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+    include: categoryImageInclude,
+  });
+
+  return categories.map(mapCategoryWithFallbackImage);
 }
+
+/** Lightweight nav/footer links — one query, no nested product joins */
+export const getNavCategories = unstable_cache(
+  async () => {
+    const rows = await prisma.category.findMany({
+      where: { isPublished: true },
+      orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        group: true,
+      },
+    });
+
+    const toLink = (c: (typeof rows)[number]): CategoryItem => ({
+      id: c.id,
+      name: c.name,
+      slug: c.slug,
+      description: "",
+    });
+
+    const categories = rows.filter((r) => r.group === "categories").map(toLink);
+    const industries = rows.filter((r) => r.group === "industries").map(toLink);
+    const materials = rows.filter((r) => r.group === "materials").map(toLink);
+    const shapes = rows.filter((r) => r.group === "shapes").map(toLink);
+
+    return {
+      categories,
+      industries,
+      materials,
+      shapes,
+      all: rows.map(toLink),
+    };
+  },
+  ["nav-categories"],
+  { revalidate: CATALOG_REVALIDATE, tags: [CACHE_TAGS.nav, CACHE_TAGS.categories] }
+);
 
 export async function getCategoriesByGroup(
   group: CategoryGroupKey
 ): Promise<CategoryItem[]> {
-  noStore();
-  const categories = await getCategoriesWithImages();
+  return unstable_cache(
+    () => fetchCategoriesWithImages(group),
+    ["categories-by-group", group],
+    { revalidate: CATALOG_REVALIDATE, tags: [CACHE_TAGS.categories] }
+  )();
+}
 
-  if (group === "materials") {
-    const bySlug = new Map(categories.map((c) => [c.slug, c]));
-    return MATERIAL_SLUGS.map((slug) => bySlug.get(slug)).filter(Boolean) as CategoryItem[];
-  }
+export const getCategoryBySlug = cache(async (slug: string): Promise<CategoryItem | null> => {
+  return unstable_cache(
+    async () => {
+      const category = await prisma.category.findFirst({
+        where: { slug, isPublished: true },
+        include: {
+          _count: { select: { products: true } },
+          faqs: { orderBy: { sortOrder: "asc" } },
+        },
+      });
+      if (!category) return null;
 
-  if (group === "shapes") {
-    const bySlug = new Map(categories.map((c) => [c.slug, c]));
-    const ordered = SHAPE_SLUGS.map((slug) => bySlug.get(slug)).filter(
-      Boolean
-    ) as CategoryItem[];
-    // Fill with remaining non-material categories if needed
-    for (const cat of categories) {
-      if (ordered.length >= 12) break;
-      if (!SHAPE_SLUG_SET.has(cat.slug) && !MATERIAL_SLUG_SET.has(cat.slug)) {
-        if (!ordered.some((c) => c.id === cat.id)) ordered.push(cat);
+      const item = toCategoryItem(category);
+      item.cms = {
+        originalPrice: category.originalPrice
+          ? Number(category.originalPrice)
+          : null,
+        discountedPrice: category.discountedPrice
+          ? Number(category.discountedPrice)
+          : null,
+        inStock: category.inStock,
+        bannerEnabled: category.bannerEnabled,
+        bannerQuoteEnabled: category.bannerQuoteEnabled,
+        bannerHeading: category.bannerHeading || undefined,
+        bannerDescription: category.bannerDescription || undefined,
+        bannerImageUrl: category.bannerImageUrl || undefined,
+        bannerImageAlt: category.bannerImageAlt || undefined,
+        bannerImageTitle: category.bannerImageTitle || undefined,
+        imageAlt: category.imageAlt || undefined,
+        imageTitle: category.imageTitle || undefined,
+        widgetsContent: category.widgetsContent || undefined,
+        listingHeading: category.listingHeading || undefined,
+        listingText: category.listingText || undefined,
+        navbarEnabled: category.navbarEnabled,
+        featureEnabled: category.featureEnabled,
+        pageScrollEnabled: category.pageScrollEnabled,
+        pageScrollImageUrl: category.pageScrollImageUrl || undefined,
+        pageScrollImageAlt: category.pageScrollImageAlt || undefined,
+        pageScrollImageTitle: category.pageScrollImageTitle || undefined,
+        pageScrollContent: category.pageScrollContent || undefined,
+        faqsHeading: category.faqsHeading || undefined,
+        faqsSubheading: category.faqsSubheading || undefined,
+        faqs: category.faqs.map((f) => ({
+          question: f.question,
+          answer: f.answer,
+        })),
+        seoEnabled: category.seoEnabled,
+        seoTitle: category.seoTitle || undefined,
+        seoKeywords: category.seoKeywords || undefined,
+        seoDescription: category.seoDescription || undefined,
+        seoScript: category.seoScript || undefined,
+        isPublished: category.isPublished,
+      };
+      if (category.description) {
+        item.description = category.description;
       }
-    }
-    return ordered;
-  }
+      return item;
+    },
+    ["category-by-slug", slug],
+    { revalidate: CATALOG_REVALIDATE, tags: [CACHE_TAGS.categories] }
+  )();
+});
 
-  // industries: everything not purely material-focused, prefer non-material
-  return categories.filter((c) => !MATERIAL_SLUG_SET.has(c.slug));
-}
-
-export async function getCategoryBySlug(slug: string): Promise<CategoryItem | null> {
-  noStore();
-  const category = await prisma.category.findUnique({
-    where: { slug },
-    include: { _count: { select: { products: true } } },
-  });
-  return category ? toCategoryItem(category) : null;
-}
-
-export async function getPublishedProductCount() {
-  noStore();
-  return prisma.product.count({ where: { isPublished: true } });
-}
+export const getPublishedProductCount = unstable_cache(
+  async () => prisma.product.count({ where: { isPublished: true } }),
+  ["published-product-count"],
+  { revalidate: CATALOG_REVALIDATE, tags: [CACHE_TAGS.products] }
+);
 
 function productListWhere(options?: { categorySlug?: string; query?: string }) {
   const q = options?.query?.trim();
@@ -231,15 +298,26 @@ export async function getAllProducts(options?: {
   query?: string;
   limit?: number;
 }): Promise<ProductItem[]> {
-  noStore();
-  const products = await prisma.product.findMany({
-    where: productListWhere(options),
-    orderBy: { updatedAt: "desc" },
-    take: options?.limit,
-    include: productInclude,
-  });
+  const key = [
+    "all-products",
+    options?.categorySlug || "",
+    options?.query?.trim() || "",
+    String(options?.limit ?? ""),
+  ];
 
-  return products.map(toProductItem);
+  return unstable_cache(
+    async () => {
+      const products = await prisma.product.findMany({
+        where: productListWhere(options),
+        orderBy: { updatedAt: "desc" },
+        take: options?.limit,
+        include: productInclude,
+      });
+      return products.map(toProductItem);
+    },
+    key,
+    { revalidate: CATALOG_REVALIDATE, tags: [CACHE_TAGS.products] }
+  )();
 }
 
 export async function getProductsPaged(options?: {
@@ -254,137 +332,274 @@ export async function getProductsPaged(options?: {
   pageSize: number;
   totalPages: number;
 }> {
-  noStore();
   const pageSize = Math.min(48, Math.max(1, options?.pageSize ?? 16));
   const requestedPage = Math.max(1, options?.page ?? 1);
-  const where = productListWhere(options);
+  const key = [
+    "products-paged",
+    options?.categorySlug || "",
+    options?.query?.trim() || "",
+    String(requestedPage),
+    String(pageSize),
+  ];
 
-  const total = await prisma.product.count({ where });
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
-  const page = Math.min(requestedPage, totalPages);
+  return unstable_cache(
+    async () => {
+      const where = productListWhere(options);
+      const total = await prisma.product.count({ where });
+      const totalPages = Math.max(1, Math.ceil(total / pageSize));
+      const page = Math.min(requestedPage, totalPages);
 
-  const products = await prisma.product.findMany({
-    where,
-    orderBy: { updatedAt: "desc" },
-    skip: (page - 1) * pageSize,
-    take: pageSize,
-    include: productInclude,
-  });
+      const products = await prisma.product.findMany({
+        where,
+        orderBy: { updatedAt: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        include: productInclude,
+      });
 
-  return {
-    products: products.map(toProductItem),
-    total,
-    page,
-    pageSize,
-    totalPages,
-  };
+      return {
+        products: products.map(toProductItem),
+        total,
+        page,
+        pageSize,
+        totalPages,
+      };
+    },
+    key,
+    { revalidate: CATALOG_REVALIDATE, tags: [CACHE_TAGS.products] }
+  )();
 }
 
 export async function getFeaturedProducts(limit = 6): Promise<ProductItem[]> {
   return getAllProducts({ limit });
 }
 
-export async function getProductBySlug(slug: string): Promise<ProductItem | null> {
-  noStore();
-  const product = await prisma.product.findFirst({
-    where: { slug, isPublished: true },
-    include: {
-      images: {
-        orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }],
-        take: 20,
-      },
-      categories: {
-        include: { category: true },
-      },
-    },
-  });
+export const getProductBySlug = cache(async (slug: string): Promise<ProductItem | null> => {
+  return unstable_cache(
+    async () => {
+      const product = await prisma.product.findFirst({
+        where: { slug, isPublished: true },
+        include: {
+          images: {
+            orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }],
+            take: 20,
+          },
+          categories: {
+            include: { category: true },
+          },
+          specs: { orderBy: { sortOrder: "asc" } },
+          faqs: { orderBy: { sortOrder: "asc" } },
+        },
+      });
+      if (!product) return null;
 
-  return product ? toProductItem(product) : null;
-}
+      const item = toProductItem(product);
+      const thumb = product.thumbnailUrl || item.imageUrl;
+      if (thumb) item.imageUrl = thumb;
+
+      item.discountedPrice = product.discountedPrice
+        ? Number(product.discountedPrice)
+        : null;
+      item.inStock = product.inStock;
+      if (product.originalPrice != null) {
+        item.startingPrice = Number(product.originalPrice);
+      }
+
+      const crumbIds =
+        product.breadcrumbCategoryIds?.length > 0
+          ? product.breadcrumbCategoryIds
+          : product.breadcrumbCategoryId
+            ? [product.breadcrumbCategoryId]
+            : [];
+
+      if (crumbIds.length > 0) {
+        const crumbCats = await prisma.category.findMany({
+          where: { id: { in: crumbIds }, isPublished: true },
+          select: { id: true, name: true, slug: true, group: true },
+        });
+        const byId = new Map(crumbCats.map((c) => [c.id, c]));
+        item.breadcrumbs = crumbIds
+          .map((id) => byId.get(id))
+          .filter(Boolean)
+          .map((c) => ({
+            label: c!.name,
+            href: `/categories/${c!.slug}`,
+          }));
+      }
+
+      item.cms = {
+        thumbnailAlt: product.thumbnailAlt || undefined,
+        thumbnailTitle: product.thumbnailTitle || undefined,
+        thumbnailSubDescription: product.thumbnailSubDescription || undefined,
+        videoUrl: product.videoUrl || undefined,
+        videoThumbnailUrl: product.videoThumbnailUrl || undefined,
+        videoDescription: product.videoDescription || undefined,
+        detailHeading: product.detailHeading || undefined,
+        detailShortDescription: product.detailShortDescription || undefined,
+        specsHeading: product.specsHeading || undefined,
+        specsDescription: product.specsDescription || undefined,
+        specsTableHeading: product.specsTableHeading || undefined,
+        specs: product.specs.map((s) => ({
+          heading: s.heading,
+          details: s.details,
+        })),
+        widgetsContent: product.widgetsContent || undefined,
+        relevantProductsHeading: product.relevantProductsHeading || undefined,
+        relevantProductsDescription:
+          product.relevantProductsDescription || undefined,
+        relatedBlogsHeading: product.relatedBlogsHeading || undefined,
+        relatedBlogsDescription: product.relatedBlogsDescription || undefined,
+        relatedBlogIds: product.relatedBlogIds || [],
+        pageScrollEnabled: product.pageScrollEnabled,
+        pageScrollImageUrl: product.pageScrollImageUrl || undefined,
+        pageScrollImageAlt: product.pageScrollImageAlt || undefined,
+        pageScrollImageTitle: product.pageScrollImageTitle || undefined,
+        pageScrollContent: product.pageScrollContent || undefined,
+        faqsHeading: product.faqsHeading || undefined,
+        faqsSubheading: product.faqsSubheading || undefined,
+        faqs: product.faqs.map((f) => ({
+          question: f.question,
+          answer: f.answer,
+        })),
+        merchantImageUrls: product.merchantImageUrls || [],
+        navbarEnabled: product.navbarEnabled,
+        featureEnabled: product.featureEnabled,
+        seoEnabled: product.seoEnabled,
+        seoTitle: product.seoTitle || undefined,
+        seoKeywords: product.seoKeywords || undefined,
+        seoDescription: product.seoDescription || undefined,
+        seoScript: product.seoScript || undefined,
+      };
+
+      return item;
+    },
+    ["product-by-slug", slug],
+    { revalidate: CATALOG_REVALIDATE, tags: [CACHE_TAGS.products] }
+  )();
+});
 
 export async function getRelatedProducts(
   categorySlug: string,
   excludeSlug: string,
   limit = 8
 ): Promise<ProductItem[]> {
-  noStore();
-  const products = await prisma.product.findMany({
-    where: {
-      isPublished: true,
-      slug: { not: excludeSlug },
-      categories: { some: { category: { slug: categorySlug } } },
-    },
-    orderBy: { updatedAt: "desc" },
-    take: limit,
-    include: productInclude,
-  });
-  return products.map(toProductItem);
-}
-
-export async function getIndustryShowcaseCategories(limit = 10): Promise<CategoryItem[]> {
-  noStore();
-  const preferred = [
-    "cosmetic-boxes",
-    "bottle-boxes",
-    "food-boxes",
-    "kraft-boxes",
-    "corrugated-boxes",
-    "candle-boxes",
-    "soap-boxes",
-    "cbd-boxes",
-    "apparel-boxes",
-    "gift-boxes",
-  ];
-
-  const categories = await prisma.category.findMany({
-    where: { slug: { in: preferred } },
-    include: {
-      _count: { select: { products: true } },
-      products: {
-        take: 1,
-        include: {
-          product: {
+  return unstable_cache(
+    async () => {
+      const current = await prisma.product.findFirst({
+        where: { slug: excludeSlug },
+        select: {
+          id: true,
+          relatedFrom: {
+            orderBy: { sortOrder: "asc" },
+            take: limit,
             include: {
-              images: {
-                orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }],
-                take: 1,
-              },
+              relatedProduct: { include: productInclude },
             },
           },
         },
-      },
+      });
+
+      const curated = (current?.relatedFrom || [])
+        .map((row) => row.relatedProduct)
+        .filter((p) => p?.isPublished)
+        .map(toProductItem);
+
+      if (curated.length > 0) return curated.slice(0, limit);
+
+      const products = await prisma.product.findMany({
+        where: {
+          isPublished: true,
+          slug: { not: excludeSlug },
+          categories: { some: { category: { slug: categorySlug } } },
+        },
+        orderBy: { updatedAt: "desc" },
+        take: limit,
+        include: productInclude,
+      });
+      return products.map(toProductItem);
     },
-  });
-
-  const mapped = categories.map((category) => {
-    const item = toCategoryItem(category);
-    if (!item.imageUrl) {
-      item.imageUrl = category.products[0]?.product.images[0]?.imageUrl || undefined;
-    }
-    return item;
-  });
-
-  const bySlug = new Map(mapped.map((c) => [c.slug, c]));
-  const ordered = preferred.map((slug) => bySlug.get(slug)).filter(Boolean) as CategoryItem[];
-
-  if (ordered.length >= limit) return ordered.slice(0, limit);
-
-  const extras = await getAllCategories();
-  for (const cat of extras) {
-    if (ordered.length >= limit) break;
-    if (!ordered.some((c) => c.id === cat.id)) ordered.push(cat);
-  }
-  return ordered.slice(0, limit);
+    ["related-products", categorySlug, excludeSlug, String(limit)],
+    { revalidate: CATALOG_REVALIDATE, tags: [CACHE_TAGS.products] }
+  )();
 }
 
-export async function getSitemapEntries() {
-  noStore();
-  const [categories, products] = await Promise.all([
-    prisma.category.findMany({ select: { slug: true, updatedAt: true } }),
-    prisma.product.findMany({
-      where: { isPublished: true },
-      select: { slug: true, updatedAt: true },
-    }),
-  ]);
-  return { categories, products };
+export async function getProductRelatedBlogs(
+  blogIds: string[],
+  limit = 4
+): Promise<RelatedBlogItem[]> {
+  if (!blogIds || blogIds.length === 0) return [];
+  return unstable_cache(
+    async () => {
+      const blogs = await prisma.blogPost.findMany({
+        where: {
+          id: { in: blogIds },
+          isPublished: true,
+        },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          excerpt: true,
+          featuredImage: true,
+          thumbnailImageUrl: true,
+          publishedDate: true,
+          author: true,
+        },
+      });
+
+      const blogMap = new Map(blogs.map((b) => [b.id, b]));
+      return blogIds
+        .map((id) => blogMap.get(id))
+        .filter((b): b is NonNullable<typeof b> => Boolean(b))
+        .slice(0, limit);
+    },
+    ["product-related-blogs", blogIds.join(","), String(limit)],
+    { revalidate: CATALOG_REVALIDATE, tags: [CACHE_TAGS.blogs || "blogs", CACHE_TAGS.products] }
+  )();
 }
+
+export const getIndustryShowcaseCategories = unstable_cache(
+  async (limit = 10): Promise<CategoryItem[]> => {
+    const industries = await prisma.category.findMany({
+      where: { group: "industries", isPublished: true },
+      orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+      take: limit,
+      include: categoryImageInclude,
+    });
+    return industries.map(mapCategoryWithFallbackImage);
+  },
+  ["industry-showcase"],
+  { revalidate: CATALOG_REVALIDATE, tags: [CACHE_TAGS.categories] }
+);
+
+export const getCategoryShowcaseCategories = unstable_cache(
+  async (limit = 8): Promise<CategoryItem[]> => {
+    const categories = await prisma.category.findMany({
+      where: { group: "categories", isPublished: true },
+      orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+      take: limit,
+      include: categoryImageInclude,
+    });
+    return categories.map(mapCategoryWithFallbackImage);
+  },
+  ["category-showcase"],
+  { revalidate: CATALOG_REVALIDATE, tags: [CACHE_TAGS.categories] }
+);
+
+export const getSitemapEntries = unstable_cache(
+  async () => {
+    const [categories, products] = await Promise.all([
+      prisma.category.findMany({
+        where: { isPublished: true },
+        select: { slug: true, updatedAt: true },
+      }),
+      prisma.product.findMany({
+        where: { isPublished: true },
+        select: { slug: true, updatedAt: true },
+      }),
+    ]);
+    return { categories, products };
+  },
+  ["sitemap-entries"],
+  { revalidate: 3600, tags: [CACHE_TAGS.sitemap, CACHE_TAGS.categories, CACHE_TAGS.products] }
+);

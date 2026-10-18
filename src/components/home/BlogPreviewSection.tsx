@@ -1,92 +1,131 @@
-import React from "react";
 import Link from "next/link";
-import { ArrowRight, Calendar } from "lucide-react";
+import Image from "next/image";
+import { ArrowUpRight } from "lucide-react";
 import { Container } from "@/components/ui/Container";
+import { getFeaturedBlogs } from "@/lib/blogs";
 
-const POSTS = [
+const DEFAULT_POSTS = [
   {
-    title: "How To Choose Mylar Bags: A Step-by-Step Guide",
-    slug: "how-to-choose-mylar-bags",
-    excerpt:
-      "Select the right barrier thickness, zipper style, and seal setup for long-term product protection.",
-    date: "September 2026",
-    category: "Material Guides",
+    title: "How to Choose the Right Corrugated Mailer for E-Commerce Shipping",
+    slug: "how-to-choose-corrugated-mailer-boxes",
+    image: "/images/blog-mailer-boxes.jpg",
   },
   {
-    title: "The Power of Packaging Design in Modern Retail",
-    slug: "power-of-packaging-design",
-    excerpt:
-      "How structure, print, and finishes influence shelf impact and purchase decisions.",
-    date: "September 2026",
-    category: "Branding",
+    title: "Luxury Rigid Boxes: Enhancing Unboxing Experience and Perceived Value",
+    slug: "luxury-rigid-boxes-unboxing-experience",
+    image: "/images/blog-rigid-boxes.jpg",
   },
   {
-    title: "Guide to International Packaging Symbols",
-    slug: "guide-to-international-packaging-symbols",
-    excerpt:
-      "Understand shipping icons, recycling marks, and compliance labels for domestic and export freight.",
-    date: "August 2026",
-    category: "Compliance",
+    title: "Eco-Friendly Kraft Packaging: Trends and Benefits for Modern Brands",
+    slug: "eco-friendly-kraft-packaging-trends",
+    image: "/images/blog-kraft-boxes.jpg",
   },
-] as const;
+  {
+    title: "Spot UV vs Foil Stamping: Selecting the Perfect Finish for Retail Boxes",
+    slug: "spot-uv-vs-foil-stamping-retail-finishes",
+    image: "/images/blog-luxury-finishes.jpg",
+  },
+];
 
-export function BlogPreviewSection() {
+export async function BlogPreviewSection() {
+  const dbPosts = await getFeaturedBlogs(4);
+
+  const posts =
+    dbPosts.length > 0
+      ? dbPosts.map((p) => ({
+          title: p.title,
+          slug: p.slug,
+          image:
+            p.thumbnailImageUrl ||
+            p.featuredImage ||
+            p.bannerImageUrl ||
+            "/images/blog-mailer-boxes.jpg",
+        }))
+      : DEFAULT_POSTS;
+
   return (
-    <section className="bg-white py-14 sm:py-16 lg:py-20">
+    <section className="bg-white py-16 sm:py-20 lg:py-24 border-t border-gray-100">
       <Container>
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="max-w-2xl">
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#21AAA5]">
-              Insights & Guides
-            </p>
-            <h2 className="mt-2 font-heading text-2xl font-extrabold tracking-tight text-[#172455] sm:text-3xl">
-              From the Packaging Blog
+        <div className="grid items-start gap-8 lg:grid-cols-[380px_1fr] xl:grid-cols-[410px_1fr] lg:gap-10 xl:gap-12">
+          {/* Left Column: Heading + Description + 3D Illustration Card */}
+          <div className="flex flex-col">
+            <h2 className="font-heading text-3xl font-extrabold tracking-tight text-[#1A1349] sm:text-4xl lg:text-[40px] lg:leading-[1.15]">
+              Latest News
             </h2>
-            <p className="mt-2 text-sm leading-relaxed text-gray-500 sm:text-[15px]">
-              Practical tips on materials, print, structure, and unboxing that help
-              your brand ship smarter.
+            <p className="mt-3.5 max-w-md text-[14.5px] leading-relaxed text-[#5B667A] sm:text-[15px]">
+              Keep up with the latest packaging design tips, industry guides,
+              material insights, and unboxing innovations for modern brands.
             </p>
-          </div>
-          <Link
-            href="/blog"
-            className="inline-flex items-center gap-1.5 text-sm font-bold text-[#FF5548] transition-colors hover:text-[#e04337]"
-          >
-            View all articles
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
 
-        <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-3 md:gap-6">
-          {POSTS.map((post) => (
-            <article key={post.slug} className="flex flex-col bg-[#F6F8FA] p-5 sm:p-6">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-[#21AAA5]">
-                {post.category}
-              </p>
-              <h3 className="mt-2 text-[15px] font-bold leading-snug text-[#172455] sm:text-base">
-                <Link
-                  href={`/blog/${post.slug}`}
-                  className="transition-colors hover:text-[#FF5548]"
-                >
-                  {post.title}
-                </Link>
-              </h3>
-              <p className="mt-2 flex-1 text-[13px] leading-relaxed text-gray-500">
-                {post.excerpt}
-              </p>
-              <div className="mt-4 flex items-center justify-between gap-3 border-t border-[#E8EAEF] pt-3">
-                <span className="inline-flex items-center gap-1.5 text-[12px] text-gray-400">
-                  <Calendar className="h-3.5 w-3.5" aria-hidden />
-                  {post.date}
-                </span>
-                <Link
-                  href={`/blog/${post.slug}`}
-                  className="text-[12.5px] font-bold text-[#172455] transition-colors hover:text-[#FF5548]"
-                >
-                  Read more →
-                </Link>
+            <Link
+              href="/blog"
+              className="mt-3.5 inline-flex w-fit items-center gap-1.5 text-sm font-bold text-[#FF5548] transition-colors hover:text-[#e04337]"
+            >
+              <span>Explore all articles</span>
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+
+            {/* 3D Illustration Card matching reference */}
+            <div className="relative mt-7 overflow-hidden rounded-[20px] bg-[#FBF6EE] p-3 sm:p-4 shadow-sm border border-[#F2E8D8]">
+              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[14px]">
+                <Image
+                  src="/images/packaging-guide-3d.jpg"
+                  alt="Packaging Guide and Design Workspace"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 410px"
+                  className="object-cover transition-transform duration-700 ease-out hover:scale-105"
+                  priority={false}
+                />
               </div>
-            </article>
-          ))}
+            </div>
+          </div>
+
+          {/* Right Column: 2x2 Grid of Blog Cards with Bottom Overlay */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
+            {posts.slice(0, 4).map((post) => (
+              <article
+                key={post.slug}
+                className="group relative isolate aspect-[16/10] overflow-hidden rounded-[16px] bg-[#0F172A] shadow-sm transition-all duration-300 hover:shadow-xl"
+              >
+                {/* Background Image */}
+                <Image
+                  src={post.image}
+                  alt={post.title}
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 30vw"
+                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  unoptimized={post.image.startsWith("http")}
+                />
+
+                {/* Dark Gradient Overlay */}
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-transparent transition-opacity duration-300 group-hover:from-black/95"
+                />
+
+                {/* Bottom Bar: Title on left, Read Now button on right */}
+                <div className="absolute inset-x-0 bottom-0 z-10 flex items-end justify-between gap-3 p-4 sm:p-5">
+                  <h3 className="min-w-0 flex-1">
+                    <Link
+                      href={`/blog/${post.slug}`}
+                      className="line-clamp-2 text-[14px] sm:text-[15px] font-bold leading-snug text-white transition-colors group-hover:text-white/95"
+                    >
+                      {post.title}
+                    </Link>
+                  </h3>
+
+                  <Link
+                    href={`/blog/${post.slug}`}
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-[8px] bg-[#2D1B69] px-3.5 py-2 text-[12px] font-bold text-white shadow-sm transition-all duration-200 hover:bg-[#FF5548] group-hover:bg-[#FF5548] group-hover:shadow-md"
+                    aria-label={`Read ${post.title}`}
+                  >
+                    <span>Read Now</span>
+                    <ArrowUpRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       </Container>
     </section>

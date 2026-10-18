@@ -13,6 +13,7 @@ type NavLink = { name: string; slug: string };
 interface MobileNavigationProps {
   isOpen: boolean;
   onClose: () => void;
+  categories: NavLink[];
   industries: NavLink[];
   materials: NavLink[];
 }
@@ -20,10 +21,13 @@ interface MobileNavigationProps {
 export function MobileNavigation({
   isOpen,
   onClose,
+  categories,
   industries,
   materials,
 }: MobileNavigationProps) {
-  const [openSection, setOpenSection] = useState<"industries" | "materials" | null>(null);
+  const [openSection, setOpenSection] = useState<
+    "categories" | "industries" | "materials" | null
+  >(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -77,28 +81,78 @@ export function MobileNavigation({
         <div className="flex-1 overflow-y-auto p-4 space-y-1">
           <div className="flex items-center rounded hover:bg-[#F6F8FA]">
             <Link
+              href="/categories"
+              onClick={onClose}
+              className="flex-1 px-3 py-2.5 text-base font-semibold text-[#172455]"
+            >
+              Categories
+            </Link>
+            {categories.length > 0 && (
+              <button
+                type="button"
+                onClick={() =>
+                  setOpenSection((prev) =>
+                    prev === "categories" ? null : "categories"
+                  )
+                }
+                className="px-3 py-2.5 text-[#172455]"
+                aria-expanded={openSection === "categories"}
+                aria-label="Toggle categories list"
+              >
+                <ChevronDown
+                  className={cn(
+                    "w-4 h-4 transition-transform",
+                    openSection === "categories" && "rotate-180 text-[#FF5548]"
+                  )}
+                />
+              </button>
+            )}
+          </div>
+          {openSection === "categories" && (
+            <div className="ml-2 mb-2 space-y-0.5 border-l border-gray-200 pl-3">
+              {categories.length > 0 ? (
+                categories.map((item) => (
+                  <Link
+                    key={item.slug}
+                    href={`/categories/${item.slug}`}
+                    onClick={onClose}
+                    className="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-[#F6F8FA] hover:text-[#FF5548]"
+                  >
+                    {item.name}
+                  </Link>
+                ))
+              ) : (
+                <p className="px-3 py-2 text-xs text-gray-400">No categories added yet</p>
+              )}
+            </div>
+          )}
+
+          <div className="flex items-center rounded hover:bg-[#F6F8FA]">
+            <Link
               href="/industries"
               onClick={onClose}
               className="flex-1 px-3 py-2.5 text-base font-semibold text-[#172455]"
             >
               Industries
             </Link>
-            <button
-              type="button"
-              onClick={() =>
-                setOpenSection((prev) => (prev === "industries" ? null : "industries"))
-              }
-              className="px-3 py-2.5 text-[#172455]"
-              aria-expanded={openSection === "industries"}
-              aria-label="Toggle industries list"
-            >
-              <ChevronDown
-                className={cn(
-                  "w-4 h-4 transition-transform",
-                  openSection === "industries" && "rotate-180 text-[#FF5548]"
-                )}
-              />
-            </button>
+            {industries.length > 0 && (
+              <button
+                type="button"
+                onClick={() =>
+                  setOpenSection((prev) => (prev === "industries" ? null : "industries"))
+                }
+                className="px-3 py-2.5 text-[#172455]"
+                aria-expanded={openSection === "industries"}
+                aria-label="Toggle industries list"
+              >
+                <ChevronDown
+                  className={cn(
+                    "w-4 h-4 transition-transform",
+                    openSection === "industries" && "rotate-180 text-[#FF5548]"
+                  )}
+                />
+              </button>
+            )}
           </div>
           {openSection === "industries" && (
             <div className="ml-2 pl-3 border-l border-gray-200 space-y-0.5 mb-2">
@@ -123,22 +177,24 @@ export function MobileNavigation({
             >
               Box by Material
             </Link>
-            <button
-              type="button"
-              onClick={() =>
-                setOpenSection((prev) => (prev === "materials" ? null : "materials"))
-              }
-              className="px-3 py-2.5 text-[#172455]"
-              aria-expanded={openSection === "materials"}
-              aria-label="Toggle materials list"
-            >
-              <ChevronDown
-                className={cn(
-                  "w-4 h-4 transition-transform",
-                  openSection === "materials" && "rotate-180 text-[#FF5548]"
-                )}
-              />
-            </button>
+            {materials.length > 0 && (
+              <button
+                type="button"
+                onClick={() =>
+                  setOpenSection((prev) => (prev === "materials" ? null : "materials"))
+                }
+                className="px-3 py-2.5 text-[#172455]"
+                aria-expanded={openSection === "materials"}
+                aria-label="Toggle materials list"
+              >
+                <ChevronDown
+                  className={cn(
+                    "w-4 h-4 transition-transform",
+                    openSection === "materials" && "rotate-180 text-[#FF5548]"
+                  )}
+                />
+              </button>
+            )}
           </div>
           {openSection === "materials" && (
             <div className="ml-2 pl-3 border-l border-gray-200 space-y-0.5 mb-2">

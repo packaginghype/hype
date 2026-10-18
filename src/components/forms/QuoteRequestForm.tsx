@@ -1,416 +1,559 @@
 "use client";
 
-import React, { useState } from "react";
-import { SendHorizontal, UploadCloud, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import React, { FormEvent, useEffect, useMemo, useState } from "react";
+import {
+  ArrowRight,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  Calendar,
+  ChevronDown,
+  UploadCloud,
+  X,
+  FileCheck,
+} from "lucide-react";
 
 interface QuoteRequestFormProps {
   initialProductName?: string;
+  className?: string;
 }
 
-export function QuoteRequestForm({ initialProductName = "" }: QuoteRequestFormProps) {
+const QUANTITIES = [
+  { value: "100", label: "100 units (MOQ)" },
+  { value: "250", label: "250 units" },
+  { value: "500", label: "500 units" },
+  { value: "1000", label: "1,000 units" },
+  { value: "2500", label: "2,500 units" },
+  { value: "5000", label: "5,000 units" },
+  { value: "10000", label: "10,000+ units (Bulk)" },
+];
+
+const BOX_TYPES = [
+  "Mailer Boxes",
+  "Folding Cartons",
+  "Rigid Luxury Boxes",
+  "Corrugated Shipping Boxes",
+  "Retail Display Boxes",
+  "Kraft Paper Boxes",
+  "Bakery & Food Boxes",
+  "Cosmetics & Beauty Boxes",
+  "Apparel & Pillow Boxes",
+  "Custom Die-Cut Packaging",
+];
+
+const COLORS = [
+  "1-Color Simple Print",
+  "2-Color Print",
+  "4/0 CMYK Full Color Outside",
+  "4/4 Full Color Inside & Outside",
+  "Plain / No Printing (Unprinted)",
+];
+
+function newCaptcha() {
+  const a = 2 + Math.floor(Math.random() * 7);
+  const b = 2 + Math.floor(Math.random() * 7);
+  return { a, b, answer: a + b };
+}
+
+const inputClass =
+  "h-12 w-full rounded-[6px] border border-[#E2E4E8] bg-white px-3.5 text-sm font-medium text-[#172455] placeholder:text-[#8E95A5] outline-none transition-all focus:border-[#FF5548] focus:ring-2 focus:ring-[#FF5548]/15";
+
+const selectClass =
+  "h-12 w-full appearance-none rounded-[6px] border border-[#E2E4E8] bg-white px-3.5 pr-9 text-sm font-medium text-[#172455] outline-none transition-all focus:border-[#FF5548] focus:ring-2 focus:ring-[#FF5548]/15 cursor-pointer";
+
+export function QuoteRequestForm({
+  initialProductName = "",
+  className = "",
+}: QuoteRequestFormProps) {
+  const [captcha, setCaptcha] = useState({ a: 4, b: 7, answer: 11 });
+
+  useEffect(() => {
+    setCaptcha(newCaptcha());
+  }, []);
+
   const [formData, setFormData] = useState({
-    contactName: "",
-    email: "",
-    phone: "",
-    productName: initialProductName,
-    quantity: 100,
     length: "",
     width: "",
     depth: "",
     dimensionsUnit: "inch",
-    colors: "4/0 Full Color Outside",
-    materialStock: "16 PT C1S Paperboard",
-    message: "",
+    colors: "",
+    expectedDate: "",
+    quantity: "",
+    boxType: initialProductName || "",
+    contactName: "",
+    phone: "",
+    email: "",
+    captchaInput: "",
+    brief: "",
   });
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [showFileUpload, setShowFileUpload] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "mock-success" | "error">("idle");
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
   const [statusMessage, setStatusMessage] = useState("");
+  const [quoteRefNumber, setQuoteRefNumber] = useState("");
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) {
+  const minDate = useMemo(() => {
+    const today = new Date();
+    today.setDate(today.getDate() + 1);
+    return today.toISOString().split("T")[0];
+  }, []);
+
+  function patch(field: string, value: string) {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
       setErrors((prev) => {
-        const updated = { ...prev };
-        delete updated[name];
-        return updated;
+        const next = { ...prev };
+        delete next[field];
+        return next;
       });
     }
-  };
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      // Max 25 MB limit
       if (file.size > 25 * 1024 * 1024) {
-        setErrors((prev) => ({
-          ...prev,
-          file: "File size exceeds the 25 MB maximum allowed limit.",
-        }));
+        setErrors((prev) => ({ ...prev, file: "Max file size is 25 MB" }));
         setSelectedFile(null);
       } else {
         setErrors((prev) => {
-          const updated = { ...prev };
-          delete updated.file;
-          return updated;
+          const next = { ...prev };
+          delete next.file;
+          return next;
         });
         setSelectedFile(file);
       }
     }
   };
 
-  const validate = () => {
-    const newErrors: Record<string, string> = {};
-    if (!formData.contactName.trim()) newErrors.contactName = "Full name is required.";
-    if (!formData.email.trim()) {
-      newErrors.email = "Email address is required.";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address.";
+  function validate() {
+    const next: Record<string, string> = {};
+    if (!formData.contactName.trim()) next.contactName = "Name is required";
+    if (!formData.phone.trim()) next.phone = "Phone number is required";
+    if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      next.email = "Valid business email required";
     }
-    if (!formData.phone.trim()) newErrors.phone = "Phone number is required for quote dispatch.";
-    if (!formData.quantity || Number(formData.quantity) < 100) {
-      newErrors.quantity = "Minimum order quantity is 100 units.";
+    if (!formData.quantity) next.quantity = "Please select a quantity";
+    if (Number(formData.captchaInput) !== captcha.answer) {
+      next.captchaInput = "Incorrect answer";
     }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!validate()) return;
 
     setIsSubmitting(true);
     setSubmitStatus("idle");
 
+    const messageDetails = [
+      formData.brief.trim(),
+      formData.boxType ? `Selected Box Type: ${formData.boxType}` : "",
+      formData.expectedDate ? `Expected Delivery Date: ${formData.expectedDate}` : "",
+      formData.colors ? `Color Specs: ${formData.colors}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+
     try {
       const res = await fetch("/api/quotes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...formData,
-          quantity: Number(formData.quantity),
+          contactName: formData.contactName.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
+          productName: formData.boxType || initialProductName || "Custom Box Quote",
+          quantity: Number(formData.quantity) || 100,
           length: formData.length ? Number(formData.length) : undefined,
           width: formData.width ? Number(formData.width) : undefined,
           depth: formData.depth ? Number(formData.depth) : undefined,
-          fileName: selectedFile ? selectedFile.name : undefined,
+          dimensionsUnit: formData.dimensionsUnit,
+          colors: formData.colors || undefined,
+          message: messageDetails || undefined,
+          fileName: selectedFile?.name || undefined,
         }),
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        setSubmitStatus(data.isMock ? "mock-success" : "success");
-        setStatusMessage(data.message || "Quote request received successfully!");
+        setSubmitStatus("success");
+        setQuoteRefNumber(data.quoteNumber || `PH-${Date.now().toString().slice(-6)}`);
+        setStatusMessage(
+          data.message ||
+            "Your custom quote request has been received. Our engineering team is reviewing your specifications and will respond with wholesale pricing and complimentary 3D digital proof within 24 hours."
+        );
       } else {
         setSubmitStatus("error");
-        setStatusMessage(data.error || "Failed to process quote request. Please try again.");
+        setStatusMessage(data.error || "Failed to submit quote request. Please try again.");
       }
     } catch {
       setSubmitStatus("error");
-      setStatusMessage("An unexpected network error occurred. Please contact us directly by phone.");
+      setStatusMessage("A network error occurred. Please try again or reach us by phone.");
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }
 
-  return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-xl p-6 sm:p-10">
-      {submitStatus === "success" || submitStatus === "mock-success" ? (
-        <div className="py-12 text-center space-y-4">
-          <div className="w-16 h-16 bg-[#eaf7f6] text-[#21AAA5] rounded-full flex items-center justify-center mx-auto">
-            <CheckCircle2 className="w-10 h-10" />
+  function handleReset() {
+    setFormData({
+      length: "",
+      width: "",
+      depth: "",
+      dimensionsUnit: "inch",
+      colors: "",
+      expectedDate: "",
+      quantity: "",
+      boxType: initialProductName || "",
+      contactName: "",
+      phone: "",
+      email: "",
+      captchaInput: "",
+      brief: "",
+    });
+    setSelectedFile(null);
+    setCaptcha(newCaptcha());
+    setSubmitStatus("idle");
+    setQuoteRefNumber("");
+  }
+
+  if (submitStatus === "success") {
+    return (
+      <div className={`overflow-hidden rounded-[16px] border border-[#E5E7EB] bg-white p-6 sm:p-10 ${className}`}>
+        <div className="mx-auto max-w-lg text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-500">
+            <CheckCircle2 className="h-10 w-10" />
           </div>
-          <h3 className="text-2xl font-bold text-[#172455]">
-            Quote Request Received!
+          <p className="mt-4 text-xs font-bold uppercase tracking-widest text-[#21AAA5]">
+            Quote Request Confirmed
+          </p>
+          <h3 className="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight text-[#172455]">
+            Thank You, {formData.contactName}!
           </h3>
-          <p className="text-sm text-gray-600 max-w-md mx-auto">
+          {quoteRefNumber && (
+            <div className="mt-3 inline-block rounded-[6px] border border-[#E5E7EB] bg-[#F6F8FA] px-3 py-1 font-mono text-xs font-semibold text-[#FF5548]">
+              Reference ID: {quoteRefNumber}
+            </div>
+          )}
+          <p className="mt-4 text-sm leading-relaxed text-[#4B5563]">
             {statusMessage}
           </p>
-          {submitStatus === "mock-success" && (
-            <div className="p-3 bg-amber-50 border border-amber-200 rounded text-xs text-amber-800 max-w-md mx-auto">
-              <strong>Notice:</strong> Database/email services are not currently configured in this development environment. The submission was validated locally without persisting live records.
-            </div>
-          )}
-          <div className="pt-4">
-            <Button
-              variant="outline"
-              size="md"
-              onClick={() => {
-                setSubmitStatus("idle");
-                setSelectedFile(null);
-              }}
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={handleReset}
+              className="inline-flex h-11 items-center justify-center rounded-[6px] bg-[#FF5548] px-6 text-sm font-bold text-white transition-colors hover:bg-[#e04337]"
             >
-              Submit Another Inquiry
-            </Button>
+              Request Another Quote
+            </button>
+            <a
+              href="/categories"
+              className="inline-flex h-11 items-center justify-center rounded-[6px] border border-[#E5E7EB] bg-white px-6 text-sm font-bold text-[#172455] transition-colors hover:bg-[#F6F8FA]"
+            >
+              Browse Packaging Catalog
+            </a>
           </div>
         </div>
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-          {submitStatus === "error" && (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3 text-red-800 text-xs sm:text-sm">
-              <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-red-600" />
-              <span>{statusMessage}</span>
-            </div>
-          )}
+      </div>
+    );
+  }
 
-          {/* Product and Quantity Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="productName" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-                Packaging Product
-              </label>
-              <input
-                type="text"
-                id="productName"
-                name="productName"
-                value={formData.productName}
-                onChange={handleChange}
-                placeholder="e.g. Custom Mailer Boxes"
-                className="w-full px-4 py-2.5 rounded border border-gray-300 text-sm text-[#172455] focus:outline-none focus:ring-2 focus:ring-[#21AAA5]"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="quantity" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-                Quantity <span className="text-[#FF5548]">*</span> (Min 100)
-              </label>
-              <input
-                type="number"
-                id="quantity"
-                name="quantity"
-                min="100"
-                step="50"
-                value={formData.quantity}
-                onChange={handleChange}
-                className="w-full px-4 py-2.5 rounded border border-gray-300 text-sm text-[#172455] focus:outline-none focus:ring-2 focus:ring-[#21AAA5]"
-              />
-              {errors.quantity && <p className="mt-1 text-xs text-red-600">{errors.quantity}</p>}
-            </div>
-          </div>
-
-          {/* Dimensions Row */}
+  return (
+    <div
+      className={`overflow-hidden rounded-[16px] border border-[#E5E7EB] bg-white p-4 sm:p-6 lg:p-8 ${className}`}
+    >
+      <form onSubmit={handleSubmit} noValidate className="space-y-3.5 sm:space-y-4">
+        {/* Row 1: Dimensions (Length, Width, Depth) */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-bold uppercase tracking-wider text-gray-700">
-                Box Dimensions (L × W × D)
-              </label>
-              <select
-                name="dimensionsUnit"
-                value={formData.dimensionsUnit}
-                onChange={handleChange}
-                className="text-xs border-b border-gray-300 bg-transparent text-[#172455] font-semibold py-0.5 focus:outline-none"
-              >
-                <option value="inch">Inches (in)</option>
-                <option value="cm">Centimeters (cm)</option>
-                <option value="mm">Millimeters (mm)</option>
-              </select>
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              <input
-                type="number"
-                step="0.1"
-                name="length"
-                value={formData.length}
-                onChange={handleChange}
-                placeholder="Length"
-                className="w-full px-3 py-2 rounded border border-gray-300 text-sm text-[#172455] focus:outline-none focus:ring-2 focus:ring-[#21AAA5]"
-              />
-              <input
-                type="number"
-                step="0.1"
-                name="width"
-                value={formData.width}
-                onChange={handleChange}
-                placeholder="Width"
-                className="w-full px-3 py-2 rounded border border-gray-300 text-sm text-[#172455] focus:outline-none focus:ring-2 focus:ring-[#21AAA5]"
-              />
-              <input
-                type="number"
-                step="0.1"
-                name="depth"
-                value={formData.depth}
-                onChange={handleChange}
-                placeholder="Depth"
-                className="w-full px-3 py-2 rounded border border-gray-300 text-sm text-[#172455] focus:outline-none focus:ring-2 focus:ring-[#21AAA5]"
-              />
-            </div>
-          </div>
-
-          {/* Color & Material Selects */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="colors" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-                Printing Color Options
-              </label>
-              <select
-                id="colors"
-                name="colors"
-                value={formData.colors}
-                onChange={handleChange}
-                className="w-full px-4 py-2.5 rounded border border-gray-300 text-sm text-[#172455] bg-white focus:outline-none focus:ring-2 focus:ring-[#21AAA5]"
-              >
-                <option value="1-Color Outside">1-Color Simple Print</option>
-                <option value="2-Color Outside">2-Color Print</option>
-                <option value="4/0 Full Color Outside">4/0 Full Color Outside Only</option>
-                <option value="4/1 Color Both Sides">4/1 Color (Full Outside, 1 Inside)</option>
-                <option value="4/4 Full Color Inside & Outside">4/4 Full Color Inside & Outside</option>
-                <option value="Plain / No Printing">Plain (No Printing / Unprinted Stock)</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="materialStock" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-                Material Stock
-              </label>
-              <select
-                id="materialStock"
-                name="materialStock"
-                value={formData.materialStock}
-                onChange={handleChange}
-                className="w-full px-4 py-2.5 rounded border border-gray-300 text-sm text-[#172455] bg-white focus:outline-none focus:ring-2 focus:ring-[#21AAA5]"
-              >
-                <option value="12 PT Cardstock">12 PT Folding Cardstock</option>
-                <option value="14 PT Cardstock">14 PT Folding Cardstock</option>
-                <option value="16 PT C1S Paperboard">16 PT C1S White Paperboard (Standard)</option>
-                <option value="18 PT Heavy Cardstock">18 PT Heavy Cardstock</option>
-                <option value="Recycled Natural Kraft">Recycled Natural Kraft Stock</option>
-                <option value="Fluted Corrugated Cardboard">Fluted Corrugated Cardboard (E/B Flute)</option>
-                <option value="Luxury Rigid Board">Luxury Rigid Greyboard (1000–1200 GSM)</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Contact Details */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-gray-100">
-            <div>
-              <label htmlFor="contactName" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-                Full Name <span className="text-[#FF5548]">*</span>
-              </label>
-              <input
-                type="text"
-                id="contactName"
-                name="contactName"
-                value={formData.contactName}
-                onChange={handleChange}
-                placeholder="John Doe"
-                className="w-full px-3.5 py-2.5 rounded border border-gray-300 text-sm text-[#172455] focus:outline-none focus:ring-2 focus:ring-[#21AAA5]"
-              />
-              {errors.contactName && <p className="mt-1 text-xs text-red-600">{errors.contactName}</p>}
-            </div>
-
-            <div>
-              <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-                Business Email <span className="text-[#FF5548]">*</span>
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="john@example.com"
-                className="w-full px-3.5 py-2.5 rounded border border-gray-300 text-sm text-[#172455] focus:outline-none focus:ring-2 focus:ring-[#21AAA5]"
-              />
-              {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email}</p>}
-            </div>
-
-            <div>
-              <label htmlFor="phone" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-                Phone Number <span className="text-[#FF5548]">*</span>
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                placeholder="+1 (555) 000-0000"
-                className="w-full px-3.5 py-2.5 rounded border border-gray-300 text-sm text-[#172455] focus:outline-none focus:ring-2 focus:ring-[#21AAA5]"
-              />
-              {errors.phone && <p className="mt-1 text-xs text-red-600">{errors.phone}</p>}
-            </div>
-          </div>
-
-          {/* File Upload Area */}
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-              Artwork / Dieline File (Optional, max 25 MB)
-            </label>
-            <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-5 text-center hover:border-[#21AAA5] transition-colors bg-[#F6F8FA]">
-              <input
-                type="file"
-                id="artworkFile"
-                accept=".ai,.pdf,.psd,.eps,.png,.jpg,.jpeg,.zip"
-                onChange={handleFileChange}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                aria-label="Upload artwork or dieline file"
-              />
-              <div className="flex flex-col items-center justify-center pointer-events-none">
-                <UploadCloud className="w-8 h-8 text-[#21AAA5] mb-2" />
-                <p className="text-xs font-semibold text-[#172455]">
-                  {selectedFile ? (
-                    <span className="text-[#21AAA5] font-bold">{selectedFile.name} ({(selectedFile.size / (1024 * 1024)).toFixed(2)} MB)</span>
-                  ) : (
-                    "Click or drag vector artwork, PDF, AI, or packaging dielines here"
-                  )}
-                </p>
-                <p className="text-[11px] text-gray-400 mt-1">
-                  Supported formats: .AI, .PDF, .PSD, .EPS, .PNG, .ZIP (up to 25 MB)
-                </p>
-              </div>
-            </div>
-            {errors.file && <p className="mt-1 text-xs text-red-600">{errors.file}</p>}
-          </div>
-
-          {/* Notes / Message */}
-          <div>
-            <label htmlFor="message" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-              Custom Requirements or Finishing Notes
-            </label>
-            <textarea
-              id="message"
-              name="message"
-              rows={3}
-              value={formData.message}
-              onChange={handleChange}
-              placeholder="Include details about special finishes (Spot UV, Embossing, Foil Stamping), window cutouts, or target delivery dates."
-              className="w-full px-4 py-2.5 rounded border border-gray-300 text-sm text-[#172455] focus:outline-none focus:ring-2 focus:ring-[#21AAA5]"
+            <input
+              name="length"
+              value={formData.length}
+              onChange={(e) => patch("length", e.target.value)}
+              placeholder="Length"
+              inputMode="decimal"
+              className={inputClass}
+              aria-label="Length"
             />
           </div>
-
-          {/* Submit Button */}
-          <div className="pt-2">
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              fullWidth
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  <span>Processing Quote Request...</span>
-                </>
-              ) : (
-                <>
-                  <SendHorizontal className="w-4 h-4 mr-2" />
-                  <span>Submit Custom Quote Request</span>
-                </>
-              )}
-            </Button>
-            <p className="text-[11px] text-gray-400 text-center mt-2.5">
-              Free 3D digital proofing included. Our sales engineers reply within 1 business day.
-            </p>
+          <div>
+            <input
+              name="width"
+              value={formData.width}
+              onChange={(e) => patch("width", e.target.value)}
+              placeholder="Width"
+              inputMode="decimal"
+              className={inputClass}
+              aria-label="Width"
+            />
           </div>
-        </form>
-      )}
+          <div>
+            <input
+              name="depth"
+              value={formData.depth}
+              onChange={(e) => patch("depth", e.target.value)}
+              placeholder="Depth"
+              inputMode="decimal"
+              className={inputClass}
+              aria-label="Depth"
+            />
+          </div>
+        </div>
+
+        {/* Row 2: Unit, Color, Expected Date */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="relative">
+            <select
+              name="dimensionsUnit"
+              value={formData.dimensionsUnit}
+              onChange={(e) => patch("dimensionsUnit", e.target.value)}
+              className={selectClass}
+              aria-label="Unit"
+            >
+              <option value="inch">Unit · Inch</option>
+              <option value="cm">Unit · CM</option>
+              <option value="mm">Unit · MM</option>
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8E95A5]" />
+          </div>
+
+          <div className="relative">
+            <select
+              name="colors"
+              value={formData.colors}
+              onChange={(e) => patch("colors", e.target.value)}
+              className={`${selectClass} ${!formData.colors ? "text-[#8E95A5]" : ""}`}
+              aria-label="Color"
+            >
+              <option value="">Color</option>
+              {COLORS.map((c) => (
+                <option key={c} value={c} className="text-[#172455]">
+                  {c}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8E95A5]" />
+          </div>
+
+          <div className="relative">
+            <input
+              type="date"
+              name="expectedDate"
+              value={formData.expectedDate}
+              min={minDate}
+              onChange={(e) => patch("expectedDate", e.target.value)}
+              className={`${inputClass} cursor-pointer ${!formData.expectedDate ? "text-[#8E95A5]" : ""}`}
+              aria-label="Expected Date"
+            />
+          </div>
+        </div>
+
+        {/* Row 3: Quantity Range, Box Type, Enter Your Name */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="relative">
+            <select
+              name="quantity"
+              value={formData.quantity}
+              onChange={(e) => patch("quantity", e.target.value)}
+              className={`${selectClass} ${errors.quantity ? "border-[#FF5548]" : ""} ${!formData.quantity ? "text-[#8E95A5]" : ""}`}
+              aria-label="Select Quantity Range"
+            >
+              <option value="">Select Quantity Range</option>
+              {QUANTITIES.map((q) => (
+                <option key={q.value} value={q.value} className="text-[#172455]">
+                  {q.label}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8E95A5]" />
+            {errors.quantity && (
+              <p className="mt-1 text-[11px] font-medium text-[#FF5548]">{errors.quantity}</p>
+            )}
+          </div>
+
+          <div className="relative">
+            <select
+              name="boxType"
+              value={formData.boxType}
+              onChange={(e) => patch("boxType", e.target.value)}
+              className={`${selectClass} ${!formData.boxType ? "text-[#8E95A5]" : ""}`}
+              aria-label="Select Box Type"
+            >
+              <option value="">Select Box Type</option>
+              {BOX_TYPES.map((type) => (
+                <option key={type} value={type} className="text-[#172455]">
+                  {type}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8E95A5]" />
+          </div>
+
+          <div>
+            <input
+              name="contactName"
+              value={formData.contactName}
+              onChange={(e) => patch("contactName", e.target.value)}
+              placeholder="Enter Your Name"
+              className={`${inputClass} ${errors.contactName ? "border-[#FF5548]" : ""}`}
+              aria-label="Enter Your Name"
+            />
+            {errors.contactName && (
+              <p className="mt-1 text-[11px] font-medium text-[#FF5548]">{errors.contactName}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Row 4: Phone *, Your Email, Answer X+Y (Captcha) */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div>
+            <input
+              name="phone"
+              type="tel"
+              value={formData.phone}
+              onChange={(e) => patch("phone", e.target.value)}
+              placeholder="Phone *"
+              className={`${inputClass} ${errors.phone ? "border-[#FF5548]" : ""}`}
+              aria-label="Phone"
+            />
+            {errors.phone && (
+              <p className="mt-1 text-[11px] font-medium text-[#FF5548]">{errors.phone}</p>
+            )}
+          </div>
+
+          <div>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={(e) => patch("email", e.target.value)}
+              placeholder="Your Email"
+              className={`${inputClass} ${errors.email ? "border-[#FF5548]" : ""}`}
+              aria-label="Your Email"
+            />
+            {errors.email && (
+              <p className="mt-1 text-[11px] font-medium text-[#FF5548]">{errors.email}</p>
+            )}
+          </div>
+
+          <div>
+            <input
+              name="captchaInput"
+              value={formData.captchaInput}
+              onChange={(e) => patch("captchaInput", e.target.value)}
+              placeholder={`Answer ${captcha.a}+${captcha.b}`}
+              inputMode="numeric"
+              className={`${inputClass} ${errors.captchaInput ? "border-[#FF5548]" : ""}`}
+              aria-label={`Answer ${captcha.a}+${captcha.b}`}
+            />
+            {errors.captchaInput && (
+              <p className="mt-1 text-[11px] font-medium text-[#FF5548]">
+                {errors.captchaInput}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Row 5: Short Brief textarea */}
+        <div>
+          <textarea
+            name="brief"
+            rows={3}
+            value={formData.brief}
+            onChange={(e) => patch("brief", e.target.value)}
+            placeholder="Short Brief About your requirement..."
+            className="w-full resize-y rounded-[6px] border border-[#E2E4E8] bg-white px-3.5 py-3 text-sm font-medium text-[#172455] placeholder:text-[#8E95A5] outline-none transition-all focus:border-[#FF5548] focus:ring-2 focus:ring-[#FF5548]/15"
+          />
+        </div>
+
+        {/* Optional Artwork / File Attachment Row */}
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+          {!showFileUpload && !selectedFile ? (
+            <button
+              type="button"
+              onClick={() => setShowFileUpload(true)}
+              className="inline-flex items-center gap-1.5 font-semibold text-[#21AAA5] hover:text-[#147A76] transition-colors"
+            >
+              <UploadCloud className="h-4 w-4" />
+              + Attach Artwork or Dieline (Optional)
+            </button>
+          ) : (
+            <div className="flex w-full items-center justify-between gap-3 rounded-[6px] border border-[#E2E4E8] bg-[#F6F8FA] px-3 py-2">
+              <label className="flex flex-1 cursor-pointer items-center gap-2 text-xs">
+                <FileCheck className="h-4 w-4 text-[#21AAA5]" />
+                <span className="truncate text-[#4B5563]">
+                  {selectedFile
+                    ? `${selectedFile.name} (${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB)`
+                    : "Upload file (.ai, .pdf, .psd, .png, .jpg up to 25 MB)"}
+                </span>
+                <input
+                  type="file"
+                  accept=".ai,.pdf,.psd,.eps,.png,.jpg,.jpeg,.zip"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+              </label>
+              {selectedFile ? (
+                <button
+                  type="button"
+                  onClick={() => setSelectedFile(null)}
+                  className="text-[#6B7280] hover:text-[#172455]"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowFileUpload(false)}
+                  className="text-[#6B7280] hover:text-[#172455]"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          )}
+          {errors.file && <p className="text-[11px] text-[#FF5548]">{errors.file}</p>}
+        </div>
+
+        {/* Error banner */}
+        {submitStatus === "error" && (
+          <div className="flex items-start gap-2 rounded-[6px] border border-red-200 bg-red-50 p-3 text-xs text-red-700">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
+            <span>{statusMessage}</span>
+          </div>
+        )}
+
+        {/* Row 6: Submit Button */}
+        <div>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="inline-flex h-13 w-full cursor-pointer items-center justify-center gap-2 rounded-[6px] bg-[#FF5548] px-6 text-[15px] font-extrabold uppercase tracking-wide text-white transition-all hover:bg-[#e04337] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 shadow-lg shadow-[#FF5548]/25"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Processing Quote Request...
+              </>
+            ) : (
+              <>
+                Request Free Quote
+                <ArrowRight className="h-4 w-4" />
+              </>
+            )}
+          </button>
+        </div>
+
+        <p className="text-center text-[11px] font-medium text-[#6B7280]">
+          ✓ Free 3D digital proofing included · Wholesale direct manufacturer · Fast 8-10 business day turnaround
+        </p>
+      </form>
     </div>
   );
 }

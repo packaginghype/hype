@@ -23,6 +23,14 @@ export function getProductAboutContent(product: ProductItem) {
 }
 
 export function getProductFaqs(product: ProductItem): FAQItem[] {
+  const cmsFaqs = product.cms?.faqs?.filter((f) => f.question.trim()) || [];
+  if (cmsFaqs.length > 0) {
+    return cmsFaqs.map((f) => ({
+      question: f.question,
+      answer: f.answer,
+    }));
+  }
+
   const name = cleanName(product.name);
   return [
     {

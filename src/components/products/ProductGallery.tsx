@@ -33,7 +33,7 @@ export default function ProductGallery({
 
   return (
     <div className="space-y-4">
-      <div className="relative aspect-square overflow-hidden rounded-xl bg-[#F6F8FA]">
+      <div className="group relative aspect-square overflow-hidden rounded-xl bg-[#F6F8FA]">
         {current ? (
           <Image
             src={current}
@@ -48,6 +48,27 @@ export default function ProductGallery({
             <Package className="h-16 w-16" />
           </div>
         )}
+
+        {list.length > 1 ? (
+          <>
+            <button
+              type="button"
+              onClick={() => setActive((curr) => (curr - 1 + list.length) % list.length)}
+              aria-label="Previous image"
+              className="absolute left-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-gray-200 bg-white/95 text-[#172455] shadow-md transition-all hover:scale-105 hover:border-[#FF5548] hover:text-[#FF5548] focus:outline-none"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setActive((curr) => (curr + 1) % list.length)}
+              aria-label="Next image"
+              className="absolute right-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-gray-200 bg-white/95 text-[#172455] shadow-md transition-all hover:scale-105 hover:border-[#FF5548] hover:text-[#FF5548] focus:outline-none"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </>
+        ) : null}
       </div>
 
       {list.length > 0 ? (

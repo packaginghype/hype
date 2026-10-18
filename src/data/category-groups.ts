@@ -1,4 +1,4 @@
-export type CategoryGroupKey = "industries" | "materials" | "shapes";
+export type CategoryGroupKey = "categories" | "industries" | "materials" | "shapes";
 
 export const CATEGORY_GROUPS: Record<
   CategoryGroupKey,
@@ -12,6 +12,16 @@ export const CATEGORY_GROUPS: Record<
     heroImage: string;
   }
 > = {
+  categories: {
+    title: "Categories",
+    eyebrow: "Shop by Category",
+    headline: "Browse Custom Packaging Categories",
+    description:
+      "Explore our full range of custom packaging categories — from everyday cartons to specialty structures for every product type.",
+    browseLabel: "Browse Categories",
+    href: "/categories",
+    heroImage: "/images/hero-packaging.jpg",
+  },
   industries: {
     title: "Industries",
     eyebrow: "Shop by Industry",

@@ -11,6 +11,9 @@ interface BreadcrumbsProps {
   items: BreadcrumbItem[];
   /** Slash style like packaging reference: 🏠 / Category / Product */
   variant?: "default" | "slash";
+  /** White text for use on dark/image backgrounds */
+  light?: boolean;
+  className?: string;
 }
 
 function HomeGlyph({ className }: { className?: string }) {
@@ -26,7 +29,7 @@ function HomeGlyph({ className }: { className?: string }) {
   );
 }
 
-export function Breadcrumbs({ items, variant = "default" }: BreadcrumbsProps) {
+export function Breadcrumbs({ items, variant = "default", light = false, className }: BreadcrumbsProps) {
   if (variant === "slash") {
     return (
       <nav aria-label="Breadcrumb" className="text-[13px] leading-none">
@@ -71,12 +74,15 @@ export function Breadcrumbs({ items, variant = "default" }: BreadcrumbsProps) {
   }
 
   return (
-    <nav aria-label="Breadcrumb" className="py-3 text-xs text-gray-500">
+    <nav
+      aria-label="Breadcrumb"
+      className={`py-3 text-xs ${light ? "text-white/80" : "text-gray-500"} ${className ?? ""}`}
+    >
       <ol className="flex flex-wrap items-center gap-2">
         <li className="flex items-center">
           <Link
             href="/"
-            className="flex items-center transition-colors hover:text-[#172455] focus:underline focus:outline-none"
+            className={`flex items-center transition-colors focus:underline focus:outline-none ${light ? "text-white/80 hover:text-white" : "hover:text-[#172455]"}`}
           >
             <Home className="mr-1 h-3.5 w-3.5" />
             <span>Home</span>
@@ -86,19 +92,19 @@ export function Breadcrumbs({ items, variant = "default" }: BreadcrumbsProps) {
           const isLast = idx === items.length - 1;
           return (
             <li key={idx} className="flex items-center gap-2">
-              <span className="text-gray-400" aria-hidden>
+              <span className={light ? "text-white/50" : "text-gray-400"} aria-hidden>
                 /
               </span>
               {item.href && !isLast ? (
                 <Link
                   href={item.href}
-                  className="transition-colors hover:text-[#172455] focus:underline focus:outline-none"
+                  className={`transition-colors focus:underline focus:outline-none ${light ? "text-white/80 hover:text-white" : "hover:text-[#172455]"}`}
                 >
                   {item.label}
                 </Link>
               ) : (
                 <span
-                  className="line-clamp-1 font-semibold text-[#172455]"
+                  className={`line-clamp-1 font-semibold ${light ? "text-white" : "text-[#172455]"}`}
                   aria-current="page"
                 >
                   {item.label}

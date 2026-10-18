@@ -1,9 +1,14 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ProductDetailPage from "@/components/products/ProductDetailPage";
-import { getProductBySlug, getRelatedProducts } from "@/lib/catalog";
+import {
+  getProductBySlug,
+  getProductRelatedBlogs,
+  getRelatedProducts,
+} from "@/lib/catalog";
+import { stripHtml } from "@/lib/html";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 export async function generateMetadata({
   params,
@@ -17,12 +22,22 @@ export async function generateMetadata({
     return { title: "Packaging Product Not Found" };
   }
 
+  const seoOn = product.cms?.seoEnabled !== false;
+  const title =
+    (seoOn && product.cms?.seoTitle) ||
+    `${product.name} | Custom Box Manufacturer`;
+  const description =
+    (seoOn && product.cms?.seoDescription) ||
+    stripHtml(product.description) ||
+    product.description;
+
   return {
-    title: `${product.name} | Custom Box Manufacturer`,
-    description: product.description,
+    title,
+    description,
+    keywords: seoOn ? product.cms?.seoKeywords || undefined : undefined,
     openGraph: {
-      title: `${product.name} | Packaging Hype`,
-      description: product.description,
+      title,
+      description,
       images: product.imageUrl ? [{ url: product.imageUrl }] : undefined,
     },
   };
@@ -40,7 +55,24 @@ export default async function ProductDetailRoute({
     notFound();
   }
 
-  const related = await getRelatedProducts(product.categorySlug, product.slug, 4);
+  const [related, relatedBlogs] = await Promise.all([
+    getRelatedProducts(product.categorySlug, product.slug, 4),
+    getProductRelatedBlogs(product.cms?.relatedBlogIds || [], 4),
+  ]);
 
-  return <ProductDetailPage product={product} related={related} />;
+  return (
+    <>
+      {product.cms?.seoEnabled !== false && product.cms?.seoScript ? (
+        <div
+          dangerouslySetInnerHTML={{ __html: product.cms.seoScript }}
+          suppressHydrationWarning
+        />
+      ) : null}
+      <ProductDetailPage
+        product={product}
+        related={related}
+        relatedBlogs={relatedBlogs}
+      />
+    </>
+  );
 }

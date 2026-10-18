@@ -2,8 +2,9 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CategoryDetailPage } from "@/components/categories/CategoryDetailPage";
 import { getAllProducts, getCategoryBySlug } from "@/lib/catalog";
+import { stripHtml } from "@/lib/html";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 export async function generateMetadata({
   params,
@@ -17,9 +18,19 @@ export async function generateMetadata({
     return { title: "Category Not Found" };
   }
 
+  const title =
+    category.cms?.seoEnabled !== false && category.cms?.seoTitle
+      ? category.cms.seoTitle
+      : `${category.name} | Custom Packaging Manufacturer`;
+  const description =
+    category.cms?.seoEnabled !== false && category.cms?.seoDescription
+      ? category.cms.seoDescription
+      : stripHtml(category.description);
+
   return {
-    title: `${category.name} | Custom Packaging Manufacturer`,
-    description: category.description,
+    title,
+    description,
+    keywords: category.cms?.seoKeywords || undefined,
   };
 }
 

@@ -1,8 +1,11 @@
 import { prisma } from "@/lib/prisma";
+import { requireSuperAdminPage } from "@/lib/admin-guards";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminQuotesPage() {
+  await requireSuperAdminPage();
+
   const quotes = await prisma.quoteRequest.findMany({
     orderBy: { createdAt: "desc" },
     take: 100,

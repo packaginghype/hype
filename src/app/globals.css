@@ -44,6 +44,18 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Global: all buttons and button-role elements show pointer cursor */
+button,
+[role="button"],
+[type="button"],
+[type="submit"],
+[type="reset"],
+summary,
+label[for],
+select {
+  cursor: pointer;
+}
+
 body {
   font-family: var(--font-poppins), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: var(--color-text-body);
@@ -56,6 +68,16 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--color-navy);
   font-weight: 700;
   letter-spacing: -0.02em;
+}
+
+/* Allow explicit inline color or text-white to override heading defaults */
+h1[style*="color"],
+h2[style*="color"],
+h3[style*="color"],
+h4[style*="color"],
+h5[style*="color"],
+h6[style*="color"] {
+  color: unset;
 }
 
 /* Custom UI Utilities */
@@ -130,6 +152,25 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 999px;
 }
 
+.faq-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #21aaa5 #eef3f0;
+}
+
+.faq-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.faq-scroll::-webkit-scrollbar-track {
+  background: #eef3f0;
+  border-radius: 999px;
+}
+
+.faq-scroll::-webkit-scrollbar-thumb {
+  background: #21aaa5;
+  border-radius: 999px;
+}
+
 /* TipTap / product rich text */
 .rich-text p {
   margin: 0 0 0.85em;
@@ -138,6 +179,14 @@ h1, h2, h3, h4, h5, h6 {
 
 .rich-text p:last-child {
   margin-bottom: 0;
+}
+
+.rich-text h1 {
+  margin: 1.3em 0 0.55em;
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.25;
+  color: #172455;
 }
 
 .rich-text h2 {
@@ -154,6 +203,24 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   line-height: 1.35;
   color: #172455;
+}
+
+.rich-text h4,
+.rich-text h5,
+.rich-text h6 {
+  margin: 1em 0 0.35em;
+  font-weight: 700;
+  line-height: 1.35;
+  color: #172455;
+}
+
+.rich-text h4 {
+  font-size: 1.05rem;
+}
+
+.rich-text h5,
+.rich-text h6 {
+  font-size: 1rem;
 }
 
 .rich-text ul {
@@ -196,4 +263,127 @@ h1, h2, h3, h4, h5, h6 {
   height: 0;
   pointer-events: none;
   color: #9ca3af;
+}
+
+/* CKEditor 5 admin — full toolbar + readable content */
+.ckeditor-field .ck.ck-editor {
+  color: #172455;
+}
+
+.ckeditor-field .ck.ck-toolbar {
+  border-color: #e8eaef !important;
+  background: #f8fafc !important;
+  color: #172455 !important;
+  flex-wrap: wrap !important;
+}
+
+.ckeditor-field .ck.ck-toolbar .ck-toolbar__items {
+  flex-wrap: wrap !important;
+}
+
+.ckeditor-field .ck.ck-button,
+.ckeditor-field .ck.ck-button .ck-button__label,
+.ckeditor-field .ck.ck-dropdown__button,
+.ckeditor-field .ck.ck-list__item .ck-button {
+  color: #172455 !important;
+}
+
+.ckeditor-field .ck-editor__editable,
+.ckeditor-field .ck-editor__editable.ck-focused,
+.ckeditor-field .ck.ck-editor__main > .ck-editor__editable {
+  min-height: 240px;
+  max-height: 520px;
+  overflow-y: auto;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  color: #172455 !important;
+  caret-color: #172455 !important;
+  background: #ffffff !important;
+  border-color: transparent;
+}
+
+.ckeditor-field .ck.ck-editor__main > .ck-editor__editable:not(.ck-focused) {
+  border-top-color: #e8eaef !important;
+}
+
+.ckeditor-field .ck-placeholder,
+.ckeditor-field .ck-editor__editable.ck-blank::before {
+  color: #9ca3af !important;
+}
+
+.ckeditor-field .ck-content h1,
+.ckeditor-field .ck-editor__editable h1 {
+  font-size: 1.85rem !important;
+  font-weight: 800 !important;
+  line-height: 1.25 !important;
+  color: #172455 !important;
+  margin: 0.75em 0 0.4em !important;
+}
+
+.ckeditor-field .ck-content h2,
+.ckeditor-field .ck-editor__editable h2 {
+  font-size: 1.5rem !important;
+  font-weight: 800 !important;
+  line-height: 1.3 !important;
+  color: #172455 !important;
+  margin: 0.7em 0 0.35em !important;
+}
+
+.ckeditor-field .ck-content h3,
+.ckeditor-field .ck-editor__editable h3 {
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  color: #172455 !important;
+  margin: 0.65em 0 0.3em !important;
+}
+
+.ckeditor-field .ck-content h4,
+.ckeditor-field .ck-editor__editable h4 {
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  color: #172455 !important;
+}
+
+.ckeditor-field .ck-content h5,
+.ckeditor-field .ck-editor__editable h5,
+.ckeditor-field .ck-content h6,
+.ckeditor-field .ck-editor__editable h6 {
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  color: #172455 !important;
+}
+
+.ckeditor-field .ck-content p,
+.ckeditor-field .ck-editor__editable p,
+.ckeditor-field .ck-content li,
+.ckeditor-field .ck-editor__editable li,
+.ckeditor-field .ck-content a,
+.ckeditor-field .ck-editor__editable a {
+  color: #172455 !important;
+}
+
+.ckeditor-field .ck-source-editing-area textarea {
+  color: #172455 !important;
+  background: #fff !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px !important;
+}
+
+/* Admin form inputs — never inherit invisible text */
+.admin-surface input,
+.admin-surface textarea,
+.admin-surface select {
+  color: #172455;
+  background-color: #ffffff;
+}
+
+.admin-surface input::placeholder,
+.admin-surface textarea::placeholder {
+  color: #9ca3af;
+}
+
+/* Navy section bars — global h1–h6 color must not hide titles */
+.admin-section-bar,
+.admin-section-bar :is(p, span, h1, h2, h3, h4, h5, h6) {
+  color: #ffffff !important;
 }

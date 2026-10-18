@@ -4,7 +4,11 @@ import { getAdminSession } from "@/lib/admin-auth";
 import {
   adminProductSchema,
   normalizeProductImages,
+  productWriteData,
+  resolveProductCategoryIds,
 } from "@/lib/admin-product-schema";
+import { revalidateCatalog } from "@/lib/cache";
+import { logAdminActivity } from "@/lib/admin-activity";
 
 async function guard() {
   return getAdminSession();
@@ -27,7 +31,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  if (!(await guard())) {
+  const session = await guard();
+  if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -38,27 +43,16 @@ export async function POST(request: Request) {
 
   const data = parsed.data;
   const images = normalizeProductImages(data);
+  const categoryIds = resolveProductCategoryIds(data);
+  const specs = (data.specs || []).filter((s) => s.heading.trim());
+  const faqs = (data.faqs || []).filter((f) => f.question.trim());
+  const relatedProductIds = data.relatedProductIds || [];
 
   const product = await prisma.product.create({
     data: {
-      name: data.name,
-      slug: data.slug,
-      shortDescription: data.shortDescription || null,
-      fullDescription: data.fullDescription || null,
-      sku: data.sku || null,
-      startingPrice:
-        data.startingPrice === null || data.startingPrice === undefined
-          ? null
-          : data.startingPrice,
-      minQuantity: data.minQuantity,
-      leadTimeDays: data.leadTimeDays || "8-10 Business Days",
-      materialsAvailable: data.materialsAvailable,
-      finishesAvailable: data.finishesAvailable,
-      seoTitle: data.seoTitle || null,
-      seoDescription: data.seoDescription || null,
-      isPublished: data.isPublished,
+      ...productWriteData(data),
       categories: {
-        create: data.categoryIds.map((categoryId) => ({ categoryId })),
+        create: categoryIds.map((categoryId) => ({ categoryId })),
       },
       images:
         images.length > 0
@@ -66,12 +60,41 @@ export async function POST(request: Request) {
               create: images.map((img) => ({
                 imageUrl: img.imageUrl,
                 altText: img.altText,
+                title: img.title,
                 isPrimary: img.isPrimary,
                 sortOrder: img.sortOrder,
               })),
             }
           : undefined,
+      specs: {
+        create: specs.map((spec, index) => ({
+          heading: spec.heading.trim(),
+          details: spec.details || "",
+          sortOrder: index,
+        })),
+      },
+      faqs: {
+        create: faqs.map((faq, index) => ({
+          question: faq.question.trim(),
+          answer: faq.answer || "",
+          sortOrder: index,
+        })),
+      },
+      relatedFrom: {
+        create: relatedProductIds.map((relatedProductId, index) => ({
+          relatedProductId,
+          sortOrder: index,
+        })),
+      },
     },
+  });
+
+  await logAdminActivity(session, {
+    action: "CREATE",
+    entityType: "product",
+    entityId: product.id,
+    entityLabel: product.name,
+    summary: `${session.name} created product "${product.name}"`,
   });
 
   return NextResponse.json({ product }, { status: 201 });

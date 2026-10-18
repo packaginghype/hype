@@ -6,6 +6,7 @@ import {
   AlertCircle,
   Loader2,
   ChevronDown,
+  ArrowRight,
 } from "lucide-react";
 import { AddToCartButton } from "@/components/cart/AddToCartButton";
 
@@ -127,9 +128,12 @@ export function CategoryQuoteForm({
 
   if (submitStatus === "success") {
     return (
-      <div className="overflow-hidden rounded-[10px] bg-white shadow-[0_10px_40px_rgba(15,23,42,0.10)]">
+      <div
+        style={{ maxWidth: "900px" }}
+        className="mx-auto w-full max-w-[900px] overflow-hidden rounded-[10px] bg-white shadow-[0_10px_40px_rgba(15,23,42,0.10)]"
+      >
         <div className="flex h-14 items-center bg-[#FF5548] px-5 sm:px-6">
-          <h2 className="text-lg font-bold text-white">Get Custom Quote</h2>
+          <h2 style={{ color: "#ffffff", fontWeight: 800 }} className="text-[18px] tracking-tight">Get Custom Quote</h2>
         </div>
         <div className="px-5 py-12 text-center sm:px-8">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#eaf7f6] text-[#21AAA5]">
@@ -153,41 +157,62 @@ export function CategoryQuoteForm({
   }
 
   return (
-    <div className="overflow-hidden rounded-[8px] border border-[#E8EAEF] bg-white shadow-[0_8px_28px_-10px_rgba(15,23,42,0.14)]">
-      {/* Coral header — exact reference bar */}
-      <div className="flex flex-col gap-2.5 bg-[#FF5548] px-3 py-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-3 sm:gap-y-2 sm:px-3.5 sm:py-2.5 lg:flex-nowrap">
-        <h2 className="shrink-0 text-[15px] font-extrabold leading-none text-white sm:text-[16px]">
+    <div
+      style={{ maxWidth: "900px" }}
+      className="mx-auto w-full max-w-[900px] overflow-hidden rounded-[10px] border border-[#E5E7EB] bg-white shadow-[0_12px_36px_-12px_rgba(15,23,42,0.14)]"
+    >
+      {/* Top coral header bar */}
+      <div className="flex flex-col gap-3 bg-[#FF5548] px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
+        <h2
+          style={{ color: "#ffffff", fontWeight: 800 }}
+          className="text-[18px] tracking-tight sm:text-[19px]"
+        >
           Get Custom Quote
         </h2>
 
-        <div className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1.5 sm:justify-end sm:gap-x-3">
-          <p className="whitespace-nowrap text-[11px] leading-none text-white sm:text-[12px]">
-            Starting from{" "}
-            <span className="text-[13px] font-extrabold sm:text-[14px]">
-              {startingFrom}
-            </span>{" "}
-            per box
-          </p>
-          <p className="whitespace-nowrap text-[11px] leading-none text-white sm:text-[12px]">
-            Availability <span className="font-bold">In Stock</span>
-          </p>
+        <div className="flex items-center gap-3 sm:gap-4">
+          {/* Starting from + price */}
+          <div className="flex flex-col text-white">
+            <span className="text-[9px] font-medium uppercase leading-none tracking-wide text-white/80">
+              Starting from
+            </span>
+            <div className="flex items-baseline gap-1 leading-none mt-0.5">
+              <span className="text-[22px] font-extrabold leading-none sm:text-[24px]">
+                {startingFrom}
+              </span>
+              <span className="text-[9px] text-white/80 leading-none">per box</span>
+            </div>
+          </div>
+
+          <div className="h-8 w-px bg-white/30" />
+
+          {/* Availability */}
+          <div className="flex flex-col text-white">
+            <span className="text-[9px] font-medium uppercase leading-none tracking-wide text-white/80">
+              Availability
+            </span>
+            <span className="mt-0.5 text-[13px] font-bold leading-none sm:text-[14px]">
+              In Stock
+            </span>
+          </div>
+
           <AddToCartButton
             item={{
               ...cartItem,
               quantity: Math.max(1, Number(formData.quantity) || 1),
             }}
-            showIcon={false}
-            label="Add to Cart ›"
-            className="h-8 shrink-0 rounded-[4px] bg-[#172455] px-3 text-[12px] font-bold hover:bg-[#0f1839]"
+            showIcon={true}
+            label="Add to Cart"
+            className="h-9 shrink-0 rounded-[5px] bg-[#172455] px-4 text-[12.5px] font-bold text-white transition-colors hover:bg-[#0f1839]"
           />
         </div>
       </div>
 
       <form
         onSubmit={handleSubmit}
-        className="bg-[#F3F4F6] px-3.5 py-3.5 sm:px-4 sm:py-4"
+        className="bg-white p-4 sm:p-5 lg:p-6"
       >
-        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <input
               name="contactName"
@@ -207,7 +232,7 @@ export function CategoryQuoteForm({
               type="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="emailsample@"
+              placeholder="Email"
               className={fieldClass}
               aria-label="Email"
             />
@@ -246,7 +271,7 @@ export function CategoryQuoteForm({
           </div>
         </div>
 
-        <div className="mt-2.5 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:mt-3 lg:grid-cols-4 lg:gap-3">
+        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <input
             name="length"
             type="number"
@@ -287,19 +312,20 @@ export function CategoryQuoteForm({
             >
               <option>1-Color</option>
               <option>2-Color</option>
-              <option>4/0 Full Color</option>
+              <option>4/0 CMYK Outside</option>
               <option>4/4 Full Color Both Sides</option>
             </select>
             <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9AA3AF]" />
           </div>
         </div>
 
-        <div className="mt-2.5 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:mt-3 lg:grid-cols-4 lg:gap-3">
-          <label className="flex h-11 cursor-pointer items-center gap-2.5">
-            <span className="inline-flex h-9 shrink-0 items-center rounded-[4px] border border-[#C9CDD4] bg-[#EEF0F3] px-3 text-[12.5px] font-medium text-[#222] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+        {/* Row 3 — file + material + message + submit (inline) */}
+        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <label className="flex h-10 cursor-pointer items-center gap-2.5 rounded-[4px] border border-[#D9DDE3] bg-white px-2.5 sm:h-11">
+            <span className="inline-flex h-7 shrink-0 items-center rounded-[3px] border border-[#D1D5DB] bg-[#F3F4F6] px-3 text-[12px] font-medium text-[#172455]">
               Choose File
             </span>
-            <span className="min-w-0 truncate text-[12.5px] text-[#666]">
+            <span className="min-w-0 truncate text-[12px] text-[#6B7280]">
               {selectedFile ? selectedFile.name : "No file chosen"}
             </span>
             <input
@@ -341,16 +367,34 @@ export function CategoryQuoteForm({
             <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9AA3AF]" />
           </div>
 
-          <div className="sm:col-span-2 lg:col-span-2">
-            <input
-              name="message"
-              value={formData.message}
-              onChange={handleChange}
-              placeholder="Type a message"
-              className={fieldClass}
-              aria-label="Message"
-            />
-          </div>
+          {/* Message takes remaining space + submit button shares the last cell */}
+          <input
+            name="message"
+            value={formData.message}
+            onChange={handleChange}
+            placeholder="Type a message"
+            className={fieldClass}
+            aria-label="Message"
+          />
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            data-quote-submit
+            className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-[4px] bg-[#FF5548] px-6 text-[13.5px] font-bold text-white transition-colors hover:bg-[#e04337] disabled:opacity-60 sm:h-11"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Submitting...
+              </>
+            ) : (
+              <>
+                Get A Quote
+                <ArrowRight className="h-4 w-4" />
+              </>
+            )}
+          </button>
         </div>
 
         {errors.file && (
@@ -363,28 +407,6 @@ export function CategoryQuoteForm({
             <span>{statusMessage}</span>
           </div>
         )}
-
-        <div className="mt-4">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            data-quote-submit
-            className={
-              fullWidthSubmit
-                ? "inline-flex h-11 w-full items-center justify-center rounded-[5px] bg-[#FF5548] px-7 text-[14px] font-extrabold uppercase tracking-wide text-white transition-colors hover:bg-[#e04337] disabled:opacity-60 sm:h-12 sm:text-[15px]"
-                : "inline-flex h-11 items-center justify-center rounded-[5px] bg-[#FF5548] px-7 text-sm font-bold text-white transition-colors hover:bg-[#e04337] disabled:opacity-60"
-            }
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Submitting...
-              </>
-            ) : (
-              "Get A Quote"
-            )}
-          </button>
-        </div>
       </form>
     </div>
   );

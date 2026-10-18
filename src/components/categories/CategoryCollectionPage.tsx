@@ -33,40 +33,43 @@ export function CategoryCollectionPage({
   }, [categories, query]);
 
   return (
-    <div className="bg-white min-h-screen">
-      {/* Hero */}
-      <section className="border-b border-gray-100 bg-[#F6F8FA]">
-        <Container className="py-8 sm:py-12 lg:py-14">
-          <Breadcrumbs items={[{ label: meta.title }]} />
+    <div className="min-h-screen bg-white">
+      {/* Hero — Aligned with ProductHero position & styling */}
+      <section className="border-b border-gray-100 bg-white">
+        <Container className="max-w-[1180px] py-6 sm:py-8 lg:py-10">
+          <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-8">
+            {/* Left Column: Breadcrumb -> Title -> Copy -> CTA */}
+            <div className="flex min-w-0 flex-col justify-start lg:min-h-[420px]">
+              <Breadcrumbs variant="slash" items={[{ label: meta.title }]} />
 
-          <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-[#21AAA5]">
-                {meta.eyebrow}
-              </p>
-              <h1 className="mt-3 font-heading text-3xl sm:text-4xl lg:text-[2.6rem] font-extrabold tracking-tight text-[#172455] leading-[1.15]">
+              <h1 className="mt-4 font-heading text-[1.65rem] font-extrabold leading-tight tracking-tight text-[#111111] sm:mt-5 sm:text-[1.9rem] lg:text-[2.05rem]">
                 {meta.headline}
               </h1>
-              <p className="mt-4 text-base sm:text-lg text-gray-600 leading-relaxed max-w-xl">
+
+              <p className="mt-3 text-[14px] leading-[1.65] text-[#333] sm:text-[14.5px]">
                 {meta.description}
               </p>
-              <div className="mt-7">
-                <Button href="/quote" variant="primary" size="lg">
+
+              <div className="mt-5 sm:mt-6">
+                <Button href="/quote" variant="primary" size="md" className="h-11 px-6 font-bold">
                   <span>Request a Quote</span>
-                  <ArrowRight className="w-4 h-4 ml-1.5" />
+                  <ArrowRight className="ml-1.5 h-4 w-4" />
                 </Button>
               </div>
             </div>
 
-            <div className="relative aspect-[5/4] w-full overflow-hidden rounded-2xl bg-white">
-              <Image
-                src={meta.heroImage}
-                alt={meta.title}
-                fill
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-contain p-6"
-                priority
-              />
+            {/* Right Column: Flush image stretching to full left-column height (~500px) */}
+            <div className="min-w-0">
+              <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#F3F3F3] sm:aspect-[16/10] lg:aspect-auto lg:h-full lg:min-h-[420px]">
+                <Image
+                  src={meta.heroImage}
+                  alt={meta.title}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 48vw"
+                  className="object-cover"
+                  priority
+                />
+              </div>
             </div>
           </div>
         </Container>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { ChevronLeft, ChevronRight, Quote, Star } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { cn } from "@/lib/utils";
 
@@ -32,98 +32,202 @@ const REVIEWS = [
   },
 ] as const;
 
-export function ReviewsSlider() {
-  const [index, setIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const total = REVIEWS.length;
+function initials(name: string) {
+  return name
+    .split(" ")
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
+}
+
+function usePerPage() {
+  const [perPage, setPerPage] = useState(3);
 
   useEffect(() => {
-    if (paused) return;
-    const id = window.setInterval(() => {
-      setIndex((current) => (current + 1) % total);
-    }, 5000);
-    return () => window.clearInterval(id);
-  }, [paused, total]);
+    const update = () => {
+      const w = window.innerWidth;
+      if (w < 640) setPerPage(1);
+      else if (w < 1024) setPerPage(2);
+      else setPerPage(3);
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
 
-  const go = (next: number) => {
-    setPaused(true);
-    setIndex(((next % total) + total) % total);
-    window.setTimeout(() => setPaused(false), 7000);
-  };
+  return perPage;
+}
 
-  const review = REVIEWS[index];
+export function ReviewsSlider() {
+  const perPage = usePerPage();
+  const pageCount = Math.max(1, Math.ceil(REVIEWS.length / perPage));
+  const [page, setPage] = useState(0);
+
+  useEffect(() => {
+    setPage((current) => Math.min(current, pageCount - 1));
+  }, [pageCount]);
+
+  const goPrev = () => setPage((p) => (p - 1 + pageCount) % pageCount);
+  const goNext = () => setPage((p) => (p + 1) % pageCount);
 
   return (
-    <section className="border-y border-[#E8EAEF] bg-[#F6F8FA] py-14 sm:py-16 lg:py-20">
+    <section className="border-y border-[#D5E8DC] bg-[#F3FAF6] py-14 sm:py-16 lg:py-20">
       <Container>
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#21AAA5]">
-            Trusted by Growing Brands
-          </p>
-          <h2 className="mt-2 font-heading text-2xl font-extrabold tracking-tight text-[#172455] sm:text-3xl">
-            What Our Customers Say
-          </h2>
-        </div>
-
-        <div
-          className="relative mx-auto mt-8 max-w-3xl"
-          onMouseEnter={() => setPaused(true)}
-          onMouseLeave={() => setPaused(false)}
-        >
-          <div className="rounded-[8px] bg-white px-6 py-8 sm:px-10 sm:py-10">
-            <div className="flex items-center justify-center gap-1 text-[#FF5548]">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star key={i} className="h-4 w-4 fill-current" aria-hidden />
-              ))}
-            </div>
-            <blockquote className="mt-5 text-center text-[15px] leading-relaxed text-[#444] sm:text-base">
-              “{review.quote}”
-            </blockquote>
-            <div className="mt-6 text-center">
-              <p className="text-sm font-bold text-[#172455]">{review.name}</p>
-              <p className="mt-0.5 text-[12.5px] text-gray-500">{review.role}</p>
-            </div>
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div className="max-w-2xl">
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#21AAA5]">
+              Trusted by Growing Brands
+            </p>
+            <h2 className="mt-2 font-heading text-2xl font-extrabold tracking-tight text-[#172455] sm:text-3xl">
+              What Our Customers Say
+            </h2>
+            <p className="mt-2 text-[14px] leading-relaxed text-[#5B667A] sm:text-[15px]">
+              Real feedback from brands that ship with Packaging Hype.
+            </p>
           </div>
 
-          <div className="mt-5 flex items-center justify-center gap-3">
-            <button
-              type="button"
-              aria-label="Previous review"
-              onClick={() => go(index - 1)}
-              className="flex h-9 w-9 items-center justify-center rounded-[5px] border border-[#E2E4E8] bg-white text-[#172455] transition-colors hover:border-[#172455]"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <div className="flex items-center gap-1.5" role="tablist" aria-label="Reviews">
-              {REVIEWS.map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  role="tab"
-                  aria-selected={i === index}
-                  aria-label={`Review ${i + 1}`}
-                  onClick={() => go(i)}
-                  className="flex h-8 w-8 items-center justify-center"
-                >
-                  <span
-                    className={cn(
-                      "block h-[3px] rounded-full transition-all",
-                      i === index ? "w-7 bg-[#FF5548]" : "w-4 bg-[#D1D5DB]"
-                    )}
-                  />
-                </button>
-              ))}
+          {pageCount > 1 ? (
+            <div className="flex shrink-0 items-center gap-2">
+              <button
+                type="button"
+                onClick={goPrev}
+                aria-label="Previous reviews"
+                className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-[#D5E8DC] bg-white text-[#172455] shadow-sm transition-colors hover:border-[#FF5548] hover:text-[#FF5548]"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                onClick={goNext}
+                aria-label="Next reviews"
+                className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-[#D5E8DC] bg-white text-[#172455] shadow-sm transition-colors hover:border-[#FF5548] hover:text-[#FF5548]"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
             </div>
-            <button
-              type="button"
-              aria-label="Next review"
-              onClick={() => go(index + 1)}
-              className="flex h-9 w-9 items-center justify-center rounded-[5px] border border-[#E2E4E8] bg-white text-[#172455] transition-colors hover:border-[#172455]"
+          ) : null}
+        </div>
+
+        <div className="relative mt-9">
+          {pageCount > 1 ? (
+            <>
+              <button
+                type="button"
+                onClick={goPrev}
+                aria-label="Previous reviews"
+                className="absolute -left-3 sm:-left-5 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-[#D5E8DC] bg-white/95 text-[#172455] shadow-lg transition-all hover:scale-105 hover:border-[#FF5548] hover:text-[#FF5548]"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                onClick={goNext}
+                aria-label="Next reviews"
+                className="absolute -right-3 sm:-right-5 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-[#D5E8DC] bg-white/95 text-[#172455] shadow-lg transition-all hover:scale-105 hover:border-[#FF5548] hover:text-[#FF5548]"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </>
+          ) : null}
+
+          <div className="overflow-hidden">
+            <div
+              className="flex transition-transform duration-500 ease-out"
+              style={{ transform: `translateX(-${page * 100}%)` }}
             >
-              <ChevronRight className="h-4 w-4" />
-            </button>
+              {Array.from({ length: pageCount }).map((_, pageIndex) => {
+                const slideItems = REVIEWS.slice(
+                  pageIndex * perPage,
+                  pageIndex * perPage + perPage
+                );
+
+                return (
+                  <div
+                    key={pageIndex}
+                    className="grid w-full shrink-0 gap-4 sm:gap-5"
+                    style={{
+                      gridTemplateColumns: `repeat(${perPage}, minmax(0, 1fr))`,
+                    }}
+                  >
+                    {slideItems.map((review) => (
+                      <article
+                        key={review.name}
+                        className="flex h-full min-h-[280px] flex-col rounded-[14px] border border-[#DCEFE4] bg-white p-5 shadow-[0_10px_28px_-18px_rgba(23,36,85,0.28)] sm:min-h-[300px] sm:p-6"
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-0.5 text-[#FF5548]">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <Star
+                                key={i}
+                                className="h-3.5 w-3.5 fill-current"
+                                aria-hidden
+                              />
+                            ))}
+                          </div>
+                          <Quote
+                            className="h-5 w-5 text-[#21AAA5]/35"
+                            aria-hidden
+                          />
+                        </div>
+
+                        <blockquote className="mt-4 flex-1 text-[13.5px] leading-relaxed text-[#3F4A5E] sm:text-[14px]">
+                          “{review.quote}”
+                        </blockquote>
+
+                        <div className="mt-5 flex items-center gap-3 border-t border-[#EEF3F0] pt-4">
+                          <span
+                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#EAF7F6] text-[12px] font-bold text-[#172455]"
+                            aria-hidden
+                          >
+                            {initials(review.name)}
+                          </span>
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-bold text-[#172455]">
+                              {review.name}
+                            </p>
+                            <p className="truncate text-[12px] text-[#6B7280]">
+                              {review.role}
+                            </p>
+                          </div>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
+
+        {pageCount > 1 ? (
+          <div
+            className="mt-7 flex items-center justify-center gap-1.5"
+            role="tablist"
+            aria-label="Review slides"
+          >
+            {Array.from({ length: pageCount }).map((_, index) => (
+              <button
+                key={index}
+                type="button"
+                role="tab"
+                aria-selected={index === page}
+                aria-label={`Go to review slide ${index + 1}`}
+                onClick={() => setPage(index)}
+                className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5548]/40"
+              >
+                <span
+                  className={cn(
+                    "block h-[3px] rounded-full transition-all duration-300",
+                    index === page
+                      ? "w-8 bg-[#FF5548]"
+                      : "w-5 bg-[#C5D4CC] hover:bg-[#9CA3AF]"
+                  )}
+                />
+              </button>
+            ))}
+          </div>
+        ) : null}
       </Container>
     </section>
   );

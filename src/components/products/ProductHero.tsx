@@ -69,6 +69,13 @@ export default function ProductHero({
     };
   }, []);
 
+  const prevImage = () => {
+    setActive((curr) => (curr - 1 + images.length) % images.length);
+  };
+  const nextImage = () => {
+    setActive((curr) => (curr + 1) % images.length);
+  };
+
   return (
     <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-8">
       {/* Left — breadcrumb → title → copy → form */}
@@ -104,7 +111,7 @@ export default function ProductHero({
       {/* Right — gallery starts with breadcrumb; no image padding; flush thumbs */}
       <div className="min-w-0">
         <div
-          className="relative min-h-[280px] overflow-hidden bg-[#F3F3F3] lg:min-h-0"
+          className="group relative min-h-[280px] overflow-hidden bg-[#F3F3F3] lg:min-h-0"
           style={imageHeight ? { height: imageHeight } : undefined}
         >
           {current ? (
@@ -113,7 +120,7 @@ export default function ProductHero({
               alt={product.name}
               fill
               sizes="(max-width: 1024px) 100vw, 48vw"
-              className="object-cover"
+              className="object-cover transition-opacity duration-300"
               priority
             />
           ) : (
@@ -121,6 +128,27 @@ export default function ProductHero({
               <Package className="h-16 w-16" />
             </div>
           )}
+
+          {images.length > 1 ? (
+            <>
+              <button
+                type="button"
+                onClick={prevImage}
+                aria-label="Previous image"
+                className="absolute left-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-gray-200 bg-white/95 text-[#172455] shadow-md transition-all hover:scale-105 hover:border-[#FF5548] hover:text-[#FF5548] focus:outline-none"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                onClick={nextImage}
+                aria-label="Next image"
+                className="absolute right-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-gray-200 bg-white/95 text-[#172455] shadow-md transition-all hover:scale-105 hover:border-[#FF5548] hover:text-[#FF5548] focus:outline-none"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </>
+          ) : null}
         </div>
 
         {images.length > 0 ? (
@@ -132,7 +160,7 @@ export default function ProductHero({
                   aria-label="Previous images"
                   disabled={page <= 0}
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
-                  className="absolute left-1 top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 items-center justify-center bg-white/90 text-[#172455] shadow enabled:hover:text-[#FF5548] disabled:opacity-30"
+                  className="absolute left-1 top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 cursor-pointer items-center justify-center bg-white/90 text-[#172455] shadow enabled:hover:text-[#FF5548] disabled:cursor-not-allowed disabled:opacity-30"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
@@ -141,7 +169,7 @@ export default function ProductHero({
                   aria-label="Next images"
                   disabled={page >= maxPage}
                   onClick={() => setPage((p) => Math.min(maxPage, p + 1))}
-                  className="absolute right-1 top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 items-center justify-center bg-white/90 text-[#172455] shadow enabled:hover:text-[#FF5548] disabled:opacity-30"
+                  className="absolute right-1 top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 cursor-pointer items-center justify-center bg-white/90 text-[#172455] shadow enabled:hover:text-[#FF5548] disabled:cursor-not-allowed disabled:opacity-30"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>

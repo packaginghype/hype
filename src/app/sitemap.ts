@@ -1,12 +1,16 @@
 import { MetadataRoute } from "next";
 import { getSitemapEntries } from "@/lib/catalog";
+import { getPublishedBlogs } from "@/lib/blogs";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://packaginghype.com";
   const now = new Date();
-  const { categories, products } = await getSitemapEntries();
+  const [{ categories, products }, blogs] = await Promise.all([
+    getSitemapEntries(),
+    getPublishedBlogs(),
+  ]);
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
@@ -85,5 +89,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  return [...staticRoutes, ...categoryRoutes, ...productRoutes];
+  const blogRoutes: MetadataRoute.Sitemap = blogs.map((post) => ({
+    url: `${baseUrl}/blog/${post.slug}`,
+    lastModified: post.publishedDate,
+    changeFrequency: "weekly",
+    priority: 0.7,
+  }));
+
+  return [...staticRoutes, ...categoryRoutes, ...productRoutes, ...blogRoutes];
 }
