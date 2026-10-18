@@ -1,8 +1,8 @@
 import React from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowRight, Package } from "lucide-react";
 import { CategoryItem } from "@/types";
+import { SafeImage } from "@/components/ui/SafeImage";
 
 interface CategoryCardProps {
   category: CategoryItem;
@@ -15,21 +15,15 @@ export function CategoryCard({ category }: CategoryCardProps) {
       className="group relative flex flex-col bg-white border border-[#E7E7E7] rounded-[5px] overflow-hidden card-hover-effect focus:outline-none focus:ring-2 focus:ring-[#21AAA5]"
     >
       <div className="relative w-full aspect-square bg-[#F6F8FA] overflow-hidden flex items-center justify-center p-4">
-        {category.imageUrl ? (
-          <Image
-            src={category.imageUrl}
-            alt={`${category.name} custom packaging`}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            className="object-contain p-4"
-            loading="lazy"
-          />
-        ) : (
-          <div className="flex flex-col items-center justify-center text-slate-400">
-            <Package className="w-12 h-12 stroke-[1.5]" />
-            <span className="text-xs mt-2 font-medium">Packaging Hype</span>
-          </div>
-        )}
+        <SafeImage
+          src={category.imageUrl || "/images/designs/mailer-box.jpg"}
+          alt={`${category.name} custom packaging`}
+          fallbackSrc="/images/designs/mailer-box.jpg"
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          className="object-contain p-4"
+          loading="lazy"
+        />
         <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded text-[11px] font-semibold text-[#172455] shadow-xs">
           Custom Made
         </div>

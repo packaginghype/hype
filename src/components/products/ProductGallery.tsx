@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Package } from "lucide-react";
+import { SafeImage } from "@/components/ui/SafeImage";
 import { cn } from "@/lib/utils";
 
 const VISIBLE = 4;
@@ -34,20 +35,15 @@ export default function ProductGallery({
   return (
     <div className="space-y-4">
       <div className="group relative aspect-square overflow-hidden rounded-xl bg-[#F6F8FA]">
-        {current ? (
-          <Image
-            src={current}
-            alt={name}
-            fill
-            sizes="(max-width: 1024px) 100vw, 48vw"
-            className="object-contain p-4 sm:p-6"
-            priority
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center text-slate-300">
-            <Package className="h-16 w-16" />
-          </div>
-        )}
+        <SafeImage
+          src={current || "/images/designs/mailer-box.jpg"}
+          alt={name}
+          fallbackSrc="/images/designs/mailer-box.jpg"
+          fill
+          sizes="(max-width: 1024px) 100vw, 48vw"
+          className="object-contain p-4 sm:p-6"
+          priority
+        />
 
         {list.length > 1 ? (
           <>
@@ -123,9 +119,10 @@ export default function ProductGallery({
                       : "border-[#E8EAEF] hover:border-[#FF5548]/50"
                   )}
                 >
-                  <Image
+                  <SafeImage
                     src={src}
                     alt=""
+                    fallbackSrc="/images/designs/mailer-box.jpg"
                     fill
                     sizes="140px"
                     className="object-contain p-2"

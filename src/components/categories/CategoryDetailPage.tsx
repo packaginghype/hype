@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Package } from "lucide-react";
 import { Container } from "@/components/ui/Container";
+import { SafeImage } from "@/components/ui/SafeImage";
 import { CategoryQuoteForm } from "@/components/categories/CategoryQuoteForm";
 import { CategoryProductCard } from "@/components/categories/CategoryProductCard";
 import { FAQAccordion } from "@/components/ui/FAQAccordion";
@@ -109,10 +110,11 @@ export function CategoryDetailPage({
 
               <div className="relative mx-auto h-[280px] w-full max-w-[400px] sm:h-[350px] sm:max-w-[460px] lg:mx-0 lg:h-[420px] lg:max-w-none">
                 {heroImage ? (
-                  <Image
+                  <SafeImage
                     src={heroImage}
                     alt={heroImageAlt}
                     title={cms?.bannerImageTitle || cms?.imageTitle || undefined}
+                    fallbackSrc="/images/designs/mailer-box.jpg"
                     fill
                     sizes="(max-width: 1024px) 100vw, 420px"
                     className="object-contain drop-shadow-[0_14px_26px_rgba(15,23,42,0.13)]"
@@ -200,7 +202,7 @@ export function CategoryDetailPage({
                 {cms?.pageScrollImageUrl ||
                   about.imageUrl ||
                   products[0]?.imageUrl ? (
-                  <Image
+                  <SafeImage
                     src={
                       cms?.pageScrollImageUrl ||
                       about.imageUrl ||
@@ -208,6 +210,7 @@ export function CategoryDetailPage({
                     }
                     alt={cms?.pageScrollImageAlt || about.heading}
                     title={cms?.pageScrollImageTitle || undefined}
+                    fallbackSrc="/images/reliable-packaging-boxes.jpg"
                     fill
                     sizes="(max-width: 1024px) 100vw, 50vw"
                     className="object-cover object-center"

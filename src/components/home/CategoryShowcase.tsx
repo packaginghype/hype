@@ -1,8 +1,8 @@
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Package } from "lucide-react";
 import { Container } from "@/components/ui/Container";
+import { SafeImage } from "@/components/ui/SafeImage";
 import { getCategoryShowcaseCategories } from "@/lib/catalog";
 
 export async function CategoryShowcase() {
@@ -42,20 +42,15 @@ export async function CategoryShowcase() {
               className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#21AAA5] focus-visible:ring-offset-2"
             >
               <div className="relative aspect-square overflow-hidden bg-[#F0EBE3]">
-                {category.imageUrl ? (
-                  <Image
-                    src={category.imageUrl}
-                    alt={category.name}
-                    fill
-                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                    className="object-cover object-center"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-slate-300">
-                    <Package className="h-10 w-10" />
-                  </div>
-                )}
+                <SafeImage
+                  src={category.imageUrl || "/images/designs/mailer-box.jpg"}
+                  alt={category.name}
+                  fallbackSrc="/images/designs/mailer-box.jpg"
+                  fill
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                  className="object-cover object-center"
+                  loading="lazy"
+                />
               </div>
               <p className="mt-3 text-center text-sm font-semibold leading-snug text-[#172455] transition-colors group-hover:text-[#FF5548] sm:text-[15px]">
                 {category.name}

@@ -3,6 +3,7 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Package } from "lucide-react";
+import { SafeImage } from "@/components/ui/SafeImage";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { CategoryQuoteForm } from "@/components/categories/CategoryQuoteForm";
 import { cn } from "@/lib/utils";
@@ -114,20 +115,15 @@ export default function ProductHero({
           className="group relative min-h-[280px] overflow-hidden bg-[#F3F3F3] lg:min-h-0"
           style={imageHeight ? { height: imageHeight } : undefined}
         >
-          {current ? (
-            <Image
-              src={current}
-              alt={product.name}
-              fill
-              sizes="(max-width: 1024px) 100vw, 48vw"
-              className="object-cover transition-opacity duration-300"
-              priority
-            />
-          ) : (
-            <div className="flex h-full min-h-[280px] items-center justify-center text-slate-300 lg:min-h-full">
-              <Package className="h-16 w-16" />
-            </div>
-          )}
+          <SafeImage
+            src={current || "/images/designs/mailer-box.jpg"}
+            alt={product.name}
+            fallbackSrc="/images/designs/mailer-box.jpg"
+            fill
+            sizes="(max-width: 1024px) 100vw, 48vw"
+            className="object-cover transition-opacity duration-300"
+            priority
+          />
 
           {images.length > 1 ? (
             <>
@@ -200,9 +196,10 @@ export default function ProductHero({
                       active === index ? "ring-2 ring-inset ring-[#FF5548]" : ""
                     )}
                   >
-                    <Image
+                    <SafeImage
                       src={src}
                       alt=""
+                      fallbackSrc="/images/designs/mailer-box.jpg"
                       fill
                       sizes="160px"
                       className="object-cover"

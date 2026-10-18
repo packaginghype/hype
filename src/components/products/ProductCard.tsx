@@ -2,10 +2,10 @@
 
 import React from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Package } from "lucide-react";
 import { ProductItem } from "@/types";
 import { AddToCartButton } from "@/components/cart/AddToCartButton";
+import { SafeImage } from "@/components/ui/SafeImage";
 
 interface ProductCardProps {
   product: ProductItem;
@@ -20,20 +20,15 @@ export function ProductCard({ product }: ProductCardProps) {
         tabIndex={-1}
         aria-hidden="true"
       >
-        {product.imageUrl ? (
-          <Image
-            src={product.imageUrl}
-            alt={product.name}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            className="object-contain p-4"
-            loading="lazy"
-          />
-        ) : (
-          <div className="flex flex-col items-center justify-center text-slate-300">
-            <Package className="w-12 h-12 stroke-[1.5]" />
-          </div>
-        )}
+        <SafeImage
+          src={product.imageUrl || "/images/designs/mailer-box.jpg"}
+          alt={product.name}
+          fallbackSrc="/images/designs/mailer-box.jpg"
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          className="object-contain p-4"
+          loading="lazy"
+        />
 
         <div className="absolute bottom-2 left-2 bg-[#172455]/80 text-white text-[10px] font-semibold px-2 py-0.5 rounded backdrop-blur-xs">
           MOQ: {product.minQuantity} units

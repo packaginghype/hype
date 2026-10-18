@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Container } from "@/components/ui/Container";
+import { SafeImage } from "@/components/ui/SafeImage";
 import { cn } from "@/lib/utils";
 import type { CategoryItem } from "@/types";
 
@@ -61,27 +61,6 @@ export function IndustrySolutionsSection({ items }: { items: IndustryItem[] }) {
           </div>
 
           <div className="flex flex-wrap items-center gap-3 self-start lg:self-center">
-            {pageCount > 1 ? (
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={goPrev}
-                  aria-label="Previous industries"
-                  className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-[#E2E4E8] bg-white text-[#172455] shadow-sm transition-colors hover:border-[#FF5548] hover:text-[#FF5548]"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={goNext}
-                  aria-label="Next industries"
-                  className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-[#E2E4E8] bg-white text-[#172455] shadow-sm transition-colors hover:border-[#FF5548] hover:text-[#FF5548]"
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </button>
-              </div>
-            ) : null}
-
             <Link
               href="/industries"
               className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-[4px] bg-[#FF5548] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#e04337] focus:outline-none"
@@ -140,15 +119,14 @@ export function IndustrySolutionsSection({ items }: { items: IndustryItem[] }) {
                         className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#21AAA5] focus-visible:ring-offset-2"
                       >
                         <div className="relative aspect-square overflow-hidden bg-[#F0EBE3]">
-                          {item.imageUrl ? (
-                            <Image
-                              src={item.imageUrl}
-                              alt={item.label}
-                              fill
-                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 25vw"
-                              className="object-cover object-center transition-transform duration-500 group-hover:scale-[1.03]"
-                            />
-                          ) : null}
+                          <SafeImage
+                            src={item.imageUrl || "/images/designs/mailer-box.jpg"}
+                            alt={item.label}
+                            fallbackSrc="/images/designs/mailer-box.jpg"
+                            fill
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 25vw"
+                            className="object-cover object-center transition-transform duration-500 group-hover:scale-[1.03]"
+                          />
                         </div>
                         <p className="mt-3 text-center text-sm font-semibold leading-snug text-[#172455] transition-colors group-hover:text-[#FF5548] sm:text-[15px]">
                           {item.label}

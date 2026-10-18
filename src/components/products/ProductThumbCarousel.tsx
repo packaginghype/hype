@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { SafeImage } from "@/components/ui/SafeImage";
 import { cn } from "@/lib/utils";
 
 const VISIBLE = 4;
@@ -78,9 +79,10 @@ export default function ProductThumbCarousel({
                   : "border-[#E8EAEF] hover:border-[#FF5548]/50"
               )}
             >
-              <Image
+              <SafeImage
                 src={src}
                 alt=""
+                fallbackSrc="/images/designs/mailer-box.jpg"
                 fill
                 sizes="220px"
                 className="object-contain p-2"

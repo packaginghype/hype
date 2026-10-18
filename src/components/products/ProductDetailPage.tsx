@@ -13,6 +13,7 @@ import { CategoryProductCard } from "@/components/categories/CategoryProductCard
 import ProductHero from "@/components/products/ProductHero";
 import { ProductFaq } from "@/components/products/ProductFaq";
 import { RichText } from "@/components/ui/RichText";
+import { SafeImage } from "@/components/ui/SafeImage";
 import {
   getProductAboutContent,
   getProductFaqs,
@@ -237,10 +238,11 @@ export default function ProductDetailPage({
             <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
               {cms?.pageScrollImageUrl ? (
                 <div className="relative aspect-[616/479] overflow-hidden rounded-[12px] bg-white">
-                  <Image
+                  <SafeImage
                     src={cms.pageScrollImageUrl}
                     alt={cms.pageScrollImageAlt || product.name}
                     title={cms.pageScrollImageTitle || product.name}
+                    fallbackSrc="/images/designs/mailer-box.jpg"
                     fill
                     className="object-cover"
                     sizes="(max-width: 1024px) 100vw, 50vw"
@@ -329,9 +331,10 @@ export default function ProductDetailPage({
                       href={`/blog/${blog.slug}`}
                       className="relative aspect-[16/10] w-full overflow-hidden bg-[#F6F8FA]"
                     >
-                      <Image
+                      <SafeImage
                         src={img}
                         alt={blog.title}
+                        fallbackSrc="/images/blog-mailer-boxes.jpg"
                         fill
                         className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"

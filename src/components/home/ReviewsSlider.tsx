@@ -110,27 +110,6 @@ export function ReviewsSlider() {
         </div>
 
         <div className="relative mt-9">
-          {pageCount > 1 ? (
-            <>
-              <button
-                type="button"
-                onClick={goPrev}
-                aria-label="Previous reviews"
-                className="absolute -left-3 sm:-left-5 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-[#D5E8DC] bg-white/95 text-[#172455] shadow-lg transition-all hover:scale-105 hover:border-[#FF5548] hover:text-[#FF5548]"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-              <button
-                type="button"
-                onClick={goNext}
-                aria-label="Next reviews"
-                className="absolute -right-3 sm:-right-5 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-[#D5E8DC] bg-white/95 text-[#172455] shadow-lg transition-all hover:scale-105 hover:border-[#FF5548] hover:text-[#FF5548]"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </button>
-            </>
-          ) : null}
-
           <div className="overflow-hidden">
             <div
               className="flex transition-transform duration-500 ease-out"
