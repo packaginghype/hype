@@ -211,7 +211,7 @@ export function CategoryDetailPage({
                     title={cms?.pageScrollImageTitle || undefined}
                     fill
                     sizes="(max-width: 1024px) 100vw, 50vw"
-                    className="object-cover object-center"
+                    className="object-contain p-4 sm:p-6 object-center"
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center text-slate-300">
