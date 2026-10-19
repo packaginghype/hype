@@ -120,9 +120,8 @@ export function IndustrySolutionsSection({ items }: { items: IndustryItem[] }) {
                       >
                         <div className="relative aspect-square overflow-hidden bg-[#F0EBE3]">
                           <SafeImage
-                            src={item.imageUrl || "/images/designs/mailer-box.jpg"}
+                            src={item.imageUrl || ""}
                             alt={item.label}
-                            fallbackSrc="/images/designs/mailer-box.jpg"
                             fill
                             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 25vw"
                             className="object-cover object-center transition-transform duration-500 group-hover:scale-[1.03]"

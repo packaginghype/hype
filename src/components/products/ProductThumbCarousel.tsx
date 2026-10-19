@@ -82,7 +82,6 @@ export default function ProductThumbCarousel({
               <SafeImage
                 src={src}
                 alt=""
-                fallbackSrc="/images/designs/mailer-box.jpg"
                 fill
                 sizes="220px"
                 className="object-contain p-2"

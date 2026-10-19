@@ -114,7 +114,6 @@ export function CategoryDetailPage({
                     src={heroImage}
                     alt={heroImageAlt}
                     title={cms?.bannerImageTitle || cms?.imageTitle || undefined}
-                    fallbackSrc="/images/designs/mailer-box.jpg"
                     fill
                     sizes="(max-width: 1024px) 100vw, 420px"
                     className="object-contain drop-shadow-[0_14px_26px_rgba(15,23,42,0.13)]"
@@ -210,7 +209,6 @@ export function CategoryDetailPage({
                     }
                     alt={cms?.pageScrollImageAlt || about.heading}
                     title={cms?.pageScrollImageTitle || undefined}
-                    fallbackSrc="/images/reliable-packaging-boxes.jpg"
                     fill
                     sizes="(max-width: 1024px) 100vw, 50vw"
                     className="object-cover object-center"

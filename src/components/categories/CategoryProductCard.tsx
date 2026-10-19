@@ -11,9 +11,8 @@ export function CategoryProductCard({ product }: { product: ProductItem }) {
     >
       <div className="relative aspect-square overflow-hidden bg-[#F6F8FA]">
         <SafeImage
-          src={product.imageUrl || "/images/designs/mailer-box.jpg"}
+          src={product.imageUrl || ""}
           alt={product.name}
-          fallbackSrc="/images/designs/mailer-box.jpg"
           fill
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           className="object-cover object-center"

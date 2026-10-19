@@ -242,7 +242,6 @@ export default function ProductDetailPage({
                     src={cms.pageScrollImageUrl}
                     alt={cms.pageScrollImageAlt || product.name}
                     title={cms.pageScrollImageTitle || product.name}
-                    fallbackSrc="/images/designs/mailer-box.jpg"
                     fill
                     className="object-cover"
                     sizes="(max-width: 1024px) 100vw, 50vw"

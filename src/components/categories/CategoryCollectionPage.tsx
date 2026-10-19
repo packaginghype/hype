@@ -116,9 +116,8 @@ export function CategoryCollectionPage({
                 >
                   <div className="relative aspect-square overflow-hidden bg-[#F0EBE3]">
                     <SafeImage
-                      src={category.imageUrl || "/images/designs/mailer-box.jpg"}
+                      src={category.imageUrl || ""}
                       alt={category.name}
-                      fallbackSrc="/images/designs/mailer-box.jpg"
                       fill
                       sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                       className="object-cover object-center"

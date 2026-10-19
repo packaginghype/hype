@@ -16,9 +16,8 @@ export function CategoryCard({ category }: CategoryCardProps) {
     >
       <div className="relative w-full aspect-square bg-[#F6F8FA] overflow-hidden flex items-center justify-center p-4">
         <SafeImage
-          src={category.imageUrl || "/images/designs/mailer-box.jpg"}
+          src={category.imageUrl || ""}
           alt={`${category.name} custom packaging`}
-          fallbackSrc="/images/designs/mailer-box.jpg"
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           className="object-contain p-4"

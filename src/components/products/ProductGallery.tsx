@@ -36,9 +36,8 @@ export default function ProductGallery({
     <div className="space-y-4">
       <div className="group relative aspect-square overflow-hidden rounded-xl bg-[#F6F8FA]">
         <SafeImage
-          src={current || "/images/designs/mailer-box.jpg"}
+          src={current || ""}
           alt={name}
-          fallbackSrc="/images/designs/mailer-box.jpg"
           fill
           sizes="(max-width: 1024px) 100vw, 48vw"
           className="object-contain p-4 sm:p-6"
@@ -122,7 +121,6 @@ export default function ProductGallery({
                   <SafeImage
                     src={src}
                     alt=""
-                    fallbackSrc="/images/designs/mailer-box.jpg"
                     fill
                     sizes="140px"
                     className="object-contain p-2"

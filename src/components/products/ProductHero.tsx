@@ -116,9 +116,8 @@ export default function ProductHero({
           style={imageHeight ? { height: imageHeight } : undefined}
         >
           <SafeImage
-            src={current || "/images/designs/mailer-box.jpg"}
+            src={current || ""}
             alt={product.name}
-            fallbackSrc="/images/designs/mailer-box.jpg"
             fill
             sizes="(max-width: 1024px) 100vw, 48vw"
             className="object-cover transition-opacity duration-300"
@@ -199,7 +198,6 @@ export default function ProductHero({
                     <SafeImage
                       src={src}
                       alt=""
-                      fallbackSrc="/images/designs/mailer-box.jpg"
                       fill
                       sizes="160px"
                       className="object-cover"

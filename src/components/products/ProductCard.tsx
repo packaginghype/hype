@@ -21,9 +21,8 @@ export function ProductCard({ product }: ProductCardProps) {
         aria-hidden="true"
       >
         <SafeImage
-          src={product.imageUrl || "/images/designs/mailer-box.jpg"}
+          src={product.imageUrl || ""}
           alt={product.name}
-          fallbackSrc="/images/designs/mailer-box.jpg"
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           className="object-contain p-4"
