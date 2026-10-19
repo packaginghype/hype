@@ -654,7 +654,7 @@ export function CategoryForm({
               label="Page Scroll Image"
               value={values.pageScrollImageUrl || ""}
               onChange={(url) => patch({ pageScrollImageUrl: url })}
-              recommended="900 × 900 px · Max 2MB"
+              recommended="1200 × 900 px (landscape) · Max 2MB"
               folder="packaginghype/categories/scroll"
             />
             <div className="grid gap-4 sm:grid-cols-2">

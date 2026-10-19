@@ -114,7 +114,7 @@ export default function ProductDetailPage({
             </h2>
           ) : null}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8 lg:h-[480px] xl:h-[520px]">
-            <div className="relative aspect-[5/4] min-h-0 overflow-hidden rounded-[16px] bg-[#F3F1EE] lg:aspect-auto lg:h-full">
+            <div className="relative aspect-[4/3] min-h-0 overflow-hidden rounded-[16px] bg-[#F3F1EE] lg:aspect-auto lg:h-full">
               {product.imageUrl ? (
                 <Image
                   src={product.imageUrl}
@@ -122,7 +122,7 @@ export default function ProductDetailPage({
                   title={cms?.thumbnailTitle || product.name}
                   fill
                   sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover object-center"
+                  className="object-contain p-4 sm:p-6"
                 />
               ) : (
                 <div className="flex h-full items-center justify-center text-slate-300">
@@ -237,7 +237,7 @@ export default function ProductDetailPage({
           <Container className={contentWidth}>
             <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
               {cms?.pageScrollImageUrl ? (
-                <div className="relative aspect-[616/479] overflow-hidden rounded-[12px] bg-white">
+                <div className="relative aspect-[4/3] overflow-hidden rounded-[12px] bg-white">
                   <SafeImage
                     src={cms.pageScrollImageUrl}
                     alt={cms.pageScrollImageAlt || product.name}

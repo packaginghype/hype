@@ -734,7 +734,7 @@ export function ProductForm({
               },
             ]);
           }}
-          recommended="900 × 900 px"
+          recommended="1200 × 900 px (landscape) · Max 2MB"
           folder="packaginghype/products/gallery"
         />
 
@@ -1208,7 +1208,7 @@ export function ProductForm({
               label="Image"
               value={values.pageScrollImageUrl || ""}
               onChange={(url) => patch({ pageScrollImageUrl: url })}
-              recommended="900 × 900 px · Max 2MB"
+              recommended="1200 × 900 px (landscape) · Max 2MB"
               folder="packaginghype/products/scroll"
             />
             <div className="grid gap-4 sm:grid-cols-2">
