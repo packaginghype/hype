@@ -112,7 +112,7 @@ export default function ProductHero({
       {/* Right — gallery starts with breadcrumb; no image padding; flush thumbs */}
       <div className="min-w-0">
         <div
-          className="group relative min-h-[280px] overflow-hidden bg-[#F3F3F3] lg:min-h-0"
+          className="group relative min-h-[280px] overflow-hidden bg-[#F3F3F3] lg:min-h-[500px]"
           style={imageHeight ? { height: imageHeight } : undefined}
         >
           <SafeImage

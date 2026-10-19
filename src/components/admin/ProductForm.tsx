@@ -734,7 +734,7 @@ export function ProductForm({
               },
             ]);
           }}
-          recommended="648 × 523 px"
+          recommended="900 × 900 px"
           folder="packaginghype/products/gallery"
         />
 
@@ -882,7 +882,7 @@ export function ProductForm({
             label="Thumbnail"
             value={values.thumbnailUrl || ""}
             onChange={(url) => patch({ thumbnailUrl: url })}
-            recommended="312 × 345 px · Max 1MB"
+            recommended="900 × 900 px · Max 2MB"
             folder="packaginghype/products/thumb"
           />
           <div>
@@ -1208,7 +1208,7 @@ export function ProductForm({
               label="Image"
               value={values.pageScrollImageUrl || ""}
               onChange={(url) => patch({ pageScrollImageUrl: url })}
-              recommended="616 × 479 px · Max 1MB"
+              recommended="900 × 900 px · Max 2MB"
               folder="packaginghype/products/scroll"
             />
             <div className="grid gap-4 sm:grid-cols-2">
@@ -1346,7 +1346,7 @@ export function ProductForm({
               merchantImageUrls: [...(values.merchantImageUrls || []), url],
             });
           }}
-          recommended="648 × 523 px"
+          recommended="900 × 900 px"
           folder="packaginghype/products/merchant"
         />
         <div>

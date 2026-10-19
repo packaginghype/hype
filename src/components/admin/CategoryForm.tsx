@@ -586,7 +586,7 @@ export function CategoryForm({
             label="Thumbnail Image"
             value={values.imageUrl || ""}
             onChange={(url) => patch({ imageUrl: url })}
-            recommended="312 × 345 px"
+            recommended="900 × 900 px"
             folder="packaginghype/categories/thumb"
           />
           <div className="grid gap-4 sm:grid-cols-2">
@@ -654,7 +654,7 @@ export function CategoryForm({
               label="Page Scroll Image"
               value={values.pageScrollImageUrl || ""}
               onChange={(url) => patch({ pageScrollImageUrl: url })}
-              recommended="616 × 479 px"
+              recommended="900 × 900 px · Max 2MB"
               folder="packaginghype/categories/scroll"
             />
             <div className="grid gap-4 sm:grid-cols-2">
@@ -814,7 +814,7 @@ export function CategoryForm({
                     }))
                   }
                   label="Material Image"
-                  recommended="400 × 400px (1:1 square)"
+                  recommended="900 × 900 px (1:1 square)"
                 />
               </div>
             </div>

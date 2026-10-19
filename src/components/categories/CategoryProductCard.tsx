@@ -9,7 +9,7 @@ export function CategoryProductCard({ product }: { product: ProductItem }) {
       href={`/products/${product.slug}`}
       className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#21AAA5] focus-visible:ring-offset-2"
     >
-      <div className="relative aspect-square overflow-hidden bg-[#F6F8FA]">
+      <div className="relative h-[260px] overflow-hidden bg-[#F6F8FA] sm:h-[280px]">
         <SafeImage
           src={product.imageUrl || ""}
           alt={product.name}
