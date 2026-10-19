@@ -124,7 +124,7 @@ export function IndustrySolutionsSection({ items }: { items: IndustryItem[] }) {
                             alt={item.label}
                             fill
                             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 25vw"
-                            className="object-cover object-center transition-transform duration-500 group-hover:scale-[1.03]"
+                            className="object-contain p-3 transition-transform duration-500 group-hover:scale-[1.03]"
                           />
                         </div>
                         <p className="mt-3 text-center text-sm font-semibold leading-snug text-[#172455] transition-colors group-hover:text-[#FF5548] sm:text-[15px]">

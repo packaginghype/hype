@@ -120,7 +120,7 @@ export default function ProductHero({
             alt={product.name}
             fill
             sizes="(max-width: 1024px) 100vw, 48vw"
-            className="object-cover transition-opacity duration-300"
+            className="object-contain p-4 sm:p-6 transition-opacity duration-300"
             priority
           />
 
@@ -200,7 +200,7 @@ export default function ProductHero({
                       alt=""
                       fill
                       sizes="160px"
-                      className="object-cover"
+                      className="object-contain p-1"
                     />
                   </button>
                 );

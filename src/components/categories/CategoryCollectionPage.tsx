@@ -120,7 +120,7 @@ export function CategoryCollectionPage({
                       alt={category.name}
                       fill
                       sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                      className="object-cover object-center"
+                      className="object-contain p-3 transition-transform duration-300 group-hover:scale-105"
                     />
                   </div>
                   <p className="mt-3 text-center text-sm font-semibold leading-snug text-[#172455] transition-colors group-hover:text-[#FF5548] sm:text-[15px]">

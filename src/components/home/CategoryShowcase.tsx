@@ -47,7 +47,7 @@ export async function CategoryShowcase() {
                   alt={category.name}
                   fill
                   sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                  className="object-cover object-center"
+                  className="object-contain p-3 transition-transform duration-300 group-hover:scale-105"
                   loading="lazy"
                 />
               </div>
