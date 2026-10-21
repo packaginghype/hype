@@ -1,7 +1,8 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { HOME_PAGE_DEFAULTS } from "@/lib/home-page-schema";
 import type { HomePageData } from "@/lib/home-page-schema";
@@ -38,6 +39,7 @@ export function HomeInquirySection({
   inquiryHeading = HOME_PAGE_DEFAULTS.inquiryHeading,
   inquirySubtext = HOME_PAGE_DEFAULTS.inquirySubtext,
 }: Partial<Pick<HomePageData, "inquiryHeading" | "inquirySubtext">> = {}) {
+  const router = useRouter();
   const [captcha, setCaptcha] = useState(DEFAULT_CAPTCHA);
 
   useEffect(() => {
@@ -127,24 +129,10 @@ export function HomeInquirySection({
         setMessage(data.error || "Could not send request. Try again.");
         return;
       }
-      setStatus("success");
-      setMessage(data.message || "Quote request received.");
-      setForm({
-        length: "",
-        width: "",
-        depth: "",
-        dimensionsUnit: "inch",
-        colors: "",
-        expectedDate: "",
-        quantity: "",
-        boxType: "",
-        contactName: "",
-        phone: "",
-        email: "",
-        captcha: "",
-        brief: "",
-      });
-      setCaptcha(newCaptcha());
+      const refNum = data.quoteNumber || `PH-${Date.now().toString().slice(-6)}`;
+      const params = new URLSearchParams({ ref: refNum });
+      if (form.contactName.trim()) params.set("name", form.contactName.trim().split(" ")[0]);
+      router.push(`/thank-you?${params.toString()}`);
     } catch {
       setStatus("error");
       setMessage("Network error. Please try again.");
@@ -289,12 +277,6 @@ export function HomeInquirySection({
               className="mt-3 w-full resize-y rounded-[6px] border border-[#E2E4E8] bg-white px-3.5 py-3 text-sm font-medium text-[#172455] placeholder:text-[#8E95A5] outline-none transition-all focus:border-[#FF5548] focus:ring-2 focus:ring-[#FF5548]/15"
             />
 
-            {status === "success" ? (
-              <p className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-600">
-                <CheckCircle2 className="h-4 w-4" />
-                {message}
-              </p>
-            ) : null}
             {status === "error" ? (
               <p className="mt-3 text-sm font-semibold text-[#FF5548]">{message}</p>
             ) : null}
