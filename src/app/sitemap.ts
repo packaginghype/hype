@@ -76,14 +76,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   const categoryRoutes: MetadataRoute.Sitemap = categories.map((cat) => ({
-    url: `${baseUrl}/categories/${cat.slug}`,
+    url:
+      cat.group === "industries"
+        ? `${baseUrl}/industry/${cat.slug}`
+        : cat.group === "materials"
+          ? `${baseUrl}/box-by-material/${cat.slug}`
+          : cat.group === "shapes"
+            ? `${baseUrl}/shapes-styles/${cat.slug}`
+            : `${baseUrl}/category/${cat.slug}`,
     lastModified: cat.updatedAt,
     changeFrequency: "weekly",
     priority: 0.8,
   }));
 
   const productRoutes: MetadataRoute.Sitemap = products.map((prod) => ({
-    url: `${baseUrl}/products/${prod.slug}`,
+    url: `${baseUrl}/product/${prod.slug}`,
     lastModified: prod.updatedAt,
     changeFrequency: "weekly",
     priority: 0.8,

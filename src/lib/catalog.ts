@@ -57,12 +57,26 @@ function toProductItem(
   };
 }
 
+export function getCategoryHref(category: { slug: string; group?: string }): string {
+  if (category.group === "industries") {
+    return `/industry/${category.slug}`;
+  }
+  if (category.group === "materials") {
+    return `/box-by-material/${category.slug}`;
+  }
+  if (category.group === "shapes") {
+    return `/shapes-styles/${category.slug}`;
+  }
+  return `/category/${category.slug}`;
+}
+
 function toCategoryItem(category: {
   id: string;
   name: string;
   slug: string;
   description: string | null;
   imageUrl: string | null;
+  group?: string;
   _count?: { products: number };
 }): CategoryItem {
   const plainDescription =
@@ -75,6 +89,7 @@ function toCategoryItem(category: {
     slug: category.slug,
     description: plainDescription,
     imageUrl: category.imageUrl || undefined,
+    group: (category.group as CategoryGroupKey) || undefined,
     productCount: category._count?.products,
   };
 }
@@ -172,6 +187,7 @@ export const getNavCategories = unstable_cache(
       name: c.name,
       slug: c.slug,
       description: "",
+      group: c.group as CategoryGroupKey,
     });
 
     const categories = rows.filter((r) => r.group === "categories").map(toLink);
@@ -425,7 +441,7 @@ export const getProductBySlug = cache(async (slug: string): Promise<ProductItem 
           .filter(Boolean)
           .map((c) => ({
             label: c!.name,
-            href: `/categories/${c!.slug}`,
+            href: getCategoryHref(c!),
           }));
       }
 
@@ -595,7 +611,7 @@ export const getSitemapEntries = unstable_cache(
     const [categories, products] = await Promise.all([
       prisma.category.findMany({
         where: { isPublished: true },
-        select: { slug: true, updatedAt: true },
+        select: { slug: true, group: true, updatedAt: true },
       }),
       prisma.product.findMany({
         where: { isPublished: true },

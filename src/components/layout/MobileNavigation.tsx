@@ -3,9 +3,10 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { X, Phone, Mail, ChevronDown, ArrowRight } from "lucide-react";
+import { X, Phone, Mail, ChevronDown, ArrowRight, ShoppingCart } from "lucide-react";
 import { VERIFIED_BUSINESS_INFO } from "@/data/verified-data";
 import { Button } from "@/components/ui/Button";
+import { useCart } from "@/components/cart/CartProvider";
 import { cn } from "@/lib/utils";
 
 type NavLink = { name: string; slug: string };
@@ -25,6 +26,7 @@ export function MobileNavigation({
   industries,
   materials,
 }: MobileNavigationProps) {
+  const { itemCount } = useCart();
   const [openSection, setOpenSection] = useState<
     "categories" | "industries" | "materials" | null
   >(null);
@@ -114,7 +116,7 @@ export function MobileNavigation({
                 categories.map((item) => (
                   <Link
                     key={item.slug}
-                    href={`/categories/${item.slug}`}
+                    href={`/category/${item.slug}`}
                     onClick={onClose}
                     className="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-[#F6F8FA] hover:text-[#FF5548]"
                   >
@@ -159,7 +161,7 @@ export function MobileNavigation({
               {industries.map((item) => (
                 <Link
                   key={item.slug}
-                  href={`/categories/${item.slug}`}
+                  href={`/industry/${item.slug}`}
                   onClick={onClose}
                   className="block px-3 py-2 text-sm text-gray-700 rounded hover:bg-[#F6F8FA] hover:text-[#FF5548]"
                 >
@@ -201,7 +203,7 @@ export function MobileNavigation({
               {materials.map((item) => (
                 <Link
                   key={item.slug}
-                  href={`/categories/${item.slug}`}
+                  href={`/box-by-material/${item.slug}`}
                   onClick={onClose}
                   className="block px-3 py-2 text-sm text-gray-700 rounded hover:bg-[#F6F8FA] hover:text-[#FF5548]"
                 >
@@ -233,6 +235,20 @@ export function MobileNavigation({
             className="block px-3 py-2.5 text-base font-semibold text-[#172455] rounded hover:bg-[#F6F8FA]"
           >
             Blogs
+          </Link>
+
+          <Link
+            href="/cart"
+            onClick={onClose}
+            className="flex items-center justify-between px-3 py-2.5 text-base font-semibold text-[#172455] rounded hover:bg-[#F6F8FA]"
+          >
+            <span className="flex items-center gap-2.5">
+              <ShoppingCart className="w-4 h-4 text-[#FF5548]" />
+              My Cart
+            </span>
+            <span className="text-xs font-bold bg-[#FF5548] text-white px-2 py-0.5 rounded-full">
+              {itemCount}
+            </span>
           </Link>
 
           <div className="pt-4 mt-4 border-t border-gray-100 space-y-2 px-3 text-xs text-gray-600">

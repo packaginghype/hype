@@ -6,7 +6,7 @@ import type { ProductItem } from "@/types";
 export function CategoryProductCard({ product }: { product: ProductItem }) {
   return (
     <Link
-      href={`/products/${product.slug}`}
+      href={`/product/${product.slug}`}
       className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#21AAA5] focus-visible:ring-offset-2"
     >
       <div className="relative h-[260px] overflow-hidden bg-[#F6F8FA] sm:h-[280px]">

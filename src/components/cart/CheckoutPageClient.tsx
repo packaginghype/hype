@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -15,6 +14,7 @@ import {
 } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { SafeImage } from "@/components/ui/SafeImage";
 import { useCart } from "@/components/cart/CartProvider";
 import { formatMoney } from "@/lib/cart";
 
@@ -97,7 +97,7 @@ export function CheckoutPageClient() {
     const cartLines = items
       .map(
         (item) =>
-          `${item.name} × ${item.quantity} @ ${formatMoney(item.unitPrice)} (id: ${item.slug})`
+          `${item.name} × ${item.quantity} @ ${formatMoney(item.unitPrice)} (${item.href || `/product/${item.slug}`})`
       )
       .join("\n");
 
@@ -173,7 +173,7 @@ export function CheckoutPageClient() {
             <p className="mt-2 text-sm leading-relaxed text-gray-600">{successMessage}</p>
             <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link
-                href="/products"
+                href="/product"
                 className="inline-flex items-center gap-1.5 rounded-[6px] bg-[#FF5548] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#e04337]"
               >
                 Continue Shopping
@@ -209,7 +209,7 @@ export function CheckoutPageClient() {
               Add packaging products before proceeding to checkout.
             </p>
             <Link
-              href="/products"
+              href="/product"
               className="mt-6 inline-flex items-center gap-1.5 rounded-[6px] bg-[#172455] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#0f1839]"
             >
               Browse Products
@@ -465,7 +465,7 @@ export function CheckoutPageClient() {
                   <div key={item.id} className="flex gap-3">
                     <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-md bg-[#F6F8FA]">
                       {item.imageUrl ? (
-                        <Image
+                        <SafeImage
                           src={item.imageUrl}
                           alt={item.name}
                           fill

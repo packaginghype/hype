@@ -70,7 +70,7 @@ export default function ProductDetailPage({
                         .startsWith("custom ")
                         ? product.categoryName
                         : `Custom ${product.categoryName}`,
-                      href: `/categories/${product.categorySlug}`,
+                      href: `/category/${product.categorySlug}`,
                     },
                   ]),
               { label: product.name },
@@ -120,7 +120,6 @@ export default function ProductDetailPage({
                 <Image
                   src={product.imageUrl}
                   alt={cms?.thumbnailAlt || product.name}
-                  title={cms?.thumbnailTitle || product.name}
                   fill
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   className="object-contain p-4 sm:p-6"
@@ -242,7 +241,6 @@ export default function ProductDetailPage({
                   <SafeImage
                     src={cms.pageScrollImageUrl}
                     alt={cms.pageScrollImageAlt || product.name}
-                    title={cms.pageScrollImageTitle || product.name}
                     fill
                     className="object-contain p-4 sm:p-6"
                     sizes="(max-width: 1024px) 100vw, 50vw"

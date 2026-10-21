@@ -139,7 +139,7 @@ export function IndustrySolutionsSection({ items }: { items: IndustryItem[] }) {
                   style={{ width: itemWidth }}
                 >
                   <Link
-                    href={`/categories/${item.slug}`}
+                    href={`/industry/${item.slug}`}
                     className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#21AAA5] focus-visible:ring-offset-2"
                   >
                     <div className="relative aspect-square overflow-hidden bg-[#F0EBE3]">

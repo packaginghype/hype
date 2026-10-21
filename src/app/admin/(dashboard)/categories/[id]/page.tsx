@@ -72,7 +72,11 @@ export default async function EditCategoryPage({ params }: Props) {
         </div>
 
         <Link
-          href={`/categories/${category.slug}`}
+          href={
+            category.group === "industries"
+              ? `/industry/${category.slug}`
+              : `/category/${category.slug}`
+          }
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 rounded-[4px] border border-[#172455] bg-white px-3.5 py-2 text-xs font-bold text-[#172455] hover:bg-[#172455] hover:text-white transition-colors"

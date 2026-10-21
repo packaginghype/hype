@@ -38,7 +38,7 @@ export async function CategoryShowcase() {
           {categories.map((category) => (
             <Link
               key={category.id}
-              href={`/categories/${category.slug}`}
+              href={`/category/${category.slug}`}
               className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#21AAA5] focus-visible:ring-offset-2"
             >
               <div className="relative aspect-square overflow-hidden bg-[#F0EBE3]">

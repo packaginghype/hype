@@ -5,6 +5,9 @@ import { getAdminSession } from "@/lib/admin-auth";
 import { adminBlogSchema, blogWriteData } from "@/lib/admin-blog-schema";
 import { revalidateBlogs } from "@/lib/cache";
 import { logAdminActivity } from "@/lib/admin-activity";
+import {
+  deleteRemovedCloudinaryAssets,
+} from "@/lib/cloudinary";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -30,10 +33,26 @@ export async function PUT(request: Request, { params }: Params) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
+    const newData = parsed.data;
+
+    // Collect old Cloudinary image URLs from blog (featuredImage = bannerImageUrl in DB)
+    const oldImageUrls = [
+      existing.featuredImage,   // same as bannerImageUrl in DB
+      existing.thumbnailImageUrl,
+    ];
+    // newData uses bannerImageUrl which maps to featuredImage in blogWriteData
+    const newImageUrls = [
+      newData.bannerImageUrl ?? null,
+      newData.thumbnailImageUrl ?? null,
+    ];
+
     const post = await prisma.blogPost.update({
       where: { id },
-      data: blogWriteData(parsed.data),
+      data: blogWriteData(newData),
     });
+
+    // Delete Cloudinary assets that were removed/replaced
+    await deleteRemovedCloudinaryAssets(oldImageUrls, newImageUrls);
 
     await logAdminActivity(session, {
       action: "UPDATE",
@@ -74,6 +93,13 @@ export async function DELETE(_request: Request, { params }: Params) {
     }
 
     await prisma.blogPost.delete({ where: { id } });
+
+    // Delete all Cloudinary images associated with this blog post
+    // featuredImage and bannerImageUrl are the same value in the DB
+    await deleteRemovedCloudinaryAssets(
+      [existing.featuredImage, existing.thumbnailImageUrl],
+      []
+    );
 
     await logAdminActivity(session, {
       action: "DELETE",

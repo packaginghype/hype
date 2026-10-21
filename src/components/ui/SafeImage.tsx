@@ -13,6 +13,7 @@ export function SafeImage({
   alt,
   fallbackSrc,
   className,
+  title: _ignoredTitle, // Omit title attribute to prevent browser tooltip on hover while preserving alt in DOM for SEO
   ...props
 }: SafeImageProps) {
   const [hasError, setHasError] = useState(false);

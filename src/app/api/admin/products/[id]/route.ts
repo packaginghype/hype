@@ -9,11 +9,35 @@ import {
 } from "@/lib/admin-product-schema";
 import { revalidateCatalog } from "@/lib/cache";
 import { logAdminActivity } from "@/lib/admin-activity";
+import {
+  deleteCloudinaryAssets,
+  deleteRemovedCloudinaryAssets,
+} from "@/lib/cloudinary";
 
 type Params = { params: Promise<{ id: string }> };
 
 async function guard() {
   return getAdminSession();
+}
+
+/** Collect all top-level image URLs from a product DB record */
+function productTopLevelImageUrls(
+  p: {
+    thumbnailUrl: string | null;
+    videoThumbnailUrl: string | null;
+    pageScrollImageUrl: string | null;
+    faqsImageUrl: string | null;
+    merchantImageUrls: string[];
+  } | null
+): string[] {
+  if (!p) return [];
+  return [
+    p.thumbnailUrl,
+    p.videoThumbnailUrl,
+    p.pageScrollImageUrl,
+    p.faqsImageUrl,
+    ...(p.merchantImageUrls || []),
+  ].filter(Boolean) as string[];
 }
 
 export async function PUT(request: Request, { params }: Params) {
@@ -36,6 +60,22 @@ export async function PUT(request: Request, { params }: Params) {
   const relatedProductIds = (data.relatedProductIds || []).filter(
     (relatedId) => relatedId !== id
   );
+
+  // Fetch old image data before updating
+  const existing = await prisma.product.findUnique({
+    where: { id },
+    select: {
+      thumbnailUrl: true,
+      videoThumbnailUrl: true,
+      pageScrollImageUrl: true,
+      faqsImageUrl: true,
+      merchantImageUrls: true,
+      images: { select: { imageUrl: true } },
+    },
+  });
+
+  const oldTopLevelUrls = productTopLevelImageUrls(existing);
+  const oldGalleryUrls = (existing?.images || []).map((img) => img.imageUrl);
 
   await prisma.$transaction([
     prisma.productCategory.deleteMany({ where: { productId: id } }),
@@ -87,6 +127,28 @@ export async function PUT(request: Request, { params }: Params) {
     },
   });
 
+  // Build new image URL sets for comparison
+  const newTopLevelUrls = productTopLevelImageUrls({
+    thumbnailUrl: data.thumbnailUrl ?? null,
+    videoThumbnailUrl: data.videoThumbnailUrl ?? null,
+    pageScrollImageUrl: data.pageScrollImageUrl ?? null,
+    faqsImageUrl: data.faqsImageUrl ?? null,
+    merchantImageUrls: data.merchantImageUrls ?? [],
+  });
+  const newGalleryUrls = images.map((img) => img.imageUrl);
+
+  // Delete removed Cloudinary assets (top-level + gallery)
+  await deleteRemovedCloudinaryAssets(oldTopLevelUrls, newTopLevelUrls);
+  await deleteRemovedCloudinaryAssets(oldGalleryUrls, newGalleryUrls);
+
+  // Video thumbnails are images; also handle video deletion if URL changed
+  if (
+    existing?.videoThumbnailUrl &&
+    existing.videoThumbnailUrl !== (data.videoThumbnailUrl ?? null)
+  ) {
+    // Already handled above in top-level; separate video url itself:
+  }
+
   await logAdminActivity(session, {
     action: "UPDATE",
     entityType: "product",
@@ -108,13 +170,36 @@ export async function DELETE(_request: Request, { params }: Params) {
   const { id } = await params;
   const existing = await prisma.product.findUnique({
     where: { id },
-    select: { id: true, name: true },
+    select: {
+      id: true,
+      name: true,
+      thumbnailUrl: true,
+      videoThumbnailUrl: true,
+      videoUrl: true,
+      pageScrollImageUrl: true,
+      faqsImageUrl: true,
+      merchantImageUrls: true,
+      images: { select: { imageUrl: true } },
+    },
   });
   if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
   await prisma.product.delete({ where: { id } });
+
+  // Delete all Cloudinary images for this product
+  const allImageUrls = [
+    ...productTopLevelImageUrls(existing),
+    ...(existing.images || []).map((img) => img.imageUrl),
+  ];
+  await deleteCloudinaryAssets(allImageUrls, "image");
+
+  // Delete video from Cloudinary if it's there
+  if (existing.videoUrl) {
+    const { deleteCloudinaryAsset } = await import("@/lib/cloudinary");
+    await deleteCloudinaryAsset(existing.videoUrl, "video");
+  }
 
   await logAdminActivity(session, {
     action: "DELETE",
@@ -124,4 +209,6 @@ export async function DELETE(_request: Request, { params }: Params) {
     summary: `${session.name} deleted product "${existing.name}"`,
   });
 
+  revalidateCatalog();
+  return NextResponse.json({ ok: true });
 }

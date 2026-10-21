@@ -99,7 +99,6 @@ export function CategoryDetailPage({
                   <SafeImage
                     src={heroImage}
                     alt={heroImageAlt}
-                    title={cms?.bannerImageTitle || cms?.imageTitle || undefined}
                     fill
                     sizes="(max-width: 1024px) 100vw, 420px"
                     className="object-contain drop-shadow-[0_14px_26px_rgba(15,23,42,0.13)]"
@@ -130,7 +129,10 @@ export function CategoryDetailPage({
                     name: heroTitle,
                     imageUrl: heroImage,
                     unitPrice: cms?.discountedPrice ?? cms?.originalPrice ?? null,
-                    href: `/categories/${category.slug}`,
+                    href:
+                      category.group === "industries"
+                        ? `/industry/${category.slug}`
+                        : `/category/${category.slug}`,
                   }}
                 />
               </div>
@@ -194,7 +196,7 @@ export function CategoryDetailPage({
                       products[0].imageUrl
                     }
                     alt={cms?.pageScrollImageAlt || about.heading}
-                    title={cms?.pageScrollImageTitle || undefined}
+
                     fill
                     sizes="(max-width: 1024px) 100vw, 50vw"
                     className="object-contain p-4 sm:p-6 object-center"

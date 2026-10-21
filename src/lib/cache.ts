@@ -23,8 +23,11 @@ export function revalidateCatalog() {
   expireTag(CACHE_TAGS.sitemap);
   revalidatePath("/", "layout");
   revalidatePath("/categories");
+  revalidatePath("/category");
   revalidatePath("/products");
+  revalidatePath("/product");
   revalidatePath("/industries");
+  revalidatePath("/industry");
   revalidatePath("/box-by-material");
   revalidatePath("/shapes-styles");
 }

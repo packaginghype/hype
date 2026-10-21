@@ -7,7 +7,7 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { RichText } from "@/components/ui/RichText";
 import { BlogShareButtons } from "@/components/blog/BlogShareButtons";
 import { Calendar, Clock, ArrowLeft, ArrowRight, BookOpen, Sparkles } from "lucide-react";
-import { formatBlogDate, getBlogBySlug, getPublishedBlogs } from "@/lib/blogs";
+import { formatBlogDate, getBlogBySlug, getPublishedBlogs, getBlogFallbackImage } from "@/lib/blogs";
 
 export const revalidate = 120;
 
@@ -59,7 +59,10 @@ export default async function BlogDetailPage({ params }: Props) {
   const allBlogs = await getPublishedBlogs();
   const relatedBlogs = allBlogs.filter((b) => b.slug !== slug).slice(0, 3);
 
-  const banner = post.bannerImageUrl || post.featuredImage;
+  const banner =
+    post.bannerImageUrl ||
+    post.featuredImage ||
+    getBlogFallbackImage(post.slug);
   const estRead = readingTime(post.content || "");
 
   return (
@@ -132,7 +135,6 @@ export default async function BlogDetailPage({ params }: Props) {
               <Image
                 src={banner}
                 alt={post.bannerImageAlt || post.title}
-                title={post.bannerImageTitle || post.title}
                 fill
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 900px"

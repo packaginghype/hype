@@ -9,6 +9,7 @@ export interface CategoryItem {
   slug: string;
   description: string;
   imageUrl?: string;
+  group?: "categories" | "industries" | "materials" | "shapes";
   productCount?: number;
   /** Full CMS payload for single category pages */
   cms?: {

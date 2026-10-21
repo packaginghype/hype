@@ -165,7 +165,7 @@ export function Header({
                   {categories.map((item) => (
                     <Link
                       key={item.slug}
-                      href={`/categories/${item.slug}`}
+                      href={`/category/${item.slug}`}
                       className="rounded px-3 py-2 text-sm font-semibold text-[#172455] transition-colors hover:bg-[#F6F8FA] hover:text-[#FF5548]"
                     >
                       {item.name}
@@ -215,7 +215,7 @@ export function Header({
                   {industries.map((item) => (
                     <Link
                       key={item.slug}
-                      href={`/categories/${item.slug}`}
+                      href={`/industry/${item.slug}`}
                       className="rounded px-3 py-2 text-sm font-semibold text-[#172455] transition-colors hover:bg-[#F6F8FA] hover:text-[#FF5548]"
                     >
                       {item.name}
@@ -254,7 +254,7 @@ export function Header({
                   {materials.map((item) => (
                     <Link
                       key={item.slug}
-                      href={`/categories/${item.slug}`}
+                      href={`/box-by-material/${item.slug}`}
                       className="block rounded px-3 py-2.5 text-sm font-semibold text-[#172455] transition-colors hover:bg-[#F6F8FA] hover:text-[#FF5548]"
                     >
                       {item.name}

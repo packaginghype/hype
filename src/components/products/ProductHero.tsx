@@ -103,7 +103,7 @@ export default function ProductHero({
               name: product.name,
               imageUrl: product.imageUrl,
               unitPrice: product.startingPrice ?? null,
-              href: `/products/${product.slug}`,
+              href: `/product/${product.slug}`,
             }}
           />
         </div>

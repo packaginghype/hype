@@ -108,12 +108,17 @@ export function CategoryCollectionPage({
             </p>
           ) : (
             <div className="mt-10 grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-4">
-              {filtered.map((category) => (
-                <Link
-                  key={category.id}
-                  href={`/categories/${category.slug}`}
-                  className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#21AAA5] focus-visible:ring-offset-2"
-                >
+              {filtered.map((category) => {
+                const itemHref =
+                  group === "industries" || category.group === "industries"
+                    ? `/industry/${category.slug}`
+                    : `/category/${category.slug}`;
+                return (
+                  <Link
+                    key={category.id}
+                    href={itemHref}
+                    className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#21AAA5] focus-visible:ring-offset-2"
+                  >
                   <div className="relative aspect-square overflow-hidden bg-[#F0EBE3]">
                     <SafeImage
                       src={category.imageUrl || ""}
@@ -132,7 +137,8 @@ export function CategoryCollectionPage({
                     </p>
                   ) : null}
                 </Link>
-              ))}
+                );
+              })}
             </div>
           )}
         </Container>

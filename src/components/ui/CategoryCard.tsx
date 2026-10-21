@@ -9,9 +9,14 @@ interface CategoryCardProps {
 }
 
 export function CategoryCard({ category }: CategoryCardProps) {
+  const href =
+    category.group === "industries"
+      ? `/industry/${category.slug}`
+      : `/category/${category.slug}`;
+
   return (
     <Link
-      href={`/categories/${category.slug}`}
+      href={href}
       className="group relative flex flex-col bg-white border border-[#E7E7E7] rounded-[5px] overflow-hidden card-hover-effect focus:outline-none focus:ring-2 focus:ring-[#21AAA5]"
     >
       <div className="relative w-full aspect-square bg-[#F6F8FA] overflow-hidden flex items-center justify-center p-4">

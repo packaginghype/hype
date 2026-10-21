@@ -53,6 +53,6 @@ export function normalizeCartItem(input: CartAddInput): CartItem {
     imageUrl: input.imageUrl,
     unitPrice: input.unitPrice ?? null,
     quantity: qty,
-    href: input.href ?? `/products/${input.slug}`,
+    href: input.href ?? `/product/${input.slug}`,
   };
 }

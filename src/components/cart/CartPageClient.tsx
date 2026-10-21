@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -14,6 +13,7 @@ import {
 } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { SafeImage } from "@/components/ui/SafeImage";
 import { useCart } from "@/components/cart/CartProvider";
 import { cartLineTotal, formatMoney } from "@/lib/cart";
 
@@ -48,7 +48,7 @@ export function CartPageClient() {
             </p>
             <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link
-                href="/products"
+                href="/product"
                 className="inline-flex h-11 items-center justify-center gap-1.5 rounded-[5px] bg-[#FF5548] px-5 text-sm font-bold text-white transition-colors hover:bg-[#e04337]"
               >
                 Browse Products
@@ -84,7 +84,7 @@ export function CartPageClient() {
             </p>
           </div>
           <Link
-            href="/products"
+            href="/product"
             className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-[#172455] transition-colors hover:text-[#FF5548]"
           >
             Continue shopping
@@ -103,11 +103,11 @@ export function CartPageClient() {
                 >
                   <div className="flex gap-4 sm:items-center">
                     <Link
-                      href={item.href || `/products/${item.slug}`}
+                      href={item.href || `/product/${item.slug}`}
                       className="relative h-[88px] w-[88px] shrink-0 overflow-hidden rounded-[6px] bg-[#F6F8FA] sm:h-24 sm:w-24"
                     >
                       {item.imageUrl ? (
-                        <Image
+                        <SafeImage
                           src={item.imageUrl}
                           alt={item.name}
                           fill
@@ -125,7 +125,7 @@ export function CartPageClient() {
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <Link
-                            href={item.href || `/products/${item.slug}`}
+                            href={item.href || `/product/${item.slug}`}
                             className="block text-[15px] font-bold leading-snug text-[#172455] transition-colors hover:text-[#FF5548] sm:text-base"
                           >
                             {item.name}

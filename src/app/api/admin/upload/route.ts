@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
 import { getAdminSession } from "@/lib/admin-auth";
+import { deleteCloudinaryAsset } from "@/lib/cloudinary";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -91,5 +92,36 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Upload failed", error);
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+  }
+}
+
+/**
+ * DELETE /api/admin/upload
+ * Body: { url: string; resourceType?: "image" | "video" }
+ *
+ * Immediately deletes a Cloudinary asset by its URL. Used by admin image
+ * pickers when a user explicitly removes an image before saving the record.
+ */
+export async function DELETE(request: Request) {
+  const session = await getAdminSession();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const body = await request.json();
+    const url = typeof body?.url === "string" ? body.url : null;
+    const resourceType: "image" | "video" =
+      body?.resourceType === "video" ? "video" : "image";
+
+    if (!url) {
+      return NextResponse.json({ error: "url is required" }, { status: 400 });
+    }
+
+    await deleteCloudinaryAsset(url, resourceType);
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("Delete asset failed", error);
+    return NextResponse.json({ error: "Delete failed" }, { status: 500 });
   }
 }

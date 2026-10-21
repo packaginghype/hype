@@ -15,7 +15,7 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <div className="group flex flex-col bg-white border border-[#E7E7E7] rounded-[5px] overflow-hidden card-hover-effect">
       <Link
-        href={`/products/${product.slug}`}
+        href={`/product/${product.slug}`}
         className="relative w-full aspect-square bg-[#F6F8FA] overflow-hidden flex items-center justify-center p-4 focus:outline-none"
         tabIndex={-1}
         aria-hidden="true"
@@ -36,14 +36,14 @@ export function ProductCard({ product }: ProductCardProps) {
 
       <div className="flex flex-col flex-1 p-5">
         <Link
-          href={`/categories/${product.categorySlug}`}
+          href={`/category/${product.categorySlug}`}
           className="text-[11px] font-bold text-[#21AAA5] uppercase tracking-wider hover:underline"
         >
           {product.categoryName}
         </Link>
 
         <h3 className="mt-1 text-base font-bold text-[#172455] hover:text-[#FF5548] transition-colors">
-          <Link href={`/products/${product.slug}`}>{product.name}</Link>
+          <Link href={`/product/${product.slug}`}>{product.name}</Link>
         </h3>
 
         <p className="mt-2 text-xs text-gray-500 line-clamp-2 leading-relaxed flex-1">
@@ -70,7 +70,7 @@ export function ProductCard({ product }: ProductCardProps) {
               imageUrl: product.imageUrl,
               unitPrice: product.startingPrice ?? null,
               quantity: 1,
-              href: `/products/${product.slug}`,
+              href: `/product/${product.slug}`,
             }}
             label="Add"
             redirectToCart={false}
