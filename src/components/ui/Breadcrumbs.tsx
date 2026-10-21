@@ -1,6 +1,5 @@
 import React from "react";
 import Link from "next/link";
-import { Home } from "lucide-react";
 
 interface BreadcrumbItem {
   label: string;
@@ -9,22 +8,28 @@ interface BreadcrumbItem {
 
 interface BreadcrumbsProps {
   items: BreadcrumbItem[];
-  /** Slash style like packaging reference: 🏠 / Category / Product */
+  /** Slash style like packaging reference: 🏠 Home / Category / Product */
   variant?: "default" | "slash";
   /** White text for use on dark/image backgrounds */
   light?: boolean;
   className?: string;
 }
 
-function HomeGlyph({ className }: { className?: string }) {
+/** Outlined house icon — consistent across both breadcrumb variants */
+function HomeIcon({ className }: { className?: string }) {
   return (
     <svg
-      viewBox="0 0 20 20"
-      fill="currentColor"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.75}
+      strokeLinecap="round"
+      strokeLinejoin="round"
       aria-hidden
       className={className}
     >
-      <path d="M9.293 1.293a1 1 0 0 1 1.414 0l7 7A1 1 0 0 1 17 10h-1v7a1 1 0 0 1-1 1h-3.5a.5.5 0 0 1-.5-.5V13a1 1 0 0 0-1-1H10a1 1 0 0 0-1 1v4.5a.5.5 0 0 1-.5.5H5a1 1 0 0 1-1-1v-7H3a1 1 0 0 1-.707-1.707l7-7Z" />
+      <path d="M3 9.75L12 3l9 6.75V21a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9.75Z" />
+      <path d="M9 22V12h6v10" />
     </svg>
   );
 }
@@ -32,15 +37,16 @@ function HomeGlyph({ className }: { className?: string }) {
 export function Breadcrumbs({ items, variant = "default", light = false, className }: BreadcrumbsProps) {
   if (variant === "slash") {
     return (
-      <nav aria-label="Breadcrumb" className="text-[13px] leading-none">
-        <ol className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[#FF5548]">
+      <nav aria-label="Breadcrumb" className={`text-[13px] leading-none ${className ?? ""}`}>
+        <ol className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
           <li className="flex items-center">
             <Link
               href="/"
-              className="inline-flex h-[18px] w-[18px] items-center justify-center text-[#FF5548] transition-opacity hover:opacity-75"
+              className="inline-flex items-center gap-1 text-[#FF5548] transition-opacity hover:opacity-75"
               aria-label="Home"
             >
-              <HomeGlyph className="h-[15px] w-[15px]" />
+              <HomeIcon className="h-[14px] w-[14px]" />
+              <span className="font-medium">Home</span>
             </Link>
           </li>
           {items.map((item, idx) => {
@@ -59,7 +65,7 @@ export function Breadcrumbs({ items, variant = "default", light = false, classNa
                   </Link>
                 ) : (
                   <span
-                    className="font-medium text-[#222]"
+                    className="font-semibold text-[#222]"
                     aria-current="page"
                   >
                     {item.label}
@@ -73,6 +79,7 @@ export function Breadcrumbs({ items, variant = "default", light = false, classNa
     );
   }
 
+  // ── default variant ────────────────────────────────────────────────────────
   return (
     <nav
       aria-label="Breadcrumb"
@@ -82,9 +89,11 @@ export function Breadcrumbs({ items, variant = "default", light = false, classNa
         <li className="flex items-center">
           <Link
             href="/"
-            className={`flex items-center transition-colors focus:underline focus:outline-none ${light ? "text-white/80 hover:text-white" : "hover:text-[#172455]"}`}
+            className={`flex items-center gap-1 transition-colors focus:underline focus:outline-none ${
+              light ? "text-white/80 hover:text-white" : "text-gray-500 hover:text-[#172455]"
+            }`}
           >
-            <Home className="mr-1 h-3.5 w-3.5" />
+            <HomeIcon className="h-3.5 w-3.5 shrink-0" />
             <span>Home</span>
           </Link>
         </li>
@@ -98,7 +107,9 @@ export function Breadcrumbs({ items, variant = "default", light = false, classNa
               {item.href && !isLast ? (
                 <Link
                   href={item.href}
-                  className={`transition-colors focus:underline focus:outline-none ${light ? "text-white/80 hover:text-white" : "hover:text-[#172455]"}`}
+                  className={`transition-colors focus:underline focus:outline-none ${
+                    light ? "text-white/80 hover:text-white" : "hover:text-[#172455]"
+                  }`}
                 >
                   {item.label}
                 </Link>
