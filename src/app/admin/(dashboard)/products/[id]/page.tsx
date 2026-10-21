@@ -124,6 +124,8 @@ export default async function EditProductPage({ params }: Props) {
           pageScrollContent: product.pageScrollContent,
           faqsHeading: product.faqsHeading,
           faqsSubheading: product.faqsSubheading,
+          faqsImageUrl: product.faqsImageUrl,
+          faqsImageAlt: product.faqsImageAlt,
           faqs: product.faqs.map((f) => ({
             question: f.question,
             answer: f.answer,

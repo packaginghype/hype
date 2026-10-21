@@ -39,16 +39,18 @@ export function ProductFaq({ items }: { items: FAQItem[] }) {
             </button>
             <div
               className={cn(
-                "overflow-hidden transition-all duration-300",
-                isOpen ? "max-h-[480px] opacity-100" : "max-h-0 opacity-0"
+                "grid transition-[grid-template-rows,opacity] duration-300 ease-in-out",
+                isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
               )}
             >
-              <div className="px-4 pb-4 pl-[3.75rem] text-sm leading-relaxed text-[#555] sm:px-5 sm:pb-5 sm:pl-[4.25rem]">
-                {looksLikeHtml(item.answer) ? (
-                  <RichText html={item.answer} />
-                ) : (
-                  <p>{item.answer}</p>
-                )}
+              <div className="min-h-0 overflow-hidden">
+                <div className="px-4 pb-4 pl-[3.75rem] text-sm leading-relaxed text-[#555] sm:px-5 sm:pb-5 sm:pl-[4.25rem]">
+                  {looksLikeHtml(item.answer) ? (
+                    <RichText html={item.answer} />
+                  ) : (
+                    <p>{item.answer}</p>
+                  )}
+                </div>
               </div>
             </div>
           </div>

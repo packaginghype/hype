@@ -243,6 +243,8 @@ export const getCategoryBySlug = cache(async (slug: string): Promise<CategoryIte
         pageScrollContent: category.pageScrollContent || undefined,
         faqsHeading: category.faqsHeading || undefined,
         faqsSubheading: category.faqsSubheading || undefined,
+        faqsImageUrl: category.faqsImageUrl || undefined,
+        faqsImageAlt: category.faqsImageAlt || undefined,
         faqs: category.faqs.map((f) => ({
           question: f.question,
           answer: f.answer,
@@ -457,6 +459,8 @@ export const getProductBySlug = cache(async (slug: string): Promise<ProductItem 
         pageScrollContent: product.pageScrollContent || undefined,
         faqsHeading: product.faqsHeading || undefined,
         faqsSubheading: product.faqsSubheading || undefined,
+        faqsImageUrl: product.faqsImageUrl || undefined,
+        faqsImageAlt: product.faqsImageAlt || undefined,
         faqs: product.faqs.map((f) => ({
           question: f.question,
           answer: f.answer,

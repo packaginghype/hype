@@ -122,6 +122,8 @@ export default async function EditCategoryPage({ params }: Props) {
           pageScrollContent: category.pageScrollContent,
           faqsHeading: category.faqsHeading,
           faqsSubheading: category.faqsSubheading,
+          faqsImageUrl: category.faqsImageUrl,
+          faqsImageAlt: category.faqsImageAlt,
           faqs: category.faqs.map((f) => ({
             question: f.question,
             answer: f.answer,

@@ -46,6 +46,8 @@ export const adminCategorySchema = z.object({
 
   faqsHeading: z.string().optional().nullable(),
   faqsSubheading: z.string().optional().nullable(),
+  faqsImageUrl: z.string().optional().nullable().or(z.literal("")),
+  faqsImageAlt: z.string().optional().nullable(),
   faqs: z.array(faqSchema).optional().default([]),
 
   seoEnabled: z.boolean().optional().default(true),
@@ -90,6 +92,8 @@ export function categoryWriteData(data: AdminCategoryInput) {
     pageScrollContent: data.pageScrollContent || null,
     faqsHeading: data.faqsHeading || null,
     faqsSubheading: data.faqsSubheading || null,
+    faqsImageUrl: data.faqsImageUrl?.trim() || null,
+    faqsImageAlt: data.faqsImageAlt || null,
     seoEnabled: data.seoEnabled ?? true,
     seoKeywords: data.seoKeywords || null,
     seoScript: data.seoScript || null,

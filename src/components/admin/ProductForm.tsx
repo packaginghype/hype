@@ -92,6 +92,8 @@ export type ProductFormValues = {
   pageScrollContent?: string | null;
   faqsHeading?: string | null;
   faqsSubheading?: string | null;
+  faqsImageUrl?: string | null;
+  faqsImageAlt?: string | null;
   faqs?: ProductFaqInput[];
   merchantImageUrls?: string[];
   navbarEnabled?: boolean;
@@ -255,6 +257,8 @@ export function ProductForm({
     pageScrollContent: initial?.pageScrollContent || "",
     faqsHeading: initial?.faqsHeading || "",
     faqsSubheading: initial?.faqsSubheading || "",
+    faqsImageUrl: initial?.faqsImageUrl || "",
+    faqsImageAlt: initial?.faqsImageAlt || "",
     merchantImageUrls: initial?.merchantImageUrls || [],
     navbarEnabled: initial?.navbarEnabled ?? true,
     featureEnabled: initial?.featureEnabled ?? true,
@@ -1262,6 +1266,31 @@ export function ProductForm({
               className={inputClass}
               placeholder="Enter Faqs SubHeading"
             />
+          </div>
+        </div>
+
+        <div className="rounded-[8px] border border-[#E8EAEF] bg-white p-4 space-y-4">
+          <p className="text-sm font-bold text-[#172455]">FAQ Section Side Image (Optional)</p>
+          <div className="grid gap-5 lg:grid-cols-2">
+            <ImageUploadField
+              label="FAQ Side Image"
+              value={values.faqsImageUrl || ""}
+              onChange={(url) => patch({ faqsImageUrl: url })}
+              recommended="800 × 800 or 1200 × 900 px · Max 2MB"
+              folder="packaginghype/products/faqs"
+            />
+            <div>
+              <FieldLabel>FAQ Image Alt Text</FieldLabel>
+              <input
+                value={values.faqsImageAlt || ""}
+                onChange={(e) => patch({ faqsImageAlt: e.target.value })}
+                className={inputClass}
+                placeholder="Describe FAQ side image for SEO & accessibility"
+              />
+              <p className="mt-1.5 text-xs text-gray-500">
+                When provided, the FAQ section displays a 2-column layout with this image on one side.
+              </p>
+            </div>
           </div>
         </div>
 

@@ -72,20 +72,24 @@ export function FAQAccordion({
                 role="region"
                 aria-labelledby={buttonId}
                 className={cn(
-                  "overflow-hidden transition-all duration-300 ease-in-out",
-                  isOpen ? "mt-2.5 max-h-64 opacity-100" : "max-h-0 opacity-0"
+                  "grid transition-[grid-template-rows,opacity] duration-300 ease-in-out",
+                  isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
                 )}
               >
-                {looksLikeHtml(item.answer) ? (
-                  <RichText
-                    html={item.answer}
-                    className="pr-8 text-[13px] leading-relaxed text-[#5B667A] sm:text-[13.5px]"
-                  />
-                ) : (
-                  <p className="pr-8 text-[13px] leading-relaxed text-[#5B667A] sm:text-[13.5px]">
-                    {item.answer}
-                  </p>
-                )}
+                <div className="min-h-0 overflow-hidden">
+                  <div className="pt-2.5">
+                    {looksLikeHtml(item.answer) ? (
+                      <RichText
+                        html={item.answer}
+                        className="pr-8 text-[13px] leading-relaxed text-[#5B667A] sm:text-[13.5px]"
+                      />
+                    ) : (
+                      <p className="pr-8 text-[13px] leading-relaxed text-[#5B667A] sm:text-[13.5px]">
+                        {item.answer}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           );
@@ -128,13 +132,17 @@ export function FAQAccordion({
               role="region"
               aria-labelledby={buttonId}
               className={cn(
-                "overflow-hidden transition-all duration-300 ease-in-out",
-                isOpen ? "mt-3 max-h-96 opacity-100" : "max-h-0 opacity-0"
+                "grid transition-[grid-template-rows,opacity] duration-300 ease-in-out",
+                isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
               )}
             >
-              <p className="pr-6 text-sm leading-relaxed text-gray-600 sm:text-base">
-                {item.answer}
-              </p>
+              <div className="min-h-0 overflow-hidden">
+                <div className="pt-3">
+                  <p className="pr-6 text-sm leading-relaxed text-gray-600 sm:text-base">
+                    {item.answer}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         );

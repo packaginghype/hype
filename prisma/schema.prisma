@@ -103,6 +103,8 @@ model Category {
   // FAQs block
   faqsHeading      String?
   faqsSubheading   String?
+  faqsImageUrl     String?
+  faqsImageAlt     String?
 
   // SEO extras
   seoEnabled       Boolean         @default(true)
@@ -192,6 +194,8 @@ model Product {
   // FAQs + modules
   faqsHeading      String?
   faqsSubheading   String?
+  faqsImageUrl     String?
+  faqsImageAlt     String?
   merchantImageUrls String[]         @default([])
   navbarEnabled    Boolean           @default(true)
   featureEnabled   Boolean           @default(true)

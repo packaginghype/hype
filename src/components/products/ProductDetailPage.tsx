@@ -2,6 +2,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
+  ArrowRight,
   Award,
   Headphones,
   Leaf,
@@ -262,7 +263,7 @@ export default function ProductDetailPage({
       {faqs.length > 0 ? (
         <section className="bg-white py-12 sm:py-16">
           <Container className={contentWidth}>
-            <div className="mx-auto max-w-3xl text-center">
+            <div className={cms?.faqsImageUrl ? "max-w-2xl text-left" : "mx-auto max-w-3xl text-center"}>
               <h2 className="font-heading text-2xl font-extrabold tracking-tight text-[#111] sm:text-3xl">
                 {cms?.faqsHeading || "Frequently Asked Questions"}
               </h2>
@@ -271,9 +272,61 @@ export default function ProductDetailPage({
                   `Here are some common questions about ${product.name.toLowerCase()}.`}
               </p>
             </div>
-            <div className="mx-auto mt-8 max-w-3xl">
-              <ProductFaq items={faqs} />
-            </div>
+
+            {cms?.faqsImageUrl ? (
+              <div className="mt-8 grid grid-cols-1 items-stretch gap-5 lg:mt-10 lg:grid-cols-2 lg:gap-6 lg:h-[540px] xl:h-[580px]">
+                <div className="relative min-h-[280px] overflow-hidden rounded-[16px] bg-[#EAF2ED] sm:min-h-[340px] lg:min-h-0 lg:h-full">
+                  <SafeImage
+                    src={cms.faqsImageUrl}
+                    alt={cms.faqsImageAlt || `${product.name} FAQs`}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    className="object-cover object-center"
+                  />
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0F1839]/45 via-transparent to-transparent"
+                  />
+                  <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
+                    <p className="max-w-xs text-[13px] font-semibold leading-snug text-white sm:text-sm">
+                      Custom sizes, materials, and finishes — built for your brand.
+                    </p>
+                    <Link
+                      href="/quote"
+                      className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-bold text-white transition-colors hover:text-[#FF5548]"
+                    >
+                      Get a free quote
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </div>
+                </div>
+
+                <div className="flex min-h-0 flex-col overflow-hidden rounded-[16px] border border-[#E5E9F0] bg-white lg:h-full">
+                  <div className="faq-scroll min-h-0 flex-1 overflow-y-auto px-4 py-2 sm:px-5 sm:py-3">
+                    <ProductFaq items={faqs} />
+                  </div>
+                  <div className="shrink-0 border-t border-[#E5E9F0] bg-[#F8FAFC] px-4 py-4 sm:px-5">
+                    <p className="text-[13px] font-bold text-[#172455]">
+                      Have a technical question?
+                    </p>
+                    <p className="mt-0.5 text-[12.5px] text-[#6B7280]">
+                      Our packaging experts are available Monday–Friday.
+                    </p>
+                    <Link
+                      href="/contact-us"
+                      className="mt-2 inline-flex items-center gap-1.5 text-[13px] font-bold text-[#21AAA5] transition-colors hover:text-[#FF5548]"
+                    >
+                      Contact support
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="mx-auto mt-8 max-w-3xl">
+                <ProductFaq items={faqs} />
+              </div>
+            )}
           </Container>
         </section>
       ) : null}

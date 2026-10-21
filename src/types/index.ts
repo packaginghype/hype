@@ -36,6 +36,8 @@ export interface CategoryItem {
     pageScrollContent?: string;
     faqsHeading?: string;
     faqsSubheading?: string;
+    faqsImageUrl?: string;
+    faqsImageAlt?: string;
     faqs: CategoryFaqItem[];
     seoEnabled: boolean;
     seoTitle?: string;
@@ -95,6 +97,8 @@ export interface ProductItem {
     pageScrollContent?: string;
     faqsHeading?: string;
     faqsSubheading?: string;
+    faqsImageUrl?: string;
+    faqsImageAlt?: string;
     faqs: { question: string; answer: string }[];
     merchantImageUrls?: string[];
     navbarEnabled: boolean;
