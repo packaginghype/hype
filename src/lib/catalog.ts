@@ -243,8 +243,8 @@ export const getCategoryBySlug = cache(async (slug: string): Promise<CategoryIte
         pageScrollContent: category.pageScrollContent || undefined,
         faqsHeading: category.faqsHeading || undefined,
         faqsSubheading: category.faqsSubheading || undefined,
-        faqsImageUrl: category.faqsImageUrl || undefined,
-        faqsImageAlt: category.faqsImageAlt || undefined,
+        faqsImageUrl: (category as { faqsImageUrl?: string | null }).faqsImageUrl || undefined,
+        faqsImageAlt: (category as { faqsImageAlt?: string | null }).faqsImageAlt || undefined,
         faqs: category.faqs.map((f) => ({
           question: f.question,
           answer: f.answer,
@@ -459,8 +459,8 @@ export const getProductBySlug = cache(async (slug: string): Promise<ProductItem 
         pageScrollContent: product.pageScrollContent || undefined,
         faqsHeading: product.faqsHeading || undefined,
         faqsSubheading: product.faqsSubheading || undefined,
-        faqsImageUrl: product.faqsImageUrl || undefined,
-        faqsImageAlt: product.faqsImageAlt || undefined,
+        faqsImageUrl: (product as { faqsImageUrl?: string | null }).faqsImageUrl || undefined,
+        faqsImageAlt: (product as { faqsImageAlt?: string | null }).faqsImageAlt || undefined,
         faqs: product.faqs.map((f) => ({
           question: f.question,
           answer: f.answer,
