@@ -26,8 +26,6 @@ export default function CategoryDetailLoading() {
                 <div className="h-4 w-4/5 animate-pulse rounded bg-[#F1F3F5]" />
               </div>
 
-              {/* Starting from */}
-              <div className="mt-4 h-5 w-44 animate-pulse rounded bg-[#F1F3F5]" />
             </div>
 
             {/* Right column: Image placeholder */}

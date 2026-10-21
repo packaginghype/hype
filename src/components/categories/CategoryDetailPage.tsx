@@ -91,21 +91,7 @@ export function CategoryDetailPage({
                   )}
                 </div>
 
-                {cms?.originalPrice != null ? (
-                  <p className="mt-4 text-sm font-semibold text-[#172455]">
-                    Starting from{" "}
-                    <span className="text-[#FF5548]">
-                      ${Number(cms.discountedPrice ?? cms.originalPrice).toFixed(2)}
-                    </span>
-                    {cms.discountedPrice != null &&
-                      cms.originalPrice != null &&
-                      cms.discountedPrice < cms.originalPrice ? (
-                      <span className="ml-2 text-gray-400 line-through">
-                        ${Number(cms.originalPrice).toFixed(2)}
-                      </span>
-                    ) : null}
-                  </p>
-                ) : null}
+
               </div>
 
               <div className="relative mx-auto h-[280px] w-full max-w-[400px] sm:h-[350px] sm:max-w-[460px] lg:mx-0 lg:h-[420px] lg:max-w-none">
