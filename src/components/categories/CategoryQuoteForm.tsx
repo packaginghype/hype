@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
-  CheckCircle2,
   AlertCircle,
   Loader2,
   ChevronDown,
@@ -36,6 +36,7 @@ export function CategoryQuoteForm({
   startingFrom = "Contact",
   fullWidthSubmit = false,
 }: CategoryQuoteFormProps) {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     contactName: "",
     email: "",
@@ -112,8 +113,10 @@ export function CategoryQuoteForm({
       });
       const data = await res.json();
       if (res.ok) {
-        setSubmitStatus("success");
-        setStatusMessage(data.message || "Quote request received successfully!");
+        const refNum = data.quoteNumber || `PH-${Date.now().toString().slice(-6)}`;
+        const params = new URLSearchParams({ ref: refNum });
+        if (formData.contactName.trim()) params.set("name", formData.contactName.trim().split(" ")[0]);
+        router.push(`/thank-you?${params.toString()}`);
       } else {
         setSubmitStatus("error");
         setStatusMessage(data.error || "Failed to submit. Please try again.");
@@ -126,35 +129,6 @@ export function CategoryQuoteForm({
     }
   };
 
-  if (submitStatus === "success") {
-    return (
-      <div
-        style={{ maxWidth: "900px" }}
-        className="mx-auto w-full max-w-[900px] overflow-hidden rounded-[10px] bg-white shadow-[0_10px_40px_rgba(15,23,42,0.10)]"
-      >
-        <div className="flex h-14 items-center bg-[#FF5548] px-5 sm:px-6">
-          <h2 style={{ color: "#ffffff", fontWeight: 800 }} className="text-[18px] tracking-tight">Get Custom Quote</h2>
-        </div>
-        <div className="px-5 py-12 text-center sm:px-8">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#eaf7f6] text-[#21AAA5]">
-            <CheckCircle2 className="h-8 w-8" />
-          </div>
-          <h3 className="mt-4 text-xl font-bold text-[#172455]">Quote Request Received!</h3>
-          <p className="mx-auto mt-2 max-w-md text-sm text-gray-600">{statusMessage}</p>
-          <button
-            type="button"
-            onClick={() => {
-              setSubmitStatus("idle");
-              setSelectedFile(null);
-            }}
-            className="mt-6 h-11 rounded-[6px] border border-[#172455] px-5 text-sm font-semibold text-[#172455] hover:bg-[#172455] hover:text-white"
-          >
-            Submit Another Quote
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div

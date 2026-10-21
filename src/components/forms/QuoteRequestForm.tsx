@@ -1,6 +1,7 @@
 "use client";
 
 import React, { FormEvent, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   ArrowRight,
   CheckCircle2,
@@ -65,6 +66,7 @@ export function QuoteRequestForm({
   initialProductName = "",
   className = "",
 }: QuoteRequestFormProps) {
+  const router = useRouter();
   const [captcha, setCaptcha] = useState({ a: 4, b: 7, answer: 11 });
 
   useEffect(() => {
@@ -183,12 +185,10 @@ export function QuoteRequestForm({
       const data = await res.json();
 
       if (res.ok) {
-        setSubmitStatus("success");
-        setQuoteRefNumber(data.quoteNumber || `PH-${Date.now().toString().slice(-6)}`);
-        setStatusMessage(
-          data.message ||
-            "Your custom quote request has been received. Our engineering team is reviewing your specifications and will respond with wholesale pricing and complimentary 3D digital proof within 24 hours."
-        );
+        const refNum = data.quoteNumber || `PH-${Date.now().toString().slice(-6)}`;
+        const params = new URLSearchParams({ ref: refNum });
+        if (formData.contactName.trim()) params.set("name", formData.contactName.trim().split(" ")[0]);
+        router.push(`/thank-you?${params.toString()}`);
       } else {
         setSubmitStatus("error");
         setStatusMessage(data.error || "Failed to submit quote request. Please try again.");
@@ -223,46 +223,6 @@ export function QuoteRequestForm({
     setQuoteRefNumber("");
   }
 
-  if (submitStatus === "success") {
-    return (
-      <div className={`overflow-hidden rounded-[16px] border border-[#E5E7EB] bg-white p-6 sm:p-10 ${className}`}>
-        <div className="mx-auto max-w-lg text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-500">
-            <CheckCircle2 className="h-10 w-10" />
-          </div>
-          <p className="mt-4 text-xs font-bold uppercase tracking-widest text-[#21AAA5]">
-            Quote Request Confirmed
-          </p>
-          <h3 className="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight text-[#172455]">
-            Thank You, {formData.contactName}!
-          </h3>
-          {quoteRefNumber && (
-            <div className="mt-3 inline-block rounded-[6px] border border-[#E5E7EB] bg-[#F6F8FA] px-3 py-1 font-mono text-xs font-semibold text-[#FF5548]">
-              Reference ID: {quoteRefNumber}
-            </div>
-          )}
-          <p className="mt-4 text-sm leading-relaxed text-[#4B5563]">
-            {statusMessage}
-          </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <button
-              type="button"
-              onClick={handleReset}
-              className="inline-flex h-11 items-center justify-center rounded-[6px] bg-[#FF5548] px-6 text-sm font-bold text-white transition-colors hover:bg-[#e04337]"
-            >
-              Request Another Quote
-            </button>
-            <a
-              href="/categories"
-              className="inline-flex h-11 items-center justify-center rounded-[6px] border border-[#E5E7EB] bg-white px-6 text-sm font-bold text-[#172455] transition-colors hover:bg-[#F6F8FA]"
-            >
-              Browse Packaging Catalog
-            </a>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div
