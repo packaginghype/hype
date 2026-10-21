@@ -31,20 +31,47 @@ function usePerPage() {
 
 export function IndustrySolutionsSection({ items }: { items: IndustryItem[] }) {
   const perPage = usePerPage();
-  const pageCount = Math.max(1, Math.ceil(items.length / perPage));
-  const [page, setPage] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+
+  const maxIndex = Math.max(0, items.length - perPage);
+  const canSlide = items.length > perPage;
 
   useEffect(() => {
-    setPage((current) => Math.min(current, pageCount - 1));
-  }, [pageCount]);
+    setCurrentIndex((curr) => Math.min(curr, Math.max(0, items.length - perPage)));
+  }, [perPage, items.length]);
 
   if (!items.length) return null;
 
-  const goPrev = () => setPage((p) => (p - 1 + pageCount) % pageCount);
-  const goNext = () => setPage((p) => (p + 1) % pageCount);
-  const goToPage = (index: number) => {
-    setPage(((index % pageCount) + pageCount) % pageCount);
+  const goPrev = () => {
+    setCurrentIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
   };
+  const goNext = () => {
+    setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
+  };
+  const goToIndex = (index: number) => {
+    setCurrentIndex(Math.min(Math.max(0, index), maxIndex));
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStart === null) return;
+    const touchEnd = e.changedTouches[0].clientX;
+    const diff = touchStart - touchEnd;
+    if (diff > 50) {
+      goNext();
+    } else if (diff < -50) {
+      goPrev();
+    }
+    setTouchStart(null);
+  };
+
+  const trackWidth = items.length > perPage ? `${(items.length / perPage) * 100}%` : "100%";
+  const itemWidth = items.length > perPage ? `${100 / items.length}%` : `${100 / perPage}%`;
+  const transform = canSlide ? `translateX(-${(currentIndex * 100) / items.length}%)` : "none";
 
   return (
     <section className="relative bg-white py-16 sm:py-20 lg:py-24">
@@ -72,12 +99,12 @@ export function IndustrySolutionsSection({ items }: { items: IndustryItem[] }) {
         </div>
 
         <div className="relative">
-          {pageCount > 1 ? (
+          {canSlide ? (
             <>
               <button
                 type="button"
                 onClick={goPrev}
-                aria-label="Previous industries"
+                aria-label="Previous industry"
                 className="absolute -left-3 sm:-left-5 top-[38%] z-10 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-[#E2E4E8] bg-white/95 text-[#172455] shadow-lg transition-all hover:scale-105 hover:border-[#FF5548] hover:text-[#FF5548]"
               >
                 <ChevronLeft className="h-5 w-5" />
@@ -85,7 +112,7 @@ export function IndustrySolutionsSection({ items }: { items: IndustryItem[] }) {
               <button
                 type="button"
                 onClick={goNext}
-                aria-label="Next industries"
+                aria-label="Next industry"
                 className="absolute -right-3 sm:-right-5 top-[38%] z-10 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-[#E2E4E8] bg-white/95 text-[#172455] shadow-lg transition-all hover:scale-105 hover:border-[#FF5548] hover:text-[#FF5548]"
               >
                 <ChevronRight className="h-5 w-5" />
@@ -93,72 +120,67 @@ export function IndustrySolutionsSection({ items }: { items: IndustryItem[] }) {
             </>
           ) : null}
 
-          <div className="overflow-hidden">
+          <div
+            className="overflow-hidden -mx-2.5 sm:-mx-3"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
             <div
               className="flex transition-transform duration-500 ease-out"
-              style={{ transform: `translateX(-${page * 100}%)` }}
+              style={{
+                width: trackWidth,
+                transform,
+              }}
             >
-              {Array.from({ length: pageCount }).map((_, pageIndex) => {
-                const slideItems = items.slice(
-                  pageIndex * perPage,
-                  pageIndex * perPage + perPage
-                );
-
-                return (
-                  <div
-                    key={pageIndex}
-                    className="grid w-full shrink-0 gap-5 sm:gap-6"
-                    style={{
-                      gridTemplateColumns: `repeat(${perPage}, minmax(0, 1fr))`,
-                    }}
+              {items.map((item) => (
+                <div
+                  key={item.id}
+                  className="shrink-0 px-2.5 sm:px-3"
+                  style={{ width: itemWidth }}
+                >
+                  <Link
+                    href={`/categories/${item.slug}`}
+                    className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#21AAA5] focus-visible:ring-offset-2"
                   >
-                    {slideItems.map((item) => (
-                      <Link
-                        key={item.id}
-                        href={`/categories/${item.slug}`}
-                        className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#21AAA5] focus-visible:ring-offset-2"
-                      >
-                        <div className="relative aspect-square overflow-hidden bg-[#F0EBE3]">
-                          <SafeImage
-                            src={item.imageUrl || ""}
-                            alt={item.label}
-                            fill
-                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 25vw"
-                            className="object-contain p-3 transition-transform duration-500 group-hover:scale-[1.03]"
-                          />
-                        </div>
-                        <p className="mt-3 text-center text-sm font-semibold leading-snug text-[#172455] transition-colors group-hover:text-[#FF5548] sm:text-[15px]">
-                          {item.label}
-                        </p>
-                      </Link>
-                    ))}
-                  </div>
-                );
-              })}
+                    <div className="relative aspect-square overflow-hidden bg-[#F0EBE3]">
+                      <SafeImage
+                        src={item.imageUrl || ""}
+                        alt={item.label}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 25vw"
+                        className="object-contain p-3 transition-transform duration-500 group-hover:scale-[1.03]"
+                      />
+                    </div>
+                    <p className="mt-3 text-center text-sm font-semibold leading-snug text-[#172455] transition-colors group-hover:text-[#FF5548] sm:text-[15px]">
+                      {item.label}
+                    </p>
+                  </Link>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
-        {pageCount > 1 ? (
+        {canSlide ? (
           <div
             className="mt-8 flex items-center justify-center gap-1.5"
             role="tablist"
             aria-label="Industry slider pages"
           >
-            {Array.from({ length: pageCount }).map((_, index) => (
+            {Array.from({ length: maxIndex + 1 }).map((_, index) => (
               <button
                 key={index}
                 type="button"
                 role="tab"
-                aria-selected={index === page}
+                aria-selected={index === currentIndex}
                 aria-label={`Go to slide ${index + 1}`}
-                onClick={() => goToPage(index)}
+                onClick={() => goToIndex(index)}
                 className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5548]/40"
               >
                 <span
                   className={cn(
                     "block h-[3px] rounded-full transition-all duration-300",
-                    index === page
+                    index === currentIndex
                       ? "w-8 bg-[#FF5548]"
                       : "w-5 bg-[#D1D5DB] hover:bg-[#9CA3AF]"
                   )}
