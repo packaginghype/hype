@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { AlertCircle, CheckCircle2, ChevronDown, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { AlertCircle, ChevronDown, Loader2 } from "lucide-react";
 
 const fieldClass =
   "h-11 w-full rounded-[6px] border border-[#E6E8EC] bg-white px-3.5 text-[13.5px] text-[#172455] outline-none placeholder:text-[#9AA3AF] focus:border-[#FF5548]";
@@ -10,6 +11,7 @@ const selectClass =
   "h-11 w-full appearance-none rounded-[6px] border border-[#E6E8EC] bg-white px-3.5 pr-9 text-[13.5px] text-[#172455] outline-none focus:border-[#FF5548]";
 
 export default function ProductQuoteForm({ productName }: { productName: string }) {
+  const router = useRouter();
   const captchaA = useMemo(() => 7, []);
   const captchaB = useMemo(() => 2, []);
   const [form, setForm] = useState({
@@ -99,8 +101,11 @@ export default function ProductQuoteForm({ productName }: { productName: string 
       });
       const data = await res.json();
       if (res.ok) {
-        setStatus("success");
-        setStatusMessage(data.message || "Quote request received!");
+        const refNum = data.quoteNumber || `PH-${Date.now().toString().slice(-6)}`;
+        const params = new URLSearchParams({ ref: refNum });
+        if (form.contactName.trim()) params.set("name", form.contactName.trim().split(" ")[0]);
+        router.push(`/thank-you?${params.toString()}`);
+        return;
       } else {
         setStatus("error");
         setStatusMessage(data.error || "Failed to submit. Please try again.");
@@ -112,25 +117,6 @@ export default function ProductQuoteForm({ productName }: { productName: string 
       setIsSubmitting(false);
     }
   };
-
-  if (status === "success") {
-    return (
-      <div className="rounded-xl border border-[#F3D0CB] bg-[#FFF8F6] px-5 py-10 text-center">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#eaf7f6] text-[#21AAA5]">
-          <CheckCircle2 className="h-7 w-7" />
-        </div>
-        <h3 className="mt-3 text-lg font-bold text-[#172455]">Quote Request Received!</h3>
-        <p className="mx-auto mt-2 max-w-md text-sm text-gray-600">{statusMessage}</p>
-        <button
-          type="button"
-          onClick={() => setStatus("idle")}
-          className="mt-5 h-10 rounded-[6px] border border-[#172455] px-4 text-sm font-semibold text-[#172455] hover:bg-[#172455] hover:text-white"
-        >
-          Submit Another Quote
-        </button>
-      </div>
-    );
-  }
 
   return (
     <form
