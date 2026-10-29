@@ -238,7 +238,8 @@ export function QuoteRequestForm({
       brief: "",
     });
     setSelectedFile(null);
-    setCaptcha(newCaptcha());
+    quoteCaptchaSlot.current = createMathCaptcha();
+    setCaptcha(quoteCaptchaSlot.current);
     setSubmitStatus("idle");
     setQuoteRefNumber("");
   }
