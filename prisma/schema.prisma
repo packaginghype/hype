@@ -349,6 +349,21 @@ model QuoteRequest {
   @@index([status])
 }
 
+model CustomerReview {
+  id          String   @id @default(cuid())
+  name        String
+  role        String   @default("")
+  quote       String   @db.Text
+  rating      Int      @default(5)
+  isPublished Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isPublished, sortOrder])
+  @@index([sortOrder])
+}
+
 /// Generic key-value CMS store for static pages (home, about, etc.)
 /// `key` is the page identifier e.g. "home", `data` is JSON blob.
 model SitePage {

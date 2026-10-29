@@ -7,27 +7,40 @@ import { CategoryShowcase } from "@/components/home/CategoryShowcase";
 import { ReviewsSlider } from "@/components/home/ReviewsSlider";
 import { ReliablePackagingSection } from "@/components/home/ReliablePackagingSection";
 import { HomeInquirySection } from "@/components/home/HomeInquirySection";
+import { HomeSeoContent } from "@/components/home/HomeSeoContent";
 import { FaqSection } from "@/components/home/FaqSection";
 import { BlogPreviewSection } from "@/components/home/BlogPreviewSection";
 import { getHomePageData } from "@/lib/get-home-page-data";
+import { getPublishedCustomerReviews } from "@/lib/customer-reviews";
+import { JsonLdScript } from "@/components/seo/JsonLdScript";
+import { HOME_PAGE_CANONICAL_DEFAULT } from "@/lib/home-page-schema";
 import type { Metadata } from "next";
 
 export const revalidate = 120;
 
 export async function generateMetadata(): Promise<Metadata> {
   const data = await getHomePageData();
+  const canonical =
+    (data.seoCanonical || "").trim() || HOME_PAGE_CANONICAL_DEFAULT;
   return {
     title: data.seoTitle || "Custom Packaging Boxes | Packaging Hype",
     description: data.seoDescription || "Premium custom packaging boxes — tailored sizes, free USA shipping, 8-10 day turnaround.",
     keywords: data.seoKeywords || undefined,
+    alternates: {
+      canonical,
+    },
   };
 }
 
 export default async function HomePage() {
-  const data = await getHomePageData();
+  const [data, reviews] = await Promise.all([
+    getHomePageData(),
+    getPublishedCustomerReviews(),
+  ]);
 
   return (
     <>
+      <JsonLdScript source={data.seoScript} />
       <HeroSection
         heroHeading={data.heroHeading}
         heroHighlight={data.heroHighlight}
@@ -38,9 +51,17 @@ export default async function HomePage() {
         heroImageAlt={data.heroImageAlt}
       />
       <TrustBenefitsBar />
-      <IndustrySolutions />
+      <IndustrySolutions
+        industryHeading={data.industryHeading}
+        industrySubtext={data.industrySubtext}
+      />
+      <FeaturedProducts
+        trendingHeading={data.trendingHeading}
+        trendingSubtext={data.trendingSubtext}
+        trendingProductIds={data.trendingProductIds}
+      />
+      <CategoryShowcase />
       <AboutWhoWeAre
-        aboutEyebrow={data.aboutEyebrow}
         aboutHeading={data.aboutHeading}
         aboutBody={data.aboutBody}
         aboutBtnLabel={data.aboutBtnLabel}
@@ -48,28 +69,42 @@ export default async function HomePage() {
         aboutImageUrl={data.aboutImageUrl}
         aboutImageAlt={data.aboutImageAlt}
       />
-      <FeaturedProducts />
-      <CategoryShowcase />
-      <ReviewsSlider />
       <ReliablePackagingSection
         reliableImageUrl={data.reliableImageUrl}
         reliableImageAlt={data.reliableImageAlt}
         reliableHeading={data.reliableHeading}
         reliableBody={data.reliableBody}
+        reliableBtnLabel={data.reliableBtnLabel}
+        reliableBtnHref={data.reliableBtnHref}
+      />
+      <ReviewsSlider
+        reviewsEyebrow={data.reviewsEyebrow}
+        reviewsHeading={data.reviewsHeading}
+        reviewsSubtext={data.reviewsSubtext}
+        reviews={reviews}
       />
       <HomeInquirySection
         inquiryHeading={data.inquiryHeading}
         inquirySubtext={data.inquirySubtext}
       />
+      <HomeSeoContent
+        seoContentHeading={data.seoContentHeading}
+        seoContentHtml={data.seoContentHtml}
+        seoContentImageUrl={data.seoContentImageUrl}
+        seoContentImageAlt={data.seoContentImageAlt}
+      />
       <FaqSection
-        faqEyebrow={data.faqEyebrow}
         faqHeading={data.faqHeading}
         faqSubtext={data.faqSubtext}
         faqImageUrl={data.faqImageUrl}
         faqImageAlt={data.faqImageAlt}
         faqs={data.faqs}
       />
-      <BlogPreviewSection />
+      <BlogPreviewSection
+        blogsHeading={data.blogsHeading}
+        blogsSubtext={data.blogsSubtext}
+        blogIds={data.blogIds}
+      />
       {/* Small quote band sits above footer via AppShell FooterQuoteCta */}
     </>
   );

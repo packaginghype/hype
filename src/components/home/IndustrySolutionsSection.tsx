@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Container } from "@/components/ui/Container";
-import { SafeImage } from "@/components/ui/SafeImage";
+import { CatalogTile } from "@/components/ui/CatalogTile";
 import { cn } from "@/lib/utils";
 import type { CategoryItem } from "@/types";
 
@@ -29,7 +29,15 @@ function usePerPage() {
   return perPage;
 }
 
-export function IndustrySolutionsSection({ items }: { items: IndustryItem[] }) {
+export function IndustrySolutionsSection({
+  items,
+  heading = "Packaging Solutions by Industry Needs",
+  subtext = "From beauty and food to retail and e-commerce — explore custom packaging built for how your products ship, sell, and get unboxed.",
+}: {
+  items: IndustryItem[];
+  heading?: string;
+  subtext?: string;
+}) {
   const perPage = usePerPage();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -79,12 +87,13 @@ export function IndustrySolutionsSection({ items }: { items: IndustryItem[] }) {
         <div className="mb-10 flex flex-col gap-6 sm:mb-12 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
             <h2 className="font-heading text-2xl font-extrabold leading-tight tracking-tight text-[#172455] sm:text-3xl lg:text-[2.35rem]">
-              Packaging Solutions by Industry Needs
+              {heading}
             </h2>
-            <p className="mt-3 max-w-xl text-sm leading-relaxed text-gray-500 sm:text-base">
-              From beauty and food to retail and e-commerce — explore custom
-              packaging built for how your products ship, sell, and get unboxed.
-            </p>
+            {subtext ? (
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-gray-500 sm:text-base">
+                {subtext}
+              </p>
+            ) : null}
           </div>
 
           <div className="flex flex-wrap items-center gap-3 self-start lg:self-center">
@@ -105,7 +114,7 @@ export function IndustrySolutionsSection({ items }: { items: IndustryItem[] }) {
                 type="button"
                 onClick={goPrev}
                 aria-label="Previous industry"
-                className="absolute -left-3 sm:-left-5 top-[38%] z-10 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-[#E2E4E8] bg-white/95 text-[#172455] shadow-lg transition-all hover:scale-105 hover:border-[#FF5548] hover:text-[#FF5548]"
+                className="absolute -left-3 sm:-left-5 top-[42%] z-10 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-[#E2E4E8] bg-white/95 text-[#172455] shadow-lg transition-all hover:scale-105 hover:border-[#FF5548] hover:text-[#FF5548]"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
@@ -113,7 +122,7 @@ export function IndustrySolutionsSection({ items }: { items: IndustryItem[] }) {
                 type="button"
                 onClick={goNext}
                 aria-label="Next industry"
-                className="absolute -right-3 sm:-right-5 top-[38%] z-10 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-[#E2E4E8] bg-white/95 text-[#172455] shadow-lg transition-all hover:scale-105 hover:border-[#FF5548] hover:text-[#FF5548]"
+                className="absolute -right-3 sm:-right-5 top-[42%] z-10 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-[#E2E4E8] bg-white/95 text-[#172455] shadow-lg transition-all hover:scale-105 hover:border-[#FF5548] hover:text-[#FF5548]"
               >
                 <ChevronRight className="h-5 w-5" />
               </button>
@@ -138,23 +147,13 @@ export function IndustrySolutionsSection({ items }: { items: IndustryItem[] }) {
                   className="shrink-0 px-2.5 sm:px-3"
                   style={{ width: itemWidth }}
                 >
-                  <Link
+                  <CatalogTile
                     href={`/industry/${item.slug}`}
-                    className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#21AAA5] focus-visible:ring-offset-2"
-                  >
-                    <div className="relative aspect-square overflow-hidden bg-[#F0EBE3]">
-                      <SafeImage
-                        src={item.imageUrl || ""}
-                        alt={item.label}
-                        fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 25vw"
-                        className="object-contain p-3 transition-transform duration-500 group-hover:scale-[1.03]"
-                      />
-                    </div>
-                    <p className="mt-3 text-center text-sm font-semibold leading-snug text-[#172455] transition-colors group-hover:text-[#FF5548] sm:text-[15px]">
-                      {item.label}
-                    </p>
-                  </Link>
+                    title={item.label}
+                    imageUrl={item.imageUrl}
+                    imageAlt={item.label}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 25vw"
+                  />
                 </div>
               ))}
             </div>

@@ -1,16 +1,49 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { sendQuoteEmails } from "@/lib/send-quote-email";
+import { logAdminActivity } from "@/lib/admin-activity";
+import {
+  validateContactName,
+  validateDimension,
+  validateEmail,
+  validatePhone,
+  validateQuantity,
+} from "@/lib/quote-form-validation";
+
+function optionalDimension(label: string) {
+  return z.any().optional().superRefine((value, ctx) => {
+    if (value === null || value === undefined || value === "") return;
+    const message = validateDimension(label, String(value));
+    if (message) ctx.addIssue({ code: "custom", message });
+  }).transform((value) => {
+    if (value === null || value === undefined || value === "") return undefined;
+    const n = Number(value);
+    return Number.isFinite(n) && n > 0 ? n : undefined;
+  });
+}
 
 const quoteSubmitSchema = z.object({
-  contactName: z.string().min(1, "Name is required"),
-  email: z.string().email("Valid email is required"),
-  phone: z.string().min(1, "Phone number is required"),
+  contactName: z.string().superRefine((value, ctx) => {
+    const message = validateContactName(value);
+    if (message) ctx.addIssue({ code: "custom", message });
+  }),
+  email: z.string().superRefine((value, ctx) => {
+    const message = validateEmail(value);
+    if (message) ctx.addIssue({ code: "custom", message });
+  }),
+  phone: z.string().superRefine((value, ctx) => {
+    const message = validatePhone(value);
+    if (message) ctx.addIssue({ code: "custom", message });
+  }),
   productName: z.string().optional(),
-  quantity: z.number().min(1, "Quantity must be at least 1"),
-  length: z.number().optional(),
-  width: z.number().optional(),
-  depth: z.number().optional(),
+  quantity: z.any().superRefine((value, ctx) => {
+    const message = validateQuantity(value as string | number);
+    if (message) ctx.addIssue({ code: "custom", message });
+  }).transform((value) => Number(value)),
+  length: optionalDimension("Length"),
+  width: optionalDimension("Width"),
+  depth: optionalDimension("Depth"),
   dimensionsUnit: z.enum(["inch", "cm", "mm"]).default("inch"),
   colors: z.string().optional(),
   materialStock: z.string().optional(),
@@ -20,83 +53,73 @@ const quoteSubmitSchema = z.object({
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const validatedData = quoteSubmitSchema.parse(body);
-
-    // Generate unique quote reference number
-    const quoteNumber = `PH-${Date.now().toString().slice(-6)}`;
-
-    // Check if database URL is configured
-    const hasDatabase =
-      process.env.DATABASE_URL &&
-      !process.env.DATABASE_URL.includes("localhost:5432/packaginghype");
-
-    if (hasDatabase) {
-      try {
-        const savedQuote = await prisma.quoteRequest.create({
-          data: {
-            quoteNumber,
-            contactName: validatedData.contactName,
-            email: validatedData.email,
-            phone: validatedData.phone,
-            productName: validatedData.productName || "Custom Packaging Inquiry",
-            quantity: validatedData.quantity,
-            length: validatedData.length,
-            width: validatedData.width,
-            depth: validatedData.depth,
-            dimensionsUnit: validatedData.dimensionsUnit,
-            colors: validatedData.colors,
-            materialStock: validatedData.materialStock,
-            message: validatedData.message,
-            attachmentUrls: validatedData.fileName ? [validatedData.fileName] : [],
-          },
-        });
-
-        return NextResponse.json(
-          {
-            success: true,
-            isMock: false,
-            quoteNumber: savedQuote.quoteNumber,
-            message: `Your quote request (${savedQuote.quoteNumber}) has been recorded. Our team will contact you shortly.`,
-          },
-          { status: 201 }
-        );
-      } catch (dbError) {
-        console.error("Database persistence failed:", dbError);
-        // Fall back to mock response with notice
-        return NextResponse.json(
-          {
-            success: true,
-            isMock: true,
-            quoteNumber,
-            message: `Quote request validated for ${validatedData.contactName}. (Database storage bypassed in current local configuration).`,
-          },
-          { status: 200 }
-        );
-      }
-    }
-
-    // Default development response when database connection is not live
-    return NextResponse.json(
-      {
-        success: true,
-        isMock: true,
-        quoteNumber,
-        message: `Quote request validated successfully for ${validatedData.contactName}! (Database not yet connected in this environment).`,
-      },
-      { status: 200 }
-    );
-  } catch (error) {
-    if (error instanceof z.ZodError) {
+    const body = await req.json().catch(() => null);
+    const parsed = quoteSubmitSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Validation failed", details: error.issues },
+        { error: "Please check the form fields and try again.", details: parsed.error.issues },
         { status: 400 }
       );
     }
 
+    const data = parsed.data;
+    const quoteNumber = `PH-${Date.now().toString().slice(-6)}`;
+
+    const savedQuote = await prisma.quoteRequest.create({
+      data: {
+        quoteNumber,
+        contactName: data.contactName,
+        email: data.email,
+        phone: data.phone,
+        productName: data.productName || "Custom Packaging Inquiry",
+        quantity: Math.round(data.quantity),
+        length: data.length,
+        width: data.width,
+        depth: data.depth,
+        dimensionsUnit: data.dimensionsUnit,
+        colors: data.colors,
+        materialStock: data.materialStock,
+        message: data.message,
+        attachmentUrls: data.fileName ? [data.fileName] : [],
+      },
+    });
+
+    const emailResult = await sendQuoteEmails({
+      quoteNumber: savedQuote.quoteNumber || quoteNumber,
+      contactName: savedQuote.contactName,
+      email: savedQuote.email,
+      phone: savedQuote.phone,
+      productName: savedQuote.productName,
+      quantity: savedQuote.quantity,
+      length: savedQuote.length,
+      width: savedQuote.width,
+      depth: savedQuote.depth,
+      dimensionsUnit: savedQuote.dimensionsUnit,
+      colors: savedQuote.colors,
+      message: savedQuote.message,
+    });
+
+    await logAdminActivity(null, {
+      action: "CREATE",
+      entityType: "quote",
+      entityId: savedQuote.id,
+      entityLabel: savedQuote.quoteNumber,
+      summary: `New quote request ${savedQuote.quoteNumber} from ${savedQuote.contactName}`,
+    });
+
+    return NextResponse.json(
+      {
+        success: true,
+        quoteNumber: savedQuote.quoteNumber,
+        emailSent: emailResult.adminSent,
+        message: `Your quote request (${savedQuote.quoteNumber}) has been recorded. Our team will contact you shortly.`,
+      },
+      { status: 201 }
+    );
+  } catch (error) {
     console.error("Quote submission error:", error);
     return NextResponse.json(
-      { error: "Internal server error occurred processing your quote." },
+      { error: "Could not submit your inquiry. Please try again." },
       { status: 500 }
     );
   }

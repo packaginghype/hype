@@ -179,6 +179,35 @@ export async function getFeaturedBlogs(limit = 4) {
   )();
 }
 
+export async function getBlogsByIds(ids: string[]) {
+  const unique = [...new Set(ids.filter(Boolean))];
+  if (unique.length === 0) return [];
+
+  return unstable_cache(
+    async () => {
+      const posts = await prisma.blogPost.findMany({
+        where: { id: { in: unique }, isPublished: true },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          excerpt: true,
+          publishedDate: true,
+          thumbnailImageUrl: true,
+          bannerImageUrl: true,
+          featuredImage: true,
+        },
+      });
+      const byId = new Map(posts.map((p) => [p.id, mapBlogWithFallbackImage(p)!]));
+      return unique
+        .map((id) => byId.get(id))
+        .filter((post): post is NonNullable<typeof post> => Boolean(post));
+    },
+    [`blogs-by-ids-${unique.join(",")}`],
+    { tags: [CACHE_TAGS.blogs], revalidate: CATALOG_REVALIDATE }
+  )();
+}
+
 export async function getBlogBySlug(slug: string) {
   return unstable_cache(
     async () => {

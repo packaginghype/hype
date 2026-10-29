@@ -738,7 +738,8 @@ export function ProductForm({
               },
             ]);
           }}
-          recommended="1200 × 900 px (landscape) · Max 2MB"
+          recommended="900 × 900 px (1:1 square)"
+          hint="Max 2MB · JPG, PNG, WEBP"
           folder="packaginghype/products/gallery"
         />
 
@@ -886,7 +887,8 @@ export function ProductForm({
             label="Thumbnail"
             value={values.thumbnailUrl || ""}
             onChange={(url) => patch({ thumbnailUrl: url })}
-            recommended="900 × 900 px · Max 2MB"
+            recommended="900 × 900 px (1:1 square)"
+            hint="Max 2MB · JPG, PNG, WEBP"
             folder="packaginghype/products/thumb"
           />
           <div>

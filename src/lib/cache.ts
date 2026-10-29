@@ -6,6 +6,7 @@ export const CACHE_TAGS = {
   products: "products",
   blogs: "blogs",
   sitemap: "sitemap",
+  home: "home",
 } as const;
 
 /** Seconds — public catalog ISR / data cache window */
@@ -37,4 +38,11 @@ export function revalidateBlogs() {
   expireTag(CACHE_TAGS.sitemap);
   revalidatePath("/blog");
   revalidatePath("/", "layout");
+}
+
+export function revalidateHomePage() {
+  expireTag(CACHE_TAGS.home);
+  expireTag(CACHE_TAGS.sitemap);
+  revalidatePath("/", "layout");
+  revalidatePath("/");
 }

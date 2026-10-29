@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Mail, Phone } from "lucide-react";
+import { Mail, Phone } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { VERIFIED_BUSINESS_INFO } from "@/data/verified-data";
 import type { CategoryItem } from "@/types";
@@ -48,9 +48,9 @@ function FooterLink({
 
 function FooterHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h4 className="text-[11.5px] font-bold uppercase tracking-[0.14em] text-[#172455]">
+    <p className="text-[11.5px] font-bold uppercase tracking-[0.14em] text-[#172455]">
       {children}
-    </h4>
+    </p>
   );
 }
 
@@ -107,14 +107,6 @@ export function Footer({ categories }: { categories: CategoryItem[] }) {
                 {VERIFIED_BUSINESS_INFO.email}
               </a>
             </div>
-
-            <Link
-              href="/quote"
-              className="mt-6 inline-flex h-11 items-center justify-center gap-2 rounded-[5px] bg-[#FF5548] px-5 text-[13.5px] font-bold text-white transition-colors hover:bg-[#e04337]"
-            >
-              Get a Custom Quote
-              <ArrowRight className="h-4 w-4" aria-hidden />
-            </Link>
           </div>
 
           {/* Shop */}

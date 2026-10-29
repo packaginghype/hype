@@ -13,6 +13,20 @@ import {
   X,
   FileCheck,
 } from "lucide-react";
+import {
+  SSR_CAPTCHA,
+  createMathCaptcha,
+  createSessionCaptcha,
+  type MathCaptcha,
+} from "@/lib/captcha";
+import {
+  validateContactName,
+  validateDimension,
+  validateEmail,
+  validatePhone,
+  validateQuantity,
+} from "@/lib/quote-form-validation";
+import { openDatePicker } from "@/lib/utils";
 
 interface QuoteRequestFormProps {
   initialProductName?: string;
@@ -50,11 +64,7 @@ const COLORS = [
   "Plain / No Printing (Unprinted)",
 ];
 
-function newCaptcha() {
-  const a = 2 + Math.floor(Math.random() * 7);
-  const b = 2 + Math.floor(Math.random() * 7);
-  return { a, b, answer: a + b };
-}
+const quoteCaptchaSlot: { current: MathCaptcha | null } = { current: null };
 
 const inputClass =
   "h-12 w-full rounded-[6px] border border-[#E2E4E8] bg-white px-3.5 text-sm font-medium text-[#172455] placeholder:text-[#8E95A5] outline-none transition-all focus:border-[#FF5548] focus:ring-2 focus:ring-[#FF5548]/15";
@@ -67,10 +77,10 @@ export function QuoteRequestForm({
   className = "",
 }: QuoteRequestFormProps) {
   const router = useRouter();
-  const [captcha, setCaptcha] = useState({ a: 4, b: 7, answer: 11 });
+  const [captcha, setCaptcha] = useState(SSR_CAPTCHA);
 
   useEffect(() => {
-    setCaptcha(newCaptcha());
+    setCaptcha(createSessionCaptcha(quoteCaptchaSlot));
   }, []);
 
   const [formData, setFormData] = useState({
@@ -133,12 +143,20 @@ export function QuoteRequestForm({
 
   function validate() {
     const next: Record<string, string> = {};
-    if (!formData.contactName.trim()) next.contactName = "Name is required";
-    if (!formData.phone.trim()) next.phone = "Phone number is required";
-    if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      next.email = "Valid business email required";
-    }
-    if (!formData.quantity) next.quantity = "Please select a quantity";
+    const lengthError = validateDimension("Length", formData.length);
+    const widthError = validateDimension("Width", formData.width);
+    const depthError = validateDimension("Depth", formData.depth);
+    const nameError = validateContactName(formData.contactName);
+    const phoneError = validatePhone(formData.phone);
+    const emailError = validateEmail(formData.email);
+    const quantityError = validateQuantity(formData.quantity);
+    if (lengthError) next.length = lengthError;
+    if (widthError) next.width = widthError;
+    if (depthError) next.depth = depthError;
+    if (nameError) next.contactName = nameError;
+    if (phoneError) next.phone = phoneError;
+    if (emailError) next.email = emailError;
+    if (quantityError) next.quantity = quantityError;
     if (Number(formData.captchaInput) !== captcha.answer) {
       next.captchaInput = "Incorrect answer";
     }
@@ -185,6 +203,8 @@ export function QuoteRequestForm({
       const data = await res.json();
 
       if (res.ok) {
+        quoteCaptchaSlot.current = createMathCaptcha();
+        setCaptcha(quoteCaptchaSlot.current);
         const refNum = data.quoteNumber || `PH-${Date.now().toString().slice(-6)}`;
         const params = new URLSearchParams({ ref: refNum });
         if (formData.contactName.trim()) params.set("name", formData.contactName.trim().split(" ")[0]);
@@ -238,9 +258,13 @@ export function QuoteRequestForm({
               onChange={(e) => patch("length", e.target.value)}
               placeholder="Length"
               inputMode="decimal"
-              className={inputClass}
+              className={`${inputClass} ${errors.length ? "border-[#FF5548]" : ""}`}
               aria-label="Length"
+              aria-invalid={Boolean(errors.length)}
             />
+            {errors.length && (
+              <p className="mt-1 text-[11px] font-medium text-[#FF5548]">{errors.length}</p>
+            )}
           </div>
           <div>
             <input
@@ -249,9 +273,13 @@ export function QuoteRequestForm({
               onChange={(e) => patch("width", e.target.value)}
               placeholder="Width"
               inputMode="decimal"
-              className={inputClass}
+              className={`${inputClass} ${errors.width ? "border-[#FF5548]" : ""}`}
               aria-label="Width"
+              aria-invalid={Boolean(errors.width)}
             />
+            {errors.width && (
+              <p className="mt-1 text-[11px] font-medium text-[#FF5548]">{errors.width}</p>
+            )}
           </div>
           <div>
             <input
@@ -260,9 +288,13 @@ export function QuoteRequestForm({
               onChange={(e) => patch("depth", e.target.value)}
               placeholder="Depth"
               inputMode="decimal"
-              className={inputClass}
+              className={`${inputClass} ${errors.depth ? "border-[#FF5548]" : ""}`}
               aria-label="Depth"
+              aria-invalid={Boolean(errors.depth)}
             />
+            {errors.depth && (
+              <p className="mt-1 text-[11px] font-medium text-[#FF5548]">{errors.depth}</p>
+            )}
           </div>
         </div>
 
@@ -308,9 +340,11 @@ export function QuoteRequestForm({
               value={formData.expectedDate}
               min={minDate}
               onChange={(e) => patch("expectedDate", e.target.value)}
-              className={`${inputClass} cursor-pointer ${!formData.expectedDate ? "text-[#8E95A5]" : ""}`}
+              onClick={openDatePicker}
+              className={`${inputClass} date-input-clickable pr-10 ${!formData.expectedDate ? "text-[#8E95A5]" : ""}`}
               aria-label="Expected Date"
             />
+            <Calendar className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8E95A5]" />
           </div>
         </div>
 

@@ -232,7 +232,7 @@ export default async function BlogDetailPage({ params }: Props) {
                   <Link
                     key={item.id}
                     href={`/blog/${item.slug}`}
-                    className="group flex flex-col overflow-hidden rounded-xl border border-gray-100 bg-white transition-all hover:border-gray-200 hover:shadow-md"
+                    className="group flex flex-col overflow-hidden rounded-xl border border-gray-100 bg-white"
                   >
                     <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#F6F8FA]">
                       {img ? (

@@ -6,6 +6,7 @@ import { Container } from "@/components/ui/Container";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { CategoryQuoteForm } from "@/components/categories/CategoryQuoteForm";
 import { CategoryProductCard } from "@/components/categories/CategoryProductCard";
+import { CATALOG_TILE } from "@/components/ui/CatalogTile";
 import { FAQAccordion } from "@/components/ui/FAQAccordion";
 import { RichText } from "@/components/ui/RichText";
 import {
@@ -155,7 +156,7 @@ export function CategoryDetailPage({
 
             <div className="mt-10">
               {products.length > 0 ? (
-                <div className="grid grid-cols-2 gap-5 sm:gap-6 lg:grid-cols-4 lg:gap-7">
+                <div className={CATALOG_TILE.grid}>
                   {products.map((product) => (
                     <CategoryProductCard key={product.id} product={product} />
                   ))}

@@ -10,11 +10,10 @@ import { HOME_PAGE_DEFAULTS } from "@/lib/home-page-schema";
 
 type Props = Pick<
   HomePageData,
-  "faqEyebrow" | "faqHeading" | "faqSubtext" | "faqImageUrl" | "faqImageAlt" | "faqs"
+  "faqHeading" | "faqSubtext" | "faqImageUrl" | "faqImageAlt" | "faqs"
 >;
 
 export function FaqSection({
-  faqEyebrow = HOME_PAGE_DEFAULTS.faqEyebrow,
   faqHeading = HOME_PAGE_DEFAULTS.faqHeading,
   faqSubtext = HOME_PAGE_DEFAULTS.faqSubtext,
   faqImageUrl = HOME_PAGE_DEFAULTS.faqImageUrl,
@@ -31,13 +30,8 @@ export function FaqSection({
     <section className="border-t border-[#E8EAEF] bg-white py-14 sm:py-16 lg:py-20">
       <Container>
         <div className="mx-auto max-w-2xl text-center lg:mx-0 lg:max-w-none lg:text-left">
-          {faqEyebrow && (
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#21AAA5]">
-              {faqEyebrow}
-            </p>
-          )}
           {faqHeading && (
-            <h2 className="mt-2 font-heading text-2xl font-extrabold tracking-tight text-[#172455] sm:text-3xl">
+            <h2 className="font-heading text-2xl font-extrabold tracking-tight text-[#172455] sm:text-3xl">
               {faqHeading}
             </h2>
           )}
@@ -66,13 +60,6 @@ export function FaqSection({
               <p className="max-w-xs text-[13px] font-semibold leading-snug text-white sm:text-sm">
                 Custom sizes, materials, and finishes — built for your brand.
               </p>
-              <Link
-                href="/quote"
-                className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-bold text-white transition-colors hover:text-[#FF5548]"
-              >
-                Get a free quote
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
             </div>
           </div>
 

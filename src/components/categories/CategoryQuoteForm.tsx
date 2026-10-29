@@ -9,6 +9,12 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { AddToCartButton } from "@/components/cart/AddToCartButton";
+import {
+  validateContactName,
+  validateDimension,
+  validateEmail,
+  validatePhone,
+} from "@/lib/quote-form-validation";
 
 interface CategoryQuoteFormProps {
   productName: string;
@@ -73,11 +79,18 @@ export function CategoryQuoteForm({
 
   const validate = () => {
     const next: Record<string, string> = {};
-    if (!formData.contactName.trim()) next.contactName = "Required";
-    if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      next.email = "Valid email required";
-    }
-    if (!formData.phone.trim()) next.phone = "Required";
+    const nameError = validateContactName(formData.contactName);
+    const emailError = validateEmail(formData.email);
+    const phoneError = validatePhone(formData.phone);
+    const lengthError = validateDimension("Length", formData.length);
+    const widthError = validateDimension("Width", formData.width);
+    const depthError = validateDimension("Depth", formData.depth);
+    if (nameError) next.contactName = nameError;
+    if (emailError) next.email = emailError;
+    if (phoneError) next.phone = phoneError;
+    if (lengthError) next.length = lengthError;
+    if (widthError) next.width = widthError;
+    if (depthError) next.depth = depthError;
     const qty = Number(formData.quantity);
     if (!formData.quantity || qty < 100) next.quantity = "Min 100";
     setErrors(next);

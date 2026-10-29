@@ -20,6 +20,16 @@ export function formatPrice(price?: number | string | null): string {
 /**
  * Generates an accessible unique ID
  */
+export function openDatePicker(
+  event: { currentTarget: HTMLInputElement }
+) {
+  try {
+    event.currentTarget.showPicker?.();
+  } catch {
+    /* Already open or unsupported */
+  }
+}
+
 export function slugify(text: string): string {
   return text
     .toLowerCase()

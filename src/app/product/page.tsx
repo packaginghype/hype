@@ -5,6 +5,7 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Pagination } from "@/components/ui/Pagination";
 import { CategoryProductCard } from "@/components/categories/CategoryProductCard";
+import { CATALOG_TILE } from "@/components/ui/CatalogTile";
 import { QuoteCTA } from "@/components/ui/QuoteCTA";
 import {
   getAllCategories,
@@ -107,7 +108,7 @@ export default async function ProductsPage({
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-4">
+            <div className={CATALOG_TILE.grid}>
               {products.map((product) => (
                 <CategoryProductCard key={product.id} product={product} />
               ))}

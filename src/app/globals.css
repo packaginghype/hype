@@ -122,14 +122,13 @@ h6[style*="color"] {
   background: #94a3b8;
 }
 
-/* Card hover — stable (no lift/move), color + soft shadow only */
+/* Card hover — stable UI (no lift, no shadow change) */
 .card-hover-effect {
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: none;
 }
 
 .card-hover-effect:hover {
-  box-shadow: 0 8px 20px -8px rgba(23, 36, 85, 0.12);
-  border-color: #cbd5e1;
+  box-shadow: none;
 }
 
 /* Reliable section text scroller */
@@ -386,4 +385,21 @@ h6[style*="color"] {
 .admin-section-bar,
 .admin-section-bar :is(p, span, h1, h2, h3, h4, h5, h6) {
   color: #ffffff !important;
+}
+
+/* Native date inputs: calendar opens on click anywhere in the field */
+input[type="date"].date-input-clickable {
+  position: relative;
+  cursor: pointer;
+}
+
+input[type="date"].date-input-clickable::-webkit-calendar-picker-indicator {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: pointer;
 }

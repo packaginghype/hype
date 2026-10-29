@@ -2,7 +2,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import { Container } from "@/components/ui/Container";
-import { getFeaturedBlogs } from "@/lib/blogs";
+import { getBlogsByIds, getFeaturedBlogs } from "@/lib/blogs";
+import { HOME_PAGE_DEFAULTS, type HomePageData } from "@/lib/home-page-schema";
 
 const DEFAULT_POSTS = [
   {
@@ -27,21 +28,27 @@ const DEFAULT_POSTS = [
   },
 ];
 
-export async function BlogPreviewSection() {
-  const dbPosts = await getFeaturedBlogs(4);
+export async function BlogPreviewSection({
+  blogsHeading = HOME_PAGE_DEFAULTS.blogsHeading,
+  blogsSubtext = HOME_PAGE_DEFAULTS.blogsSubtext,
+  blogIds = HOME_PAGE_DEFAULTS.blogIds,
+}: Partial<
+  Pick<HomePageData, "blogsHeading" | "blogsSubtext" | "blogIds">
+> = {}) {
+  const ids = blogIds?.filter(Boolean) || [];
+  const dbPosts =
+    ids.length > 0 ? await getBlogsByIds(ids) : await getFeaturedBlogs(4);
 
-  const posts =
-    dbPosts.length > 0
-      ? dbPosts.map((p) => ({
-          title: p.title,
-          slug: p.slug,
-          image:
-            p.thumbnailImageUrl ||
-            p.featuredImage ||
-            p.bannerImageUrl ||
-            "/images/blog-mailer-boxes.jpg",
-        }))
-      : DEFAULT_POSTS;
+  const mapped = dbPosts.map((p) => ({
+    title: p.title,
+    slug: p.slug,
+    image:
+      p.thumbnailImageUrl ||
+      p.featuredImage ||
+      p.bannerImageUrl ||
+      "/images/blog-mailer-boxes.jpg",
+  }));
+  const posts = ids.length > 0 ? mapped : mapped.length > 0 ? mapped : DEFAULT_POSTS;
 
   return (
     <section className="bg-white py-16 sm:py-20 lg:py-24 border-t border-gray-100">
@@ -50,12 +57,13 @@ export async function BlogPreviewSection() {
           {/* Left Column: Heading + Description + 3D Illustration Card */}
           <div className="flex flex-col">
             <h2 className="font-heading text-3xl font-extrabold tracking-tight text-[#1A1349] sm:text-4xl lg:text-[40px] lg:leading-[1.15]">
-              Latest News
+              {blogsHeading || "Latest News"}
             </h2>
-            <p className="mt-3.5 max-w-md text-[14.5px] leading-relaxed text-[#5B667A] sm:text-[15px]">
-              Keep up with the latest packaging design tips, industry guides,
-              material insights, and unboxing innovations for modern brands.
-            </p>
+            {blogsSubtext ? (
+              <p className="mt-3.5 max-w-md text-[14.5px] leading-relaxed text-[#5B667A] sm:text-[15px]">
+                {blogsSubtext}
+              </p>
+            ) : null}
 
             <Link
               href="/blog"
@@ -85,7 +93,7 @@ export async function BlogPreviewSection() {
             {posts.slice(0, 4).map((post) => (
               <article
                 key={post.slug}
-                className="group relative isolate aspect-[16/10] overflow-hidden rounded-[16px] bg-[#0F172A] shadow-sm transition-all duration-300 hover:shadow-xl"
+                className="group relative isolate aspect-[4/3] overflow-hidden rounded-2xl border border-[#E8EAEF] bg-[#0F172A]"
               >
                 {/* Background Image */}
                 <Image
@@ -116,7 +124,7 @@ export async function BlogPreviewSection() {
 
                   <Link
                     href={`/blog/${post.slug}`}
-                    className="inline-flex shrink-0 items-center gap-1.5 rounded-[8px] bg-[#2D1B69] px-3.5 py-2 text-[12px] font-bold text-white shadow-sm transition-all duration-200 hover:bg-[#FF5548] group-hover:bg-[#FF5548] group-hover:shadow-md"
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-[8px] bg-[#2D1B69] px-3.5 py-2 text-[12px] font-bold text-white transition-colors duration-200 hover:bg-[#FF5548] group-hover:bg-[#FF5548]"
                     aria-label={`Read ${post.title}`}
                   >
                     <span>Read Now</span>

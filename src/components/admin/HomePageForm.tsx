@@ -11,10 +11,14 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
+import Link from "next/link";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
-import { CkEditorField } from "@/components/admin/CkEditorField";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { HomeTrendingProductPicker } from "@/components/admin/HomeTrendingProductPicker";
+import { HomeBlogPicker } from "@/components/admin/HomeBlogPicker";
 import type { HomePageData } from "@/lib/home-page-schema";
 import { HOME_PAGE_DEFAULTS } from "@/lib/home-page-schema";
+import { jsonLdInputStatus } from "@/lib/json-ld";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -53,7 +57,15 @@ function SectionCard({
           <ChevronDown className="h-4 w-4 text-[#6B7280]" />
         )}
       </button>
-      {open && <div className="border-t border-[#E5E7EB] px-5 py-5 space-y-5">{children}</div>}
+      <div
+        className={
+          open
+            ? "border-t border-[#E5E7EB] px-5 py-5 space-y-5"
+            : "hidden"
+        }
+      >
+        {children}
+      </div>
     </div>
   );
 }
@@ -69,7 +81,7 @@ export function HomePageForm() {
 
   // Load existing data
   useEffect(() => {
-    fetch("/api/admin/pages/home")
+    fetch("/api/admin/pages/home", { cache: "no-store" })
       .then((r) => r.json())
       .then(({ data }) => {
         if (data) setValues((prev) => ({ ...prev, ...data }));
@@ -84,17 +96,21 @@ export function HomePageForm() {
   async function handleSave() {
     setSaving(true);
     setStatus("idle");
+    setErrorMsg("");
     try {
       const res = await fetch("/api/admin/pages/home", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setStatus("error");
-        setErrorMsg(data.error?.message || "Failed to save.");
+        setErrorMsg(
+          typeof data.error === "string" ? data.error : "Failed to save."
+        );
       } else {
+        if (data.data) setValues((prev) => ({ ...prev, ...data.data }));
         setStatus("success");
         setTimeout(() => setStatus("idle"), 3000);
       }
@@ -113,6 +129,8 @@ export function HomePageForm() {
       </div>
     );
   }
+
+  const schemaStatus = jsonLdInputStatus(values.seoScript);
 
   return (
     <div className="space-y-4">
@@ -215,31 +233,42 @@ export function HomePageForm() {
         </div>
       </SectionCard>
 
+      <SectionCard title="🏭 Industry Solutions Section">
+        <div>
+          <FieldLabel>Heading</FieldLabel>
+          <input
+            value={values.industryHeading ?? ""}
+            onChange={(e) => patch({ industryHeading: e.target.value })}
+            placeholder="Packaging Solutions by Industry Needs"
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <FieldLabel>Description</FieldLabel>
+          <textarea
+            rows={3}
+            value={values.industrySubtext ?? ""}
+            onChange={(e) => patch({ industrySubtext: e.target.value })}
+            placeholder="From beauty and food to retail and e-commerce…"
+            className={`${inputClass} resize-y`}
+          />
+        </div>
+      </SectionCard>
+
       {/* ── About / Who We Are ───────────────────────────────────────────── */}
-      <SectionCard title="👥 About / Who We Are Section">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <FieldLabel>Eyebrow Label</FieldLabel>
-            <input
-              value={values.aboutEyebrow ?? ""}
-              onChange={(e) => patch({ aboutEyebrow: e.target.value })}
-              placeholder="Who We Are"
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <FieldLabel>Heading</FieldLabel>
-            <input
-              value={values.aboutHeading ?? ""}
-              onChange={(e) => patch({ aboutHeading: e.target.value })}
-              placeholder="About Packaging Hype"
-              className={inputClass}
-            />
-          </div>
+      <SectionCard title="About Us Section">
+        <div>
+          <FieldLabel>Heading</FieldLabel>
+          <input
+            value={values.aboutHeading ?? ""}
+            onChange={(e) => patch({ aboutHeading: e.target.value })}
+            placeholder="About Packaging Hype"
+            className={inputClass}
+          />
         </div>
         <div>
           <FieldLabel>Body Content (Rich Text)</FieldLabel>
-          <CkEditorField
+          <RichTextEditor
             value={values.aboutBody ?? ""}
             onChange={(html) => patch({ aboutBody: html })}
             placeholder="About section body text…"
@@ -283,13 +312,84 @@ export function HomePageForm() {
         </div>
       </SectionCard>
 
+      <SectionCard title="🔥 Trending & Popular Products">
+        <div>
+          <FieldLabel>Heading</FieldLabel>
+          <input
+            value={values.trendingHeading ?? ""}
+            onChange={(e) => patch({ trendingHeading: e.target.value })}
+            placeholder="Trending & Popular Products"
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <FieldLabel>Description</FieldLabel>
+          <textarea
+            rows={3}
+            value={values.trendingSubtext ?? ""}
+            onChange={(e) => patch({ trendingSubtext: e.target.value })}
+            placeholder="Explore packaging formats brands reorder most…"
+            className={`${inputClass} resize-y`}
+          />
+        </div>
+        <div>
+          <FieldLabel>Products (add, remove, reorder)</FieldLabel>
+          <HomeTrendingProductPicker
+            selectedIds={values.trendingProductIds || []}
+            onChange={(ids) => patch({ trendingProductIds: ids })}
+          />
+        </div>
+      </SectionCard>
+
+      <SectionCard title="⭐ Customer Reviews">
+        <p className="text-sm text-[#4B5563]">
+          Heading and description for this homepage section. Individual reviews
+          are added and ordered from{" "}
+          <Link
+            href="/admin/reviews"
+            className="font-semibold text-[#21AAA5] hover:text-[#FF5548]"
+          >
+            Admin → Reviews
+          </Link>
+          .
+        </p>
+        <div>
+          <FieldLabel>Eyebrow Label</FieldLabel>
+          <input
+            value={values.reviewsEyebrow ?? ""}
+            onChange={(e) => patch({ reviewsEyebrow: e.target.value })}
+            placeholder="Trusted by Growing Brands"
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <FieldLabel>Heading</FieldLabel>
+          <input
+            value={values.reviewsHeading ?? ""}
+            onChange={(e) => patch({ reviewsHeading: e.target.value })}
+            placeholder="What Our Customers Say"
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <FieldLabel>Description</FieldLabel>
+          <textarea
+            rows={2}
+            value={values.reviewsSubtext ?? ""}
+            onChange={(e) => patch({ reviewsSubtext: e.target.value })}
+            placeholder="Real feedback from brands…"
+            className={`${inputClass} resize-y`}
+          />
+        </div>
+      </SectionCard>
+
       {/* ── Reliable Packaging Section ────────────────────────────────────── */}
       <SectionCard title="📦 Reliable Packaging Section">
         <ImageUploadField
-          label="Section Image"
+          label="Image"
           value={values.reliableImageUrl ?? ""}
           onChange={(url) => patch({ reliableImageUrl: url })}
-          recommended="900 × 720 px · Aspect 5:4 · Max 1MB"
+          recommended="1200 × 900 px · Aspect 4:3 · Max 1MB"
           folder="packaginghype/pages/home"
         />
         <div>
@@ -302,7 +402,7 @@ export function HomePageForm() {
           />
         </div>
         <div>
-          <FieldLabel>Section Heading</FieldLabel>
+          <FieldLabel>Heading</FieldLabel>
           <input
             value={values.reliableHeading ?? ""}
             onChange={(e) => patch({ reliableHeading: e.target.value })}
@@ -311,12 +411,32 @@ export function HomePageForm() {
           />
         </div>
         <div>
-          <FieldLabel>Body Content (Rich Text)</FieldLabel>
-          <CkEditorField
+          <FieldLabel>Description</FieldLabel>
+          <RichTextEditor
             value={values.reliableBody ?? ""}
             onChange={(html) => patch({ reliableBody: html })}
-            placeholder="Section body text…"
+            placeholder="Section description…"
           />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <FieldLabel>Button Label</FieldLabel>
+            <input
+              value={values.reliableBtnLabel ?? ""}
+              onChange={(e) => patch({ reliableBtnLabel: e.target.value })}
+              placeholder="Get a Free Quote"
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <FieldLabel>Button Link</FieldLabel>
+            <input
+              value={values.reliableBtnHref ?? ""}
+              onChange={(e) => patch({ reliableBtnHref: e.target.value })}
+              placeholder="/quote"
+              className={inputClass}
+            />
+          </div>
         </div>
       </SectionCard>
 
@@ -343,27 +463,56 @@ export function HomePageForm() {
         </div>
       </SectionCard>
 
+      <SectionCard title="📄 Detailed Content (above FAQs)">
+        <p className="text-sm text-[#4B5563]">
+          Image + copy block shown just above FAQs — same layout as category
+          and product detail pages.
+        </p>
+        <div>
+          <FieldLabel>Section Heading</FieldLabel>
+          <input
+            value={values.seoContentHeading ?? ""}
+            onChange={(e) => patch({ seoContentHeading: e.target.value })}
+            placeholder="Custom Packaging Designed Around Your Product"
+            className={inputClass}
+          />
+        </div>
+        <ImageUploadField
+          label="Section Image"
+          value={values.seoContentImageUrl ?? ""}
+          onChange={(url) => patch({ seoContentImageUrl: url })}
+          recommended="900 × 720 px · Aspect 5:4 · Max 1MB"
+          folder="packaginghype/pages/home"
+        />
+        <div>
+          <FieldLabel>Image Alt Text</FieldLabel>
+          <input
+            value={values.seoContentImageAlt ?? ""}
+            onChange={(e) => patch({ seoContentImageAlt: e.target.value })}
+            placeholder="Custom packaging boxes"
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <FieldLabel>Body Content (Rich Text)</FieldLabel>
+          <RichTextEditor
+            value={values.seoContentHtml ?? ""}
+            onChange={(html) => patch({ seoContentHtml: html })}
+            placeholder="Short paragraphs about custom boxes, materials, and production…"
+          />
+        </div>
+      </SectionCard>
+
       {/* ── FAQ Section ──────────────────────────────────────────────────── */}
       <SectionCard title="❓ FAQ Section">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <FieldLabel>Eyebrow Label</FieldLabel>
-            <input
-              value={values.faqEyebrow ?? ""}
-              onChange={(e) => patch({ faqEyebrow: e.target.value })}
-              placeholder="Answers to Common Questions"
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <FieldLabel>Section Heading</FieldLabel>
-            <input
-              value={values.faqHeading ?? ""}
-              onChange={(e) => patch({ faqHeading: e.target.value })}
-              placeholder="Frequently Asked Questions"
-              className={inputClass}
-            />
-          </div>
+        <div>
+          <FieldLabel>Section Heading</FieldLabel>
+          <input
+            value={values.faqHeading ?? ""}
+            onChange={(e) => patch({ faqHeading: e.target.value })}
+            placeholder="Frequently Asked Questions"
+            className={inputClass}
+          />
         </div>
         <div>
           <FieldLabel>Section Sub-text</FieldLabel>
@@ -459,6 +608,35 @@ export function HomePageForm() {
         </div>
       </SectionCard>
 
+      <SectionCard title="📰 Latest News (Blog Section)">
+        <div>
+          <FieldLabel>Heading</FieldLabel>
+          <input
+            value={values.blogsHeading ?? ""}
+            onChange={(e) => patch({ blogsHeading: e.target.value })}
+            placeholder="Latest News"
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <FieldLabel>Description</FieldLabel>
+          <textarea
+            rows={3}
+            value={values.blogsSubtext ?? ""}
+            onChange={(e) => patch({ blogsSubtext: e.target.value })}
+            placeholder="Keep up with the latest packaging design tips…"
+            className={`${inputClass} resize-y`}
+          />
+        </div>
+        <div>
+          <FieldLabel>Blogs (add, remove, reorder)</FieldLabel>
+          <HomeBlogPicker
+            selectedIds={values.blogIds || []}
+            onChange={(ids) => patch({ blogIds: ids })}
+          />
+        </div>
+      </SectionCard>
+
       {/* ── SEO ──────────────────────────────────────────────────────────── */}
       <SectionCard title="🔍 SEO — Home Page">
         <div>
@@ -495,10 +673,70 @@ export function HomePageForm() {
             className={inputClass}
           />
         </div>
+        <div>
+          <FieldLabel>Canonical URL</FieldLabel>
+          <input
+            value={values.seoCanonical ?? ""}
+            onChange={(e) => patch({ seoCanonical: e.target.value })}
+            placeholder="https://packaginghype.com/"
+            className={inputClass}
+          />
+          <p className="mt-1 text-[11px] text-[#9CA3AF]">
+            Self-referencing homepage URL by default. Leave blank to use{" "}
+            <code className="rounded bg-[#F3F4F6] px-1 py-0.5 text-[10px]">
+              https://packaginghype.com/
+            </code>
+            .
+          </p>
+        </div>
+        <div>
+          <FieldLabel>JSON-LD Schema Markup</FieldLabel>
+          <textarea
+            rows={10}
+            value={values.seoScript ?? ""}
+            onChange={(e) => patch({ seoScript: e.target.value })}
+            spellCheck={false}
+            className={`${inputClass} resize-y font-mono text-[12px] leading-relaxed`}
+            placeholder={`{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Packaging Hype",
+  "url": "https://packaginghype.com"
+}`}
+          />
+          <p className="mt-1.5 text-[11px] text-[#9CA3AF]">
+            Paste raw JSON-LD or a full{" "}
+            <code className="rounded bg-[#F3F4F6] px-1 py-0.5 text-[10px]">
+              {`<script type="application/ld+json">`}
+            </code>{" "}
+            tag. Saved with the home page and output on the live homepage.
+            {schemaStatus === "valid" && (
+              <span className="ml-1 font-semibold text-emerald-600">
+                Valid JSON-LD
+              </span>
+            )}
+            {schemaStatus === "invalid" && (
+              <span className="ml-1 font-semibold text-amber-600">
+                Not valid JSON yet — it will save, but will not render until
+                the JSON is valid.
+              </span>
+            )}
+          </p>
+        </div>
       </SectionCard>
 
       {/* ── Bottom Save Button ────────────────────────────────────────────── */}
-      <div className="flex justify-end pb-8">
+      <div className="flex items-center justify-end gap-3 pb-8">
+        {status === "success" && (
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
+            <CheckCircle2 className="h-4 w-4" /> Saved
+          </span>
+        )}
+        {status === "error" && (
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-600">
+            <AlertCircle className="h-4 w-4" /> {errorMsg}
+          </span>
+        )}
         <button
           type="button"
           onClick={handleSave}

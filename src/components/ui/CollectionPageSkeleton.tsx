@@ -44,11 +44,16 @@ export function CollectionPageSkeleton() {
             <div className="h-12 w-full animate-pulse rounded-full border border-[#E2E4E8] bg-[#F6F8FA]" />
           </div>
 
-          <div className="mt-12 grid grid-cols-2 gap-5 sm:gap-6 lg:grid-cols-4 lg:gap-8">
+          <div className="mt-12 grid grid-cols-2 gap-x-4 gap-y-6 sm:gap-x-5 sm:gap-y-8 lg:grid-cols-4 lg:gap-x-6 lg:gap-y-10">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="space-y-3">
-                <div className="aspect-square animate-pulse rounded-none bg-[#F0EBE3]" />
-                <div className="mx-auto h-4 w-2/3 animate-pulse rounded bg-[#E8EAEF]" />
+              <div
+                key={i}
+                className="overflow-hidden rounded-2xl border border-[#E8EAEF] bg-white"
+              >
+                <div className="aspect-[4/5] animate-pulse bg-[#F5F3EF] sm:aspect-square" />
+                <div className="px-3 py-3.5">
+                  <div className="mx-auto h-4 w-2/3 animate-pulse rounded bg-[#E8EAEF]" />
+                </div>
               </div>
             ))}
           </div>

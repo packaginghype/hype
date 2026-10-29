@@ -1,8 +1,8 @@
 import React from "react";
 import Link from "next/link";
-import { ArrowRight, Package } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Container } from "@/components/ui/Container";
-import { SafeImage } from "@/components/ui/SafeImage";
+import { CatalogTile, CATALOG_TILE } from "@/components/ui/CatalogTile";
 import { getCategoryShowcaseCategories } from "@/lib/catalog";
 
 export async function CategoryShowcase() {
@@ -34,27 +34,15 @@ export async function CategoryShowcase() {
           </Link>
         </div>
 
-        <div className="mt-8 grid grid-cols-2 gap-x-5 gap-y-8 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-4">
+        <div className={`mt-8 ${CATALOG_TILE.grid}`}>
           {categories.map((category) => (
-            <Link
+            <CatalogTile
               key={category.id}
               href={`/category/${category.slug}`}
-              className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#21AAA5] focus-visible:ring-offset-2"
-            >
-              <div className="relative aspect-square overflow-hidden bg-[#F0EBE3]">
-                <SafeImage
-                  src={category.imageUrl || ""}
-                  alt={category.name}
-                  fill
-                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                  className="object-contain p-3 transition-transform duration-300 group-hover:scale-105"
-                  loading="lazy"
-                />
-              </div>
-              <p className="mt-3 text-center text-sm font-semibold leading-snug text-[#172455] transition-colors group-hover:text-[#FF5548] sm:text-[15px]">
-                {category.name}
-              </p>
-            </Link>
+              title={category.name}
+              imageUrl={category.imageUrl}
+              imageAlt={category.name}
+            />
           ))}
         </div>
       </Container>

@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getAdminSession } from "@/lib/admin-auth";
-import { homePageSchema, HOME_PAGE_DEFAULTS } from "@/lib/home-page-schema";
+import {
+  homePageSchema,
+  parseHomePageData,
+  formatHomePageZodError,
+} from "@/lib/home-page-schema";
 import { logAdminActivity } from "@/lib/admin-activity";
+import { revalidateHomePage } from "@/lib/cache";
 
 const PAGE_KEY = "home";
 
@@ -19,7 +25,7 @@ export async function GET() {
   }
 
   const record = await prisma.sitePage.findUnique({ where: { key: PAGE_KEY } });
-  const data = record?.data ?? HOME_PAGE_DEFAULTS;
+  const data = parseHomePageData(record?.data);
 
   return NextResponse.json({ data });
 }
@@ -34,29 +40,35 @@ export async function PUT(request: Request) {
   const body = await request.json().catch(() => null);
   const parsed = homePageSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+    return NextResponse.json(
+      { error: formatHomePageZodError(parsed.error) },
+      { status: 400 }
+    );
   }
 
-  const record = await prisma.sitePage.upsert({
-    where: { key: PAGE_KEY },
-    create: { key: PAGE_KEY, data: parsed.data as object },
-    update: { data: parsed.data as object },
-  });
-
-  await logAdminActivity(session, {
-    action: "UPDATE",
-    entityType: "page",
-    entityId: record.id,
-    entityLabel: "Home Page",
-    summary: "Updated home page CMS content",
-  });
-
-  // Revalidate home page cache
   try {
-    await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/api/revalidate?path=/`, {
-      method: "POST",
-    }).catch(() => {});
-  } catch {}
+    const record = await prisma.sitePage.upsert({
+      where: { key: PAGE_KEY },
+      create: { key: PAGE_KEY, data: parsed.data as Prisma.InputJsonValue },
+      update: { data: parsed.data as Prisma.InputJsonValue },
+    });
 
-  return NextResponse.json({ ok: true, data: record.data });
+    await logAdminActivity(session, {
+      action: "UPDATE",
+      entityType: "page",
+      entityId: record.id,
+      entityLabel: "Home Page",
+      summary: "Updated home page CMS content",
+    });
+
+    revalidateHomePage();
+
+    return NextResponse.json({ ok: true, data: parseHomePageData(record.data) });
+  } catch (err) {
+    console.error("Failed to save home page", err);
+    return NextResponse.json(
+      { error: "Could not save home page. Please try again." },
+      { status: 500 }
+    );
+  }
 }

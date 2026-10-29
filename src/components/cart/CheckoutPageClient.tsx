@@ -17,6 +17,11 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { useCart } from "@/components/cart/CartProvider";
 import { formatMoney } from "@/lib/cart";
+import {
+  validateContactName,
+  validateEmail,
+  validatePhone,
+} from "@/lib/quote-form-validation";
 
 const PAYMENT_OPTIONS = [
   "PayPal",
@@ -72,11 +77,14 @@ export function CheckoutPageClient() {
 
   const validate = () => {
     const next: Record<string, string> = {};
-    if (!form.firstName.trim()) next.firstName = "Required";
-    if (!form.lastName.trim()) next.lastName = "Required";
-    if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-      next.email = "Valid email required";
-    }
+    const firstNameError = validateContactName(form.firstName);
+    const lastNameError = validateContactName(form.lastName);
+    const emailError = validateEmail(form.email);
+    const phoneError = validatePhone(form.phone);
+    if (firstNameError) next.firstName = firstNameError;
+    if (lastNameError) next.lastName = lastNameError;
+    if (emailError) next.email = emailError;
+    if (phoneError) next.phone = phoneError;
     if (!form.address.trim()) next.address = "Required";
     if (!form.city.trim()) next.city = "Required";
     if (!form.state.trim()) next.state = "Required";
@@ -123,7 +131,7 @@ export function CheckoutPageClient() {
         body: JSON.stringify({
           contactName: `${form.firstName.trim()} ${form.lastName.trim()}`,
           email: form.email.trim(),
-          phone: form.phone.trim() || "Not provided",
+          phone: form.phone.trim(),
           productName:
             items.length === 1
               ? primary.name

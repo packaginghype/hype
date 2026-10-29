@@ -12,7 +12,8 @@ export type ActivityInput = {
     | "quote"
     | "upload"
     | "session"
-    | "page";
+    | "page"
+    | "review";
   entityId?: string | null;
   entityLabel?: string | null;
   summary: string;

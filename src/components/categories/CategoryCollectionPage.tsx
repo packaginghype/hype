@@ -3,11 +3,11 @@
 import React, { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Search, Package } from "lucide-react";
-import { SafeImage } from "@/components/ui/SafeImage";
+import { ArrowRight, Search } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Button } from "@/components/ui/Button";
+import { CatalogTile, CATALOG_TILE } from "@/components/ui/CatalogTile";
 import type { CategoryItem } from "@/types";
 import type { CategoryGroupKey } from "@/data/category-groups";
 import { CATEGORY_GROUPS } from "@/data/category-groups";
@@ -107,36 +107,25 @@ export function CategoryCollectionPage({
               No matches for “{query}”. Try another keyword.
             </p>
           ) : (
-            <div className="mt-10 grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-4">
+            <div className={`mt-10 ${CATALOG_TILE.grid}`}>
               {filtered.map((category) => {
                 const itemHref =
                   group === "industries" || category.group === "industries"
                     ? `/industry/${category.slug}`
                     : `/category/${category.slug}`;
                 return (
-                  <Link
+                  <CatalogTile
                     key={category.id}
                     href={itemHref}
-                    className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#21AAA5] focus-visible:ring-offset-2"
-                  >
-                  <div className="relative aspect-square overflow-hidden bg-[#F0EBE3]">
-                    <SafeImage
-                      src={category.imageUrl || ""}
-                      alt={category.name}
-                      fill
-                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                      className="object-contain p-3 transition-transform duration-300 group-hover:scale-105"
-                    />
-                  </div>
-                  <p className="mt-3 text-center text-sm font-semibold leading-snug text-[#172455] transition-colors group-hover:text-[#FF5548] sm:text-[15px]">
-                    Custom {category.name.replace(/^Custom\s+/i, "")}
-                  </p>
-                  {typeof category.productCount === "number" ? (
-                    <p className="mt-1 text-center text-xs text-gray-400">
-                      {category.productCount} products
-                    </p>
-                  ) : null}
-                </Link>
+                    title={`Custom ${category.name.replace(/^Custom\s+/i, "")}`}
+                    imageUrl={category.imageUrl}
+                    imageAlt={category.name}
+                    subtitle={
+                      typeof category.productCount === "number"
+                        ? `${category.productCount} products`
+                        : null
+                    }
+                  />
                 );
               })}
             </div>

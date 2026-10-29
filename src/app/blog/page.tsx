@@ -67,10 +67,10 @@ export default async function BlogPage({
                 return (
                   <article
                     key={post.id}
-                    className="card-hover-effect flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white"
+                    className="group flex h-full flex-col overflow-hidden rounded-2xl border border-[#E8EAEF] bg-white"
                   >
                     {image ? (
-                      <div className="relative aspect-[16/9] w-full bg-[#F6F8FA]">
+                      <div className="relative aspect-[4/3] w-full bg-[#F5F3EF]">
                         <Image
                           src={image}
                           alt={
@@ -79,13 +79,13 @@ export default async function BlogPage({
                             post.title
                           }
                           fill
-                          className="object-cover"
+                          className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           unoptimized
                         />
                       </div>
                     ) : null}
-                    <div className="flex flex-1 flex-col p-6">
+                    <div className="flex flex-1 flex-col p-5 sm:p-6">
                       <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
                         <span className="flex items-center gap-1">
                           <Calendar className="h-3.5 w-3.5" />

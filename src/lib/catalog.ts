@@ -392,6 +392,24 @@ export async function getFeaturedProducts(limit = 6): Promise<ProductItem[]> {
   return getAllProducts({ limit });
 }
 
+export async function getProductsByIds(ids: string[]): Promise<ProductItem[]> {
+  const unique = [...new Set(ids.filter(Boolean))];
+  if (unique.length === 0) return [];
+
+  return unstable_cache(
+    async () => {
+      const products = await prisma.product.findMany({
+        where: { id: { in: unique }, isPublished: true },
+        include: productInclude,
+      });
+      const byId = new Map(products.map((p) => [p.id, toProductItem(p)]));
+      return unique.map((id) => byId.get(id)).filter(Boolean) as ProductItem[];
+    },
+    [`products-by-ids-${unique.join(",")}`],
+    { revalidate: CATALOG_REVALIDATE, tags: [CACHE_TAGS.products] }
+  )();
+}
+
 export const getProductBySlug = cache(async (slug: string): Promise<ProductItem | null> => {
   return unstable_cache(
     async () => {

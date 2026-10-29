@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { CategoryProductCard } from "@/components/categories/CategoryProductCard";
+import { CATALOG_TILE } from "@/components/ui/CatalogTile";
 import ProductHero from "@/components/products/ProductHero";
 import { ProductFaq } from "@/components/products/ProductFaq";
 import { RichText } from "@/components/ui/RichText";
@@ -340,7 +341,7 @@ export default function ProductDetailPage({
                 {cms.relevantProductsDescription}
               </p>
             ) : null}
-            <div className="mt-8 grid grid-cols-2 gap-5 sm:gap-6 lg:grid-cols-4">
+            <div className={`mt-8 ${CATALOG_TILE.grid}`}>
               {related.slice(0, 4).map((item) => (
                 <CategoryProductCard key={item.id} product={item} />
               ))}
@@ -375,11 +376,11 @@ export default function ProductDetailPage({
                 return (
                   <article
                     key={blog.id}
-                    className="group flex flex-col overflow-hidden rounded-[14px] border border-[#E8EAEF] bg-white shadow-sm transition-all duration-300 hover:border-[#FF5548]/40 hover:shadow-md"
+                    className="group flex h-full flex-col overflow-hidden rounded-2xl border border-[#E8EAEF] bg-white"
                   >
                     <Link
                       href={`/blog/${blog.slug}`}
-                      className="relative aspect-[16/10] w-full overflow-hidden bg-[#F6F8FA]"
+                      className="relative aspect-[4/3] w-full overflow-hidden bg-[#F5F3EF]"
                     >
                       <SafeImage
                         src={img}

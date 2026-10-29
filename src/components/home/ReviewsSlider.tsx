@@ -4,33 +4,8 @@ import React, { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Quote, Star } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { cn } from "@/lib/utils";
-
-const REVIEWS = [
-  {
-    name: "Sarah Mitchell",
-    role: "Founder, Glow Botanics",
-    quote:
-      "Our soap boxes looked premium and arrived on time. The team helped refine our dieline and the print quality exceeded expectations.",
-  },
-  {
-    name: "James Carter",
-    role: "Ops Lead, Northline Goods",
-    quote:
-      "Reliable mailers, clear communication, and free shipping made scaling our e-commerce packaging painless. We’ll reorder every quarter.",
-  },
-  {
-    name: "Aisha Rahman",
-    role: "Brand Manager, Candle & Co.",
-    quote:
-      "Rigid boxes with soft-touch finish elevated our unboxing. Design support was fast and the MOQ worked perfectly for a growing brand.",
-  },
-  {
-    name: "Daniel Ortiz",
-    role: "Owner, FreshBite Bakery",
-    quote:
-      "Custom bakery boxes held up in transit and looked sharp on the shelf. Pricing was competitive and turnaround stayed on schedule.",
-  },
-] as const;
+import { HOME_PAGE_DEFAULTS, type HomePageData } from "@/lib/home-page-schema";
+import type { PublicCustomerReview } from "@/lib/customer-reviews";
 
 function initials(name: string) {
   return name
@@ -59,17 +34,27 @@ function usePerPage() {
   return perPage;
 }
 
-export function ReviewsSlider() {
+export function ReviewsSlider({
+  reviewsEyebrow = HOME_PAGE_DEFAULTS.reviewsEyebrow,
+  reviewsHeading = HOME_PAGE_DEFAULTS.reviewsHeading,
+  reviewsSubtext = HOME_PAGE_DEFAULTS.reviewsSubtext,
+  reviews = [],
+}: Partial<
+  Pick<HomePageData, "reviewsEyebrow" | "reviewsHeading" | "reviewsSubtext">
+> & { reviews?: PublicCustomerReview[] } = {}) {
+  const list = (reviews || []).filter((r) => r.quote?.trim() && r.name?.trim());
   const perPage = usePerPage();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
 
-  const maxIndex = Math.max(0, REVIEWS.length - perPage);
-  const canSlide = REVIEWS.length > perPage;
+  const maxIndex = Math.max(0, list.length - perPage);
+  const canSlide = list.length > perPage;
 
   useEffect(() => {
-    setCurrentIndex((curr) => Math.min(curr, Math.max(0, REVIEWS.length - perPage)));
-  }, [perPage]);
+    setCurrentIndex((curr) => Math.min(curr, Math.max(0, list.length - perPage)));
+  }, [perPage, list.length]);
+
+  if (list.length === 0) return null;
 
   const goPrev = () => {
     setCurrentIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
@@ -97,24 +82,28 @@ export function ReviewsSlider() {
     setTouchStart(null);
   };
 
-  const trackWidth = REVIEWS.length > perPage ? `${(REVIEWS.length / perPage) * 100}%` : "100%";
-  const itemWidth = REVIEWS.length > perPage ? `${100 / REVIEWS.length}%` : `${100 / perPage}%`;
-  const transform = canSlide ? `translateX(-${(currentIndex * 100) / REVIEWS.length}%)` : "none";
+  const trackWidth = list.length > perPage ? `${(list.length / perPage) * 100}%` : "100%";
+  const itemWidth = list.length > perPage ? `${100 / list.length}%` : `${100 / perPage}%`;
+  const transform = canSlide ? `translateX(-${(currentIndex * 100) / list.length}%)` : "none";
 
   return (
     <section className="border-y border-[#D5E8DC] bg-[#F3FAF6] py-14 sm:py-16 lg:py-20">
       <Container>
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#21AAA5]">
-              Trusted by Growing Brands
-            </p>
+            {reviewsEyebrow ? (
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#21AAA5]">
+                {reviewsEyebrow}
+              </p>
+            ) : null}
             <h2 className="mt-2 font-heading text-2xl font-extrabold tracking-tight text-[#172455] sm:text-3xl">
-              What Our Customers Say
+              {reviewsHeading || "What Our Customers Say"}
             </h2>
-            <p className="mt-2 text-[14px] leading-relaxed text-[#5B667A] sm:text-[15px]">
-              Real feedback from brands that ship with Packaging Hype.
-            </p>
+            {reviewsSubtext ? (
+              <p className="mt-2 text-[14px] leading-relaxed text-[#5B667A] sm:text-[15px]">
+                {reviewsSubtext}
+              </p>
+            ) : null}
           </div>
 
           {canSlide ? (
@@ -152,16 +141,16 @@ export function ReviewsSlider() {
                 transform,
               }}
             >
-              {REVIEWS.map((review) => (
+              {list.map((review, reviewIndex) => (
                 <div
-                  key={review.name}
+                  key={review.id || `${review.name}-${reviewIndex}`}
                   className="shrink-0 px-2 sm:px-2.5"
                   style={{ width: itemWidth }}
                 >
                   <article className="flex h-full min-h-[280px] flex-col rounded-[14px] border border-[#DCEFE4] bg-white p-5 shadow-[0_10px_28px_-18px_rgba(23,36,85,0.28)] sm:min-h-[300px] sm:p-6">
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-0.5 text-[#FF5548]">
-                        {Array.from({ length: 5 }).map((_, i) => (
+                        {Array.from({ length: review.rating || 5 }).map((_, i) => (
                           <Star
                             key={i}
                             className="h-3.5 w-3.5 fill-current"

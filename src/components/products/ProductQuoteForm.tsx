@@ -2,7 +2,14 @@
 
 import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AlertCircle, ChevronDown, Loader2 } from "lucide-react";
+import { AlertCircle, Calendar, ChevronDown, Loader2 } from "lucide-react";
+import { openDatePicker } from "@/lib/utils";
+import {
+  validateContactName,
+  validateDimension,
+  validateEmail,
+  validatePhone,
+} from "@/lib/quote-form-validation";
 
 const fieldClass =
   "h-11 w-full rounded-[6px] border border-[#E6E8EC] bg-white px-3.5 text-[13.5px] text-[#172455] outline-none placeholder:text-[#9AA3AF] focus:border-[#FF5548]";
@@ -50,11 +57,18 @@ export default function ProductQuoteForm({ productName }: { productName: string 
 
   const validate = () => {
     const next: Record<string, string> = {};
-    if (!form.contactName.trim()) next.contactName = "Required";
-    if (!form.phone.trim()) next.phone = "Required";
-    if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-      next.email = "Valid email required";
-    }
+    const nameError = validateContactName(form.contactName);
+    const phoneError = validatePhone(form.phone);
+    const emailError = validateEmail(form.email);
+    const lengthError = validateDimension("Length", form.length);
+    const widthError = validateDimension("Width", form.width);
+    const depthError = validateDimension("Depth", form.depth);
+    if (nameError) next.contactName = nameError;
+    if (phoneError) next.phone = phoneError;
+    if (emailError) next.email = emailError;
+    if (lengthError) next.length = lengthError;
+    if (widthError) next.width = widthError;
+    if (depthError) next.depth = depthError;
     const qty = Number(form.quantity);
     if (!qty || qty < 100) next.quantity = "Min 100";
     if (Number(form.captcha) !== captchaA + captchaB) {
@@ -215,14 +229,18 @@ export default function ProductQuoteForm({ productName }: { productName: string 
           </select>
           <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9AA3AF]" />
         </div>
-        <input
-          name="date"
-          type="date"
-          value={form.date}
-          onChange={onChange}
-          className={fieldClass}
-          aria-label="Date"
-        />
+        <div className="relative">
+          <input
+            name="date"
+            type="date"
+            value={form.date}
+            onChange={onChange}
+            onClick={openDatePicker}
+            className={`${fieldClass} date-input-clickable pr-9`}
+            aria-label="Date"
+          />
+          <Calendar className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9AA3AF]" />
+        </div>
         <div>
           <input
             name="contactName"

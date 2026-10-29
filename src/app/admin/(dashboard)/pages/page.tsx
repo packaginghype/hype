@@ -1,14 +1,27 @@
 import Link from "next/link";
-import { Home, FileText } from "lucide-react";
+import {
+  Home,
+  FileText,
+  Building2,
+  Phone,
+  Shield,
+  Truck,
+  ScrollText,
+  RotateCcw,
+  MessageSquareQuote,
+} from "lucide-react";
+import { STATIC_PAGES } from "@/lib/static-pages";
 
-const PAGES = [
-  {
-    href: "/admin/pages/home",
-    icon: Home,
-    title: "Home Page",
-    description: "Edit hero, about, reliable packaging, FAQ, inquiry form and SEO for the home page.",
-  },
-];
+const ICONS = {
+  home: Home,
+  "about-us": Building2,
+  "contact-us": Phone,
+  "privacy-policy": Shield,
+  "shipping-delivery-policy": Truck,
+  "terms-and-conditions": ScrollText,
+  "refund-return-policy": RotateCcw,
+  quote: MessageSquareQuote,
+} as const;
 
 export default function AdminPagesPage() {
   return (
@@ -24,17 +37,17 @@ export default function AdminPagesPage() {
           Page Management
         </h1>
         <p className="mt-1 text-sm text-[#6B7280]">
-          Select a page to edit its content and settings.
+          Edit static pages. Public URLs match the previous WordPress site.
         </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {PAGES.map((page) => {
-          const Icon = page.icon;
+        {STATIC_PAGES.map((page) => {
+          const Icon = ICONS[page.key as keyof typeof ICONS] || FileText;
           return (
             <Link
-              key={page.href}
-              href={page.href}
+              key={page.key}
+              href={`/admin/pages/${page.key}`}
               className="group flex items-start gap-4 rounded-[12px] border border-[#E5E7EB] bg-white p-5 transition-all hover:border-[#172455] hover:shadow-md"
             >
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] bg-[#EEF2FF] text-[#172455] transition-colors group-hover:bg-[#172455] group-hover:text-white">
@@ -42,7 +55,12 @@ export default function AdminPagesPage() {
               </div>
               <div className="min-w-0">
                 <p className="font-bold text-[#172455]">{page.title}</p>
-                <p className="mt-1 text-xs leading-snug text-[#6B7280]">{page.description}</p>
+                <p className="mt-0.5 font-mono text-[11px] text-[#21AAA5]">
+                  {page.path}
+                </p>
+                <p className="mt-1 text-xs leading-snug text-[#6B7280]">
+                  {page.description}
+                </p>
               </div>
             </Link>
           );

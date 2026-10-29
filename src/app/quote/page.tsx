@@ -8,12 +8,22 @@ import {
   Clock,
   Palette,
 } from "lucide-react";
+import { getStaticPageData } from "@/lib/get-static-page";
+import { getStaticPageDef } from "@/lib/static-pages";
 
-export const metadata: Metadata = {
-  title: "Request a Custom Packaging Quote | Packaging Hype",
-  description:
-    "Get instant wholesale manufacturing pricing on custom printed boxes, mailers, and folding cartons. Free 3D digital proofs, fast 8-10 days turnaround, and free USA delivery.",
-};
+export const revalidate = 120;
+
+const KEY = "quote";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const data = await getStaticPageData(KEY);
+  const def = getStaticPageDef(KEY);
+  return {
+    title: data?.seoTitle || def?.defaults.seoTitle || "Request a Quote",
+    description: data?.seoDescription || def?.defaults.seoDescription || undefined,
+    keywords: data?.seoKeywords || undefined,
+  };
+}
 
 const VALUE_PROPS = [
   {
@@ -49,6 +59,8 @@ export default async function QuotePage({
   searchParams: Promise<{ product?: string }>;
 }) {
   const { product } = await searchParams;
+  const cms = await getStaticPageData(KEY);
+  const def = getStaticPageDef(KEY);
 
   return (
     <div className="min-h-screen bg-[#F6F8FA] pb-20 pt-8 sm:pb-24 sm:pt-10">
@@ -58,13 +70,13 @@ export default async function QuotePage({
         {/* Hero Header */}
         <div className="mx-auto mt-6 max-w-3xl text-center">
           <h1 className="mt-3.5 font-heading text-3xl font-extrabold tracking-tight text-[#172455] sm:text-4xl lg:text-[2.65rem] lg:leading-[1.18]">
-            Get a Free Custom Packaging Quote
+            {cms?.heading || def?.defaults.heading || "Get a Free Custom Packaging Quote"}
           </h1>
 
           <p className="mt-3.5 text-sm leading-relaxed text-[#4B5563] sm:text-base">
-            Specify your box dimensions, preferred stock, and quantity below. Our packaging
-            specialists will deliver a formal wholesale quote and complimentary 3D digital proof
-            within 24 hours.
+            {cms?.intro ||
+              def?.defaults.intro ||
+              "Specify your box dimensions, preferred stock, and quantity below."}
           </p>
         </div>
 
