@@ -29,14 +29,14 @@ function resolveDatabaseUrl(raw: string | undefined): string | undefined {
       url.searchParams.set("pgbouncer", "true");
     }
 
-    // One connection per serverless isolate; small pool locally
-    url.searchParams.set("connection_limit", isProd ? "1" : "3");
+    // One connection per serverless isolate; adequate pool locally
+    url.searchParams.set("connection_limit", isProd ? "1" : "10");
 
     if (!url.searchParams.has("pool_timeout")) {
-      url.searchParams.set("pool_timeout", "20");
+      url.searchParams.set("pool_timeout", "60");
     }
     if (!url.searchParams.has("connect_timeout")) {
-      url.searchParams.set("connect_timeout", "30");
+      url.searchParams.set("connect_timeout", "60");
     }
 
     return url.toString();

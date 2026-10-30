@@ -25,10 +25,10 @@ type NavLink = { name: string; slug: string };
 type DropdownKey = "categories" | "industries" | "materials" | null;
 
 const QUICK_SEARCHES = [
-  { label: "Kraft Boxes", href: "/products?q=kraft" },
-  { label: "Mailer Boxes", href: "/products?q=mailer" },
-  { label: "Rigid Boxes", href: "/products?q=rigid" },
-  { label: "Cosmetic Boxes", href: "/products?q=cosmetic" },
+  { label: "Kraft Boxes", href: "/product?q=kraft" },
+  { label: "Mailer Boxes", href: "/product?q=mailer" },
+  { label: "Rigid Boxes", href: "/product?q=rigid" },
+  { label: "Cosmetic Boxes", href: "/product?q=cosmetic" },
 ] as const;
 
 export function Header({
@@ -89,7 +89,7 @@ export function Header({
     const q = searchQuery.trim();
     if (!q) return;
     closeSearch();
-    router.push(`/products?q=${encodeURIComponent(q)}`);
+    router.push(`/product?q=${encodeURIComponent(q)}`);
   }
 
   const navLinkClass =
@@ -165,7 +165,7 @@ export function Header({
                   {categories.map((item) => (
                     <Link
                       key={item.slug}
-                      href={`/category/${item.slug}`}
+                      href={`/${item.slug}`}
                       className="rounded px-3 py-2 text-sm font-semibold text-[#172455] transition-colors hover:bg-[#F6F8FA] hover:text-[#FF5548]"
                     >
                       {item.name}
@@ -215,7 +215,7 @@ export function Header({
                   {industries.map((item) => (
                     <Link
                       key={item.slug}
-                      href={`/industry/${item.slug}`}
+                      href={`/${item.slug}`}
                       className="rounded px-3 py-2 text-sm font-semibold text-[#172455] transition-colors hover:bg-[#F6F8FA] hover:text-[#FF5548]"
                     >
                       {item.name}

@@ -1,3 +1,11 @@
+function cleanHeadingHtml(raw: string): string {
+  if (!raw) return "";
+  let s = raw.trim();
+  s = s.replace(/^<(?:h[1-6]|p)[^>]*>/i, "").replace(/<\/(?:h[1-6]|p)>$/i, "").trim();
+  s = s.replace(/<\/(?:h[1-6]|p)>\s*<(?:h[1-6]|p)[^>]*>/gi, "<br />");
+  return s;
+}
+
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -5,8 +13,10 @@ import { ArrowRight, Package } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { CategoryQuoteForm } from "@/components/categories/CategoryQuoteForm";
-import { CategoryProductCard } from "@/components/categories/CategoryProductCard";
+import { CategoryProductGrid } from "@/components/categories/CategoryProductGrid";
 import { CATALOG_TILE } from "@/components/ui/CatalogTile";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { CATEGORY_GROUP_META, type CategoryGroupKey } from "@/lib/category-groups";
 import { FAQAccordion } from "@/components/ui/FAQAccordion";
 import { RichText } from "@/components/ui/RichText";
 import {
@@ -52,6 +62,18 @@ export function CategoryDetailPage({
   const heroImageAlt =
     cms?.bannerImageAlt || cms?.imageAlt || heroTitle;
 
+  const groupKey = (category.group || "categories") as CategoryGroupKey;
+  const groupMeta = CATEGORY_GROUP_META[groupKey] || CATEGORY_GROUP_META.categories;
+  const breadcrumbItems = [
+    {
+      label: groupMeta.singularLabel,
+      href: groupMeta.publicHref,
+    },
+    {
+      label: category.name,
+    },
+  ];
+
   const contentWidth = "max-w-[900px]";
 
   return (
@@ -67,35 +89,42 @@ export function CategoryDetailPage({
             className="pointer-events-none absolute inset-x-0 bottom-0 h-[10.5rem] bg-white sm:h-[11.5rem] lg:h-[12rem]"
           />
 
-          <Container className={`relative z-10 ${contentWidth} pt-8 sm:pt-10 lg:pt-12`}>
-            <div className="grid grid-cols-1 items-center gap-5 lg:grid-cols-2 lg:gap-8">
-              <div className="min-w-0">
-                {!isEmptyHtml(cms?.bannerHeading || "") ? (
-                  <RichText
-                    html={cms!.bannerHeading!}
-                    className="font-heading text-[1.75rem] font-extrabold tracking-tight text-[#111111] sm:text-[2.1rem] lg:text-[2.35rem] [&_h1]:text-inherit [&_h2]:text-inherit [&_p]:m-0"
-                  />
-                ) : (
-                  <h1 className="font-heading text-[1.75rem] font-extrabold tracking-tight text-[#111111] sm:text-[2.1rem] lg:text-[2.35rem] lg:leading-[1.15]">
-                    {heroTitle}
-                  </h1>
-                )}
+          <Container className={`relative z-10 ${contentWidth} pt-3 sm:pt-4 lg:pt-5`}>
+            <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2 lg:gap-8 lg:min-h-[340px] xl:min-h-[360px]">
+              <div className="flex flex-col justify-start text-left min-w-0 lg:min-h-[340px] xl:min-h-[360px]">
+                <Breadcrumbs
+                  variant="slash"
+                  items={breadcrumbItems}
+                  className="mb-2 sm:mb-2.5"
+                />
+                <h1
+                  style={{ lineHeight: 1.08 }}
+                  className="banner-heading m-0 font-heading text-[1.75rem] font-extrabold tracking-tight text-[#111111] leading-[1.08] sm:text-[2.1rem] sm:leading-[1.08] lg:text-[2.35rem] lg:leading-[1.08]"
+                >
+                  {!isEmptyHtml(cms?.bannerHeading || "") ? (
+                    <span
+                      dangerouslySetInnerHTML={{
+                        __html: cleanHeadingHtml(cms!.bannerHeading!),
+                      }}
+                    />
+                  ) : (
+                    heroTitle
+                  )}
+                </h1>
 
-                <div className="mt-3.5 space-y-3 text-[13.5px] leading-[1.7] text-[#2a2a2a] sm:text-[14.5px]">
+                <div className="mt-3 text-left space-y-2.5 text-[13.5px] leading-[1.65] text-[#2a2a2a] sm:text-[14px] max-h-[175px] sm:max-h-[190px] lg:max-h-[200px] xl:max-h-[220px] overflow-y-auto pr-1.5 [scrollbar-width:thin] [scrollbar-color:#cbd5e1_transparent]">
                   {!isEmptyHtml(cms?.bannerDescription || "") ? (
-                    <RichText html={cms!.bannerDescription!} />
+                    <RichText html={cms!.bannerDescription!} className="text-left" />
                   ) : !isEmptyHtml(category.description) &&
                     category.description.includes("<") ? (
-                    <RichText html={category.description} />
+                    <RichText html={category.description} className="text-left" />
                   ) : (
-                    hero.paragraphs.map((p, i) => <p key={i}>{p}</p>)
+                    hero.paragraphs.map((p, i) => <p key={i} className="text-left">{p}</p>)
                   )}
                 </div>
-
-
               </div>
 
-              <div className="relative mx-auto h-[280px] w-full max-w-[400px] sm:h-[350px] sm:max-w-[460px] lg:mx-0 lg:h-[420px] lg:max-w-none">
+              <div className="relative mx-auto flex h-[240px] w-full max-w-[380px] items-center justify-center sm:h-[300px] sm:max-w-[420px] lg:mx-0 lg:h-[340px] xl:h-[360px] lg:max-w-none">
                 {heroImage ? (
                   <SafeImage
                     src={heroImage}
@@ -117,11 +146,15 @@ export function CategoryDetailPage({
               <div id="category-quote" className="relative z-10 mx-auto mt-7 w-full max-w-[900px] scroll-mt-28 sm:mt-8 lg:mt-9">
                 <CategoryQuoteForm
                   productName={heroTitle}
+                  originalPrice={cms?.originalPrice}
+                  discountedPrice={cms?.discountedPrice}
+                  inStock={cms?.inStock}
+                  priceUnit="per box"
                   startingFrom={
                     cms?.discountedPrice != null
-                      ? `$${Number(cms.discountedPrice).toFixed(2)}`
+                      ? "$" + Number(cms.discountedPrice).toFixed(2)
                       : cms?.originalPrice != null
-                        ? `$${Number(cms.originalPrice).toFixed(2)}`
+                        ? "$" + Number(cms.originalPrice).toFixed(2)
                         : "$0.85"
                   }
                   cartItem={{
@@ -132,8 +165,8 @@ export function CategoryDetailPage({
                     unitPrice: cms?.discountedPrice ?? cms?.originalPrice ?? null,
                     href:
                       category.group === "industries"
-                        ? `/industry/${category.slug}`
-                        : `/category/${category.slug}`,
+                        ? `/${category.slug}`
+                        : `/${category.slug}`,
                   }}
                 />
               </div>
@@ -143,24 +176,22 @@ export function CategoryDetailPage({
       ) : null}
 
       {listingOn ? (
-        <section className="bg-white pt-12 pb-14 sm:pt-14 sm:pb-16 lg:pt-16 lg:pb-20">
+        <section className="bg-white pt-10 pb-4 sm:pt-12 sm:pb-6 lg:pt-14 lg:pb-6">
           <Container className={contentWidth}>
-            <h2 className="text-center font-heading text-2xl font-extrabold tracking-tight text-[#0B1220] sm:text-3xl">
-              {cms?.listingHeading || "Explore Packaging Solutions"}
-            </h2>
-            {!isEmptyHtml(cms?.listingText || "") ? (
-              <div className="mx-auto mt-4 max-w-3xl text-center text-[14px] text-[#555]">
-                <RichText html={cms!.listingText!} />
-              </div>
-            ) : null}
+            <div className="text-left">
+              <h2 className="font-heading text-2xl font-extrabold tracking-tight text-[#0B1220] sm:text-3xl text-left">
+                {cms?.listingHeading || "Explore Packaging Solutions"}
+              </h2>
+              {!isEmptyHtml(cms?.listingText || "") ? (
+                <div className="mt-3.5 max-w-3xl text-left text-[14px] leading-relaxed text-[#555] [&_p]:text-left">
+                  <RichText html={cms!.listingText!} className="text-left" />
+                </div>
+              ) : null}
+            </div>
 
             <div className="mt-10">
               {products.length > 0 ? (
-                <div className={CATALOG_TILE.grid}>
-                  {products.map((product) => (
-                    <CategoryProductCard key={product.id} product={product} />
-                  ))}
-                </div>
+                <CategoryProductGrid products={products} />
               ) : (
                 <div className="mx-auto max-w-lg rounded-xl border border-gray-200 bg-[#F6F8FA] p-8 text-center">
                   <p className="text-sm text-gray-600">
@@ -183,7 +214,7 @@ export function CategoryDetailPage({
       ) : null}
 
       {scrollOn ? (
-        <section className="bg-white py-6 sm:py-10 lg:py-12">
+        <section className="bg-white pt-4 pb-10 sm:pt-6 sm:pb-12 lg:pt-6 lg:pb-14">
           <Container className={contentWidth}>
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8 lg:h-[500px] xl:h-[540px]">
               <div className="relative aspect-[4/3] min-h-0 overflow-hidden rounded-[16px] bg-[#F3F1EE] lg:aspect-auto lg:h-full">
@@ -236,7 +267,7 @@ export function CategoryDetailPage({
       {cms?.featureEnabled !== false ? (
         <section className="bg-white py-14 sm:py-16 lg:py-20">
           <Container className={contentWidth}>
-            <div className="mx-auto max-w-3xl text-center">
+            <div className="text-left">
               <h2 className="font-heading text-2xl font-extrabold tracking-tight text-[#0B1220] sm:text-3xl lg:text-[2rem]">
                 {materialSection.heading}
               </h2>
@@ -310,20 +341,8 @@ export function CategoryDetailPage({
                   />
                   <div
                     aria-hidden
-                    className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0F1839]/45 via-transparent to-transparent"
+                    className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0F1839]/20 via-transparent to-transparent"
                   />
-                  <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
-                    <p className="max-w-xs text-[13px] font-semibold leading-snug text-white sm:text-sm">
-                      Custom sizes, materials, and finishes — built for your brand.
-                    </p>
-                    <Link
-                      href="/quote"
-                      className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-bold text-white transition-colors hover:text-[#FF5548]"
-                    >
-                      Get a free quote
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </Link>
-                  </div>
                 </div>
 
                 <div className="flex min-h-0 flex-col overflow-hidden rounded-[16px] border border-[#E5E9F0] bg-white lg:h-full">

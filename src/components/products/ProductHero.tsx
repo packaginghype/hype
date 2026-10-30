@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Package } from "lucide-react";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { CategoryQuoteForm } from "@/components/categories/CategoryQuoteForm";
+import { RichText } from "@/components/ui/RichText";
 import { cn } from "@/lib/utils";
 import type { ProductItem } from "@/types";
 
@@ -30,45 +31,17 @@ export default function ProductHero({
   const [active, setActive] = useState(0);
   const [page, setPage] = useState(0);
   const leftRef = useRef<HTMLDivElement>(null);
-  const [imageHeight, setImageHeight] = useState<number | null>(null);
 
   const current = images[active] || images[0];
   const maxPage = Math.max(0, Math.ceil(images.length / VISIBLE) - 1);
   const start = page * VISIBLE;
   const showArrows = images.length > VISIBLE;
-  const visibleCount = Math.min(VISIBLE, Math.max(images.length, 1));
 
   useEffect(() => {
     if (images.length === 0) return;
     const nextPage = Math.floor(active / VISIBLE);
     setPage((prev) => (prev === nextPage ? prev : nextPage));
   }, [active, images.length]);
-
-  // Gallery top = breadcrumb top; gallery image bottom = Get A Quote bottom
-  useLayoutEffect(() => {
-    const left = leftRef.current;
-    if (!left) return;
-
-    const sync = () => {
-      if (window.matchMedia("(min-width: 1024px)").matches === false) {
-        setImageHeight(null);
-        return;
-      }
-      const btn = left.querySelector<HTMLElement>("[data-quote-submit]");
-      const top = left.getBoundingClientRect().top;
-      const bottom = (btn ?? left).getBoundingClientRect().bottom;
-      setImageHeight(Math.max(280, Math.round(bottom - top)));
-    };
-
-    sync();
-    const ro = new ResizeObserver(sync);
-    ro.observe(left);
-    window.addEventListener("resize", sync);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", sync);
-    };
-  }, []);
 
   const prevImage = () => {
     setActive((curr) => (curr - 1 + images.length) % images.length);
@@ -87,40 +60,41 @@ export default function ProductHero({
           {product.name}
         </h1>
         {product.description ? (
-          <p className="mt-3 w-full text-[14px] leading-[1.65] text-[#333] sm:text-[14.5px]">
-            {product.description}
-          </p>
+          <div className="mt-3 w-full text-[14px] leading-[1.65] text-[#333] sm:text-[14.5px] [&>p]:mb-2 [&>p:last-child]:mb-0">
+            <RichText html={product.description} />
+          </div>
         ) : null}
 
         <div id="product-quote" className="mt-5 scroll-mt-28 sm:mt-6">
           <CategoryQuoteForm
             productName={product.name}
             startingFrom={startingFrom}
+            originalPrice={product.originalPrice ?? product.startingPrice}
+            discountedPrice={product.discountedPrice}
+            priceUnit={product.priceUnit || "per box"}
+            inStock={product.inStock}
             fullWidthSubmit
             cartItem={{
               id: `product:${product.id}`,
               slug: product.slug,
               name: product.name,
               imageUrl: product.imageUrl,
-              unitPrice: product.startingPrice ?? null,
+              unitPrice: product.discountedPrice ?? product.startingPrice ?? null,
               href: `/product/${product.slug}`,
             }}
           />
         </div>
       </div>
 
-      {/* Right — gallery starts with breadcrumb; no image padding; flush thumbs */}
+      {/* Right — gallery: 1:1 square frame adhering to 900x900 admin specs */}
       <div className="min-w-0">
-        <div
-          className="group relative min-h-[280px] overflow-hidden bg-[#F3F3F3] lg:min-h-[500px]"
-          style={imageHeight ? { height: imageHeight } : undefined}
-        >
+        <div className="group relative aspect-square w-full overflow-hidden rounded-[8px] sm:rounded-[10px] bg-[#F3F3F3]">
           <SafeImage
             src={current || ""}
             alt={product.name}
             fill
             sizes="(max-width: 1024px) 100vw, 48vw"
-            className="object-contain p-4 sm:p-6 transition-opacity duration-300"
+            className="object-contain p-2 sm:p-4 transition-opacity duration-300"
             priority
           />
 
@@ -146,8 +120,8 @@ export default function ProductHero({
           ) : null}
         </div>
 
-        {images.length > 0 ? (
-          <div className="relative">
+        {images.length > 1 ? (
+          <div className="relative mt-3 sm:mt-3.5">
             {showArrows ? (
               <>
                 <button
@@ -155,7 +129,7 @@ export default function ProductHero({
                   aria-label="Previous images"
                   disabled={page <= 0}
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
-                  className="absolute left-1 top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 cursor-pointer items-center justify-center bg-white/90 text-[#172455] shadow enabled:hover:text-[#FF5548] disabled:cursor-not-allowed disabled:opacity-30"
+                  className="absolute -left-2 top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white text-[#172455] shadow-md transition-all hover:text-[#FF5548] disabled:cursor-not-allowed disabled:opacity-30"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
@@ -164,26 +138,16 @@ export default function ProductHero({
                   aria-label="Next images"
                   disabled={page >= maxPage}
                   onClick={() => setPage((p) => Math.min(maxPage, p + 1))}
-                  className="absolute right-1 top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 cursor-pointer items-center justify-center bg-white/90 text-[#172455] shadow enabled:hover:text-[#FF5548] disabled:cursor-not-allowed disabled:opacity-30"
+                  className="absolute -right-2 top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white text-[#172455] shadow-md transition-all hover:text-[#FF5548] disabled:cursor-not-allowed disabled:opacity-30"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>
               </>
             ) : null}
 
-            <div className="grid grid-cols-4 gap-0">
-              {Array.from({ length: visibleCount }).map((_, slot) => {
-                const index = start + slot;
-                const src = images[index];
-                if (!src) {
-                  return (
-                    <div
-                      key={`empty-${slot}`}
-                      className="aspect-square bg-[#F3F3F3]"
-                      aria-hidden
-                    />
-                  );
-                }
+            <div className="grid grid-cols-4 gap-2 sm:gap-2.5">
+              {images.slice(start, start + VISIBLE).map((src, i) => {
+                const index = start + i;
                 return (
                   <button
                     key={`${src}-${index}`}
@@ -191,15 +155,17 @@ export default function ProductHero({
                     onClick={() => setActive(index)}
                     aria-label={`View image ${index + 1}`}
                     className={cn(
-                      "relative aspect-square overflow-hidden bg-[#F3F3F3]",
-                      active === index ? "ring-2 ring-inset ring-[#FF5548]" : ""
+                      "relative aspect-square overflow-hidden rounded-[6px] sm:rounded-[8px] bg-[#F3F3F3] transition-all",
+                      active === index
+                        ? "border-2 border-[#FF5548] shadow-sm"
+                        : "border border-[#E5E7EB] hover:border-[#cbd5e1]"
                     )}
                   >
                     <SafeImage
                       src={src}
                       alt=""
                       fill
-                      sizes="160px"
+                      sizes="140px"
                       className="object-contain p-1"
                     />
                   </button>

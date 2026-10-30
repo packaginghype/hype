@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getAdminSession } from "@/lib/admin-auth";
 import {
@@ -65,6 +66,7 @@ export async function PUT(request: Request, { params }: Params) {
   const existing = await prisma.product.findUnique({
     where: { id },
     select: {
+      slug: true,
       thumbnailUrl: true,
       videoThumbnailUrl: true,
       pageScrollImageUrl: true,
@@ -158,6 +160,10 @@ export async function PUT(request: Request, { params }: Params) {
   });
 
   revalidateCatalog();
+  revalidatePath(`/product/${product.slug}`);
+  if (existing?.slug && existing.slug !== product.slug) {
+    revalidatePath(`/product/${existing.slug}`);
+  }
   return NextResponse.json({ product });
 }
 

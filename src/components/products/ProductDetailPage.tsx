@@ -10,14 +10,14 @@ import {
   Truck,
 } from "lucide-react";
 import { Container } from "@/components/ui/Container";
-import { CategoryProductCard } from "@/components/categories/CategoryProductCard";
-import { CATALOG_TILE } from "@/components/ui/CatalogTile";
+import { RelatedProductsCarousel } from "@/components/products/RelatedProductsCarousel";
+import { RelatedBlogsCarousel } from "@/components/products/RelatedBlogsCarousel";
 import ProductHero from "@/components/products/ProductHero";
+import { ProductFloatingVideo } from "@/components/products/ProductFloatingVideo";
 import { ProductFaq } from "@/components/products/ProductFaq";
 import { RichText } from "@/components/ui/RichText";
 import { SafeImage } from "@/components/ui/SafeImage";
 import {
-  getProductAboutContent,
   getProductFaqs,
   PRODUCT_TRUST_BADGES,
 } from "@/data/product-page-content";
@@ -42,17 +42,16 @@ export default function ProductDetailPage({
   related: ProductItem[];
   relatedBlogs?: RelatedBlogItem[];
 }) {
-  const about = getProductAboutContent(product);
   const faqs = getProductFaqs(product);
   const cms = product.cms;
-  const startingFrom = product.startingPrice
-    ? formatMoney(product.startingPrice)
-    : "Contact";
+  const startingFrom = product.discountedPrice != null
+    ? formatMoney(product.discountedPrice)
+    : product.startingPrice
+      ? formatMoney(product.startingPrice)
+      : "Contact";
   const contentWidth = "max-w-[1180px]";
-  const detailHtml =
-    cms?.detailShortDescription || product.fullDescription || "";
   const scrollOn = cms?.pageScrollEnabled !== false;
-  const specs = cms?.specs || [];
+  const scrollImage = cms?.pageScrollImageUrl || product.imageUrl;
 
   return (
     <div className="bg-white">
@@ -71,7 +70,7 @@ export default function ProductDetailPage({
                         .startsWith("custom ")
                         ? product.categoryName
                         : `Custom ${product.categoryName}`,
-                      href: `/category/${product.categorySlug}`,
+                      href: `/${product.categorySlug}`,
                     },
                   ]),
               { label: product.name },
@@ -108,152 +107,55 @@ export default function ProductDetailPage({
         </Container>
       </section>
 
-      <section className="bg-white py-10 sm:py-14">
-        <Container className={contentWidth}>
-          {cms?.detailHeading ? (
-            <h2 className="mb-6 font-heading text-2xl font-extrabold tracking-tight text-[#172455] sm:text-3xl">
-              {cms.detailHeading}
-            </h2>
-          ) : null}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8 lg:h-[480px] xl:h-[520px]">
-            <div className="relative aspect-[4/3] min-h-0 overflow-hidden rounded-[16px] bg-[#F3F1EE] lg:aspect-auto lg:h-full">
-              {product.imageUrl ? (
-                <Image
-                  src={product.imageUrl}
-                  alt={cms?.thumbnailAlt || product.name}
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-contain p-4 sm:p-6"
-                />
-              ) : (
-                <div className="flex h-full items-center justify-center text-slate-300">
-                  <Package className="h-14 w-14" />
-                </div>
-              )}
-            </div>
-
-            <div className="reliable-scroll h-[420px] min-h-0 overflow-y-auto pr-3 sm:h-[460px] lg:h-full">
-              {!isEmptyHtml(detailHtml) ? (
-                <RichText
-                  html={detailHtml}
-                  className="text-[15px] leading-[1.7] text-[#555]"
-                />
-              ) : (
-                <>
-                  <p className="text-[15px] leading-[1.7] text-[#555]">
-                    {about.intro}
-                  </p>
-                  <h2 className="mt-6 text-[1.45rem] font-semibold leading-snug tracking-tight text-[#FF5548] sm:text-[1.7rem]">
-                    {about.heading}
-                  </h2>
-                  <p className="mt-4 text-[15px] leading-[1.7] text-[#555]">
-                    {about.body}
-                  </p>
-                </>
-              )}
-              {!isEmptyHtml(cms?.thumbnailSubDescription || "") ? (
-                <div className="mt-6">
-                  <RichText
-                    html={cms!.thumbnailSubDescription!}
-                    className="text-[15px] leading-[1.7] text-[#555]"
-                  />
-                </div>
-              ) : null}
-            </div>
-          </div>
-        </Container>
-      </section>
-
-      {cms?.videoUrl ? (
-        <section className="bg-[#F6F8FA] py-12 sm:py-16">
-          <Container className={contentWidth}>
-            <div className="grid gap-6 lg:grid-cols-2 lg:items-center">
-              <div className="overflow-hidden rounded-[12px] bg-black">
-                <video
-                  controls
-                  poster={cms.videoThumbnailUrl || undefined}
-                  className="aspect-video w-full"
-                  preload="metadata"
-                >
-                  <source src={cms.videoUrl} type="video/mp4" />
-                </video>
-              </div>
-              {cms.videoDescription ? (
-                <p className="text-[15px] leading-relaxed text-[#555]">
-                  {cms.videoDescription}
-                </p>
-              ) : null}
-            </div>
-          </Container>
-        </section>
+      {cms?.videoUrl || (product as { videoUrl?: string }).videoUrl ? (
+        <ProductFloatingVideo
+          product={product}
+          videoUrl={cms?.videoUrl || (product as { videoUrl?: string }).videoUrl!}
+          posterUrl={
+            cms?.videoThumbnailUrl ||
+            (product as { videoThumbnailUrl?: string }).videoThumbnailUrl ||
+            undefined
+          }
+          description={
+            cms?.videoDescription ||
+            (product as { videoDescription?: string }).videoDescription ||
+            undefined
+          }
+          startingPrice={startingFrom}
+        />
       ) : null}
 
-      {(cms?.specsHeading || specs.length > 0) && (
+      {scrollOn &&
+      (scrollImage || !isEmptyHtml(cms?.pageScrollContent || "")) ? (
         <section className="bg-white py-12 sm:py-16">
           <Container className={contentWidth}>
-            {cms?.specsHeading ? (
-              <h2 className="font-heading text-2xl font-extrabold tracking-tight text-[#172455] sm:text-3xl">
-                {cms.specsHeading}
-              </h2>
-            ) : null}
-            {!isEmptyHtml(cms?.specsDescription || "") ? (
-              <div className="mt-4 max-w-3xl">
-                <RichText
-                  html={cms!.specsDescription!}
-                  className="text-[15px] leading-[1.7] text-[#555]"
-                />
-              </div>
-            ) : null}
-            {cms?.specsTableHeading ? (
-              <h3 className="mt-8 text-lg font-bold text-[#172455]">
-                {cms.specsTableHeading}
-              </h3>
-            ) : null}
-            {specs.length > 0 ? (
-              <div className="mt-4 overflow-hidden rounded-[8px] border border-[#E5E7EB]">
-                <table className="min-w-full text-left text-sm">
-                  <tbody>
-                    {specs.map((row) => (
-                      <tr
-                        key={`${row.heading}-${row.details.slice(0, 12)}`}
-                        className="border-b border-[#E5E7EB] last:border-b-0"
-                      >
-                        <th className="w-[34%] bg-[#F6F8FA] px-4 py-3 font-bold text-[#172455]">
-                          {row.heading}
-                        </th>
-                        <td className="px-4 py-3 text-[#4B5563]">{row.details}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : null}
-          </Container>
-        </section>
-      )}
-
-      {scrollOn &&
-      (cms?.pageScrollImageUrl || !isEmptyHtml(cms?.pageScrollContent || "")) ? (
-        <section className="bg-[#F6F8FA] py-12 sm:py-16">
-          <Container className={contentWidth}>
-            <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
-              {cms?.pageScrollImageUrl ? (
-                <div className="relative aspect-[4/3] overflow-hidden rounded-[12px] bg-white">
+            <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-2 lg:gap-10 lg:h-[480px] xl:h-[520px]">
+              {/* Left Column — Designated Image Frame */}
+              <div className="relative aspect-[4/3] sm:aspect-[16/10] lg:aspect-auto h-[320px] sm:h-[380px] lg:h-full w-full overflow-hidden rounded-[16px] sm:rounded-[20px] bg-[#F1F3F5] shadow-sm">
+                {scrollImage ? (
                   <SafeImage
-                    src={cms.pageScrollImageUrl}
-                    alt={cms.pageScrollImageAlt || product.name}
+                    src={scrollImage}
+                    alt={cms?.pageScrollImageAlt || product.name}
                     fill
-                    className="object-contain p-4 sm:p-6"
                     sizes="(max-width: 1024px) 100vw, 50vw"
+                    className="object-cover object-center"
                   />
-                </div>
-              ) : null}
-              {!isEmptyHtml(cms?.pageScrollContent || "") ? (
-                <RichText
-                  html={cms!.pageScrollContent!}
-                  className="text-[15px] leading-[1.7] text-[#555]"
-                />
-              ) : null}
+                ) : (
+                  <div className="flex h-full items-center justify-center text-slate-300">
+                    <Package className="h-16 w-16" />
+                  </div>
+                )}
+              </div>
+
+              {/* Right Column — Scrollable Content Section with Coral Headings and Slim Scrollbar */}
+              <div className="reliable-scroll flex flex-col h-[400px] sm:h-[440px] lg:h-full min-h-0 overflow-y-auto overflow-x-hidden pr-3 sm:pr-4">
+                {!isEmptyHtml(cms?.pageScrollContent || "") ? (
+                  <RichText
+                    html={cms!.pageScrollContent!}
+                    className="text-[14px] sm:text-[14.5px] leading-[1.75] text-[#4A5568] [&_h1]:text-[1.4rem] [&_h1]:font-bold [&_h1]:text-[#FF5548] [&_h1]:tracking-tight [&_h1]:mb-3 [&_h1]:mt-6 [&_h1:first-child]:mt-0 [&_h2]:text-[1.3rem] [&_h2]:font-bold [&_h2]:text-[#FF5548] [&_h2]:tracking-tight [&_h2]:mb-2.5 [&_h2]:mt-5 [&_h2:first-child]:mt-0 [&_h3]:text-[1.15rem] [&_h3]:font-bold [&_h3]:text-[#FF5548] [&_h3]:tracking-tight [&_h3]:mb-2 [&_h3]:mt-4 [&_h3:first-child]:mt-0 [&_h4]:text-[1.05rem] [&_h4]:font-bold [&_h4]:text-[#FF5548] [&_h4]:mb-2 [&_h4]:mt-3 [&_p]:mb-3.5 [&_p]:leading-[1.75] [&_p:last-child]:mb-0 [&_ul]:mb-3.5 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:mb-3.5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:mb-1.5"
+                  />
+                ) : null}
+              </div>
             </div>
           </Container>
         </section>
@@ -282,22 +184,7 @@ export default function ProductDetailPage({
                     sizes="(max-width: 1024px) 100vw, 50vw"
                     className="object-cover object-center"
                   />
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0F1839]/45 via-transparent to-transparent"
-                  />
-                  <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
-                    <p className="max-w-xs text-[13px] font-semibold leading-snug text-white sm:text-sm">
-                      Custom sizes, materials, and finishes — built for your brand.
-                    </p>
-                    <Link
-                      href="/quote"
-                      className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-bold text-white transition-colors hover:text-[#FF5548]"
-                    >
-                      Get a free quote
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </Link>
-                  </div>
+
                 </div>
 
                 <div className="flex min-h-0 flex-col overflow-hidden rounded-[16px] border border-[#E5E9F0] bg-white lg:h-full">
@@ -341,11 +228,7 @@ export default function ProductDetailPage({
                 {cms.relevantProductsDescription}
               </p>
             ) : null}
-            <div className={`mt-8 ${CATALOG_TILE.grid}`}>
-              {related.slice(0, 4).map((item) => (
-                <CategoryProductCard key={item.id} product={item} />
-              ))}
-            </div>
+            <RelatedProductsCarousel products={related} />
           </Container>
         </section>
       ) : null}
@@ -367,60 +250,7 @@ export default function ProductDetailPage({
               ) : null}
             </div>
 
-            <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {relatedBlogs.map((blog) => {
-                const img =
-                  blog.thumbnailImageUrl ||
-                  blog.featuredImage ||
-                  "/images/blog-mailer-boxes.jpg";
-                return (
-                  <article
-                    key={blog.id}
-                    className="group flex h-full flex-col overflow-hidden rounded-2xl border border-[#E8EAEF] bg-white"
-                  >
-                    <Link
-                      href={`/blog/${blog.slug}`}
-                      className="relative aspect-[4/3] w-full overflow-hidden bg-[#F5F3EF]"
-                    >
-                      <SafeImage
-                        src={img}
-                        alt={blog.title}
-                        fallbackSrc="/images/blog-mailer-boxes.jpg"
-                        fill
-                        className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                        unoptimized={img.startsWith("http")}
-                      />
-                    </Link>
-
-                    <div className="flex flex-1 flex-col p-4 sm:p-5">
-                      <p className="text-[11px] font-bold uppercase tracking-wider text-[#FF5548]">
-                        Guide
-                      </p>
-                      <h3 className="mt-1.5 text-[15px] font-bold leading-snug text-[#172455] transition-colors group-hover:text-[#FF5548]">
-                        <Link href={`/blog/${blog.slug}`} className="focus:outline-none">
-                          {blog.title}
-                        </Link>
-                      </h3>
-                      {blog.excerpt ? (
-                        <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-gray-500">
-                          {blog.excerpt}
-                        </p>
-                      ) : null}
-
-                      <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
-                        <Link
-                          href={`/blog/${blog.slug}`}
-                          className="inline-flex cursor-pointer items-center gap-1 text-xs font-bold text-[#172455] transition-colors hover:text-[#FF5548]"
-                        >
-                          Read Article →
-                        </Link>
-                      </div>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
+            <RelatedBlogsCarousel blogs={relatedBlogs} />
           </Container>
         </section>
       ) : null}

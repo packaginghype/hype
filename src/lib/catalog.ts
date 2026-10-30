@@ -16,6 +16,10 @@ function toProductItem(
     shortDescription: string | null;
     fullDescription: string | null;
     startingPrice: { toNumber(): number } | number | null;
+    originalPrice?: { toNumber(): number } | number | null;
+    discountedPrice?: { toNumber(): number } | number | null;
+    priceUnit?: string | null;
+    inStock?: boolean;
     minQuantity: number;
     leadTimeDays: string | null;
     materialsAvailable: string[];
@@ -36,6 +40,20 @@ function toProductItem(
 
   const imageUrls = product.images.map((img) => img.imageUrl).filter(Boolean);
 
+  const origPrice =
+    product.originalPrice == null
+      ? price
+      : typeof product.originalPrice === "number"
+        ? product.originalPrice
+        : product.originalPrice.toNumber();
+
+  const discPrice =
+    product.discountedPrice == null
+      ? null
+      : typeof product.discountedPrice === "number"
+        ? product.discountedPrice
+        : product.discountedPrice.toNumber();
+
   return {
     id: product.id,
     name: product.name,
@@ -49,7 +67,11 @@ function toProductItem(
     fullDescription: product.fullDescription || undefined,
     imageUrl: imageUrls[0] || "",
     imageUrls,
-    startingPrice: price,
+    startingPrice: origPrice ?? price,
+    originalPrice: origPrice ?? price,
+    discountedPrice: discPrice,
+    priceUnit: product.priceUnit || "per unit",
+    inStock: product.inStock ?? true,
     minQuantity: product.minQuantity,
     leadTime: product.leadTimeDays || "8-10 Business Days",
     materials: product.materialsAvailable,
@@ -59,7 +81,7 @@ function toProductItem(
 
 export function getCategoryHref(category: { slug: string; group?: string }): string {
   if (category.group === "industries") {
-    return `/industry/${category.slug}`;
+    return `/${category.slug}`;
   }
   if (category.group === "materials") {
     return `/box-by-material/${category.slug}`;
@@ -67,7 +89,7 @@ export function getCategoryHref(category: { slug: string; group?: string }): str
   if (category.group === "shapes") {
     return `/shapes-styles/${category.slug}`;
   }
-  return `/category/${category.slug}`;
+  return `/${category.slug}`;
 }
 
 function toCategoryItem(category: {
@@ -433,12 +455,36 @@ export const getProductBySlug = cache(async (slug: string): Promise<ProductItem 
       const thumb = product.thumbnailUrl || item.imageUrl;
       if (thumb) item.imageUrl = thumb;
 
-      item.discountedPrice = product.discountedPrice
-        ? Number(product.discountedPrice)
-        : null;
+      const rawDisc =
+        product.discountedPrice != null
+          ? typeof product.discountedPrice === "number"
+            ? product.discountedPrice
+            : typeof (product.discountedPrice as { toNumber?: () => number }).toNumber === "function"
+              ? (product.discountedPrice as { toNumber: () => number }).toNumber()
+              : Number(product.discountedPrice)
+          : null;
+
+      const rawOrig =
+        product.originalPrice != null
+          ? typeof product.originalPrice === "number"
+            ? product.originalPrice
+            : typeof (product.originalPrice as { toNumber?: () => number }).toNumber === "function"
+              ? (product.originalPrice as { toNumber: () => number }).toNumber()
+              : Number(product.originalPrice)
+          : (product.startingPrice != null
+              ? typeof product.startingPrice === "number"
+                ? product.startingPrice
+                : typeof (product.startingPrice as { toNumber?: () => number }).toNumber === "function"
+                  ? (product.startingPrice as { toNumber: () => number }).toNumber()
+                  : Number(product.startingPrice)
+              : null);
+
+      item.discountedPrice = rawDisc;
+      item.originalPrice = rawOrig;
+      item.startingPrice = rawOrig ?? rawDisc;
       item.inStock = product.inStock;
-      if (product.originalPrice != null) {
-        item.startingPrice = Number(product.originalPrice);
+      if (product.priceUnit) {
+        item.priceUnit = product.priceUnit;
       }
 
       const crumbIds =
@@ -542,7 +588,7 @@ export async function getRelatedProducts(
         .filter((p) => p?.isPublished)
         .map(toProductItem);
 
-      if (curated.length > 0) return curated.slice(0, limit);
+      if (curated.length > 0) return curated;
 
       const products = await prisma.product.findMany({
         where: {

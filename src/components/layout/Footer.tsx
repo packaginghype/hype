@@ -128,7 +128,7 @@ export function Footer({ categories }: { categories: CategoryItem[] }) {
               {popular.length > 0 ? (
                 popular.map((cat) => (
                   <li key={cat.id}>
-                    <FooterLink href={`/category/${cat.slug}`}>
+                    <FooterLink href={`/${cat.slug}`}>
                       {cat.name}
                     </FooterLink>
                   </li>

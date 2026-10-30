@@ -38,7 +38,7 @@ export async function CategoryShowcase() {
           {categories.map((category) => (
             <CatalogTile
               key={category.id}
-              href={`/category/${category.slug}`}
+              href={`/${category.slug}`}
               title={category.name}
               imageUrl={category.imageUrl}
               imageAlt={category.name}

@@ -54,7 +54,7 @@ export const STATIC_PAGES: StaticPageDef[] = [
 <li><strong>Flexible Low Minimums:</strong> Low MOQ starting at 100 units empowers early-stage startups and rapid testing.</li>
 <li><strong>Free Doorstep Freight:</strong> 100% free ground delivery anywhere in the continental USA.</li>
 </ul>`,
-      seoTitle: "About Us | Custom Packaging Manufacturer USA",
+      seoTitle: "About Us",
       seoDescription:
         "Learn about Packaging Hype — a premier custom packaging box manufacturer helping emerging and enterprise brands elevate retail and e-commerce unboxing.",
       seoKeywords: "about packaging hype, custom box manufacturer usa",
@@ -72,7 +72,7 @@ export const STATIC_PAGES: StaticPageDef[] = [
       intro:
         "Have questions about box dimensions, printing plates, paperboard stocks, or custom dielines? Contact our dedicated packaging engineers.",
       content: `<p>Need a formal commercial quote? Use our quotation builder to input custom dimensions and upload artwork. Phone and email details stay in sync with site settings.</p>`,
-      seoTitle: "Contact Us | Packaging Hype Support",
+      seoTitle: "Contact Us",
       seoDescription:
         "Contact Packaging Hype for custom box orders, dieline templates, and prepress support.",
       seoKeywords: "contact packaging hype, custom box quote",
@@ -91,7 +91,7 @@ export const STATIC_PAGES: StaticPageDef[] = [
 <p>We collect information provided directly through quote requests, including contact names, company details, email addresses, phone numbers, and custom packaging specifications.</p>
 <h2>2. Artwork Confidentiality &amp; Security</h2>
 <p>Your proprietary brand assets, logos, and vector dieline designs submitted for quoting or manufacturing are treated with strict confidentiality. We do not sell, rent, or share your proprietary design files with third-party marketers.</p>`,
-      seoTitle: "Privacy Policy | Packaging Hype",
+      seoTitle: "Privacy Policy",
       seoDescription:
         "Packaging Hype privacy policy detailing how your commercial information and uploaded dieline artwork are protected.",
       seoKeywords: "privacy policy, packaging hype",
@@ -110,7 +110,7 @@ export const STATIC_PAGES: StaticPageDef[] = [
 <p>Standard ground freight shipping is 100% complimentary on all custom packaging orders delivered within the contiguous United States.</p>
 <h2>2. Packaging and Freight Handling</h2>
 <p>All folding cartons, rigid boxes, and corrugated mailers are packed flat in heavy-duty corrugated master cartons and palletized with shrink wrap to protect corners and avoid transit damage.</p>`,
-      seoTitle: "Shipping & Delivery Policy | Packaging Hype",
+      seoTitle: "Shipping & Delivery Policy",
       seoDescription:
         "Packaging Hype free USA delivery terms, freight palletizing, and turnaround policies.",
       seoKeywords: "shipping policy, free usa shipping, packaging hype",
@@ -131,7 +131,7 @@ export const STATIC_PAGES: StaticPageDef[] = [
 <p>Due to variations between computer monitor color spaces (RGB) and commercial printing presses (CMYK / Pantone spot colors), minor color shifts are standard in paperboard printing. Critical color matches must specify exact Pantone (PMS) formulas.</p>
 <h2>3. Order Quantities &amp; Tolerances</h2>
 <p>Standard commercial manufacturing tolerances may include a ±5% over-run or under-run variance due to setup sheets and die-cutting calibration.</p>`,
-      seoTitle: "Terms & Conditions | Packaging Hype",
+      seoTitle: "Terms & Conditions",
       seoDescription:
         "Packaging Hype standard terms and conditions for custom box manufacturing, proof approval, and commercial orders.",
       seoKeywords: "terms and conditions, packaging hype",
@@ -150,7 +150,7 @@ export const STATIC_PAGES: StaticPageDef[] = [
 <p>Because each packaging order is custom printed, die-cut, and manufactured to individual client specifications, orders cannot be returned for buyer remorse or resale.</p>
 <h2>2. Manufacturing Defect Guarantee</h2>
 <p>If your received packaging exhibits manufacturing defects or deviates substantially from your approved digital proof, contact our quality assurance team within 7 business days of delivery. Upon verification, Packaging Hype will reprint the defective units at zero cost.</p>`,
-      seoTitle: "Refund & Return Policy | Packaging Hype",
+      seoTitle: "Refund & Return Policy",
       seoDescription:
         "Packaging Hype custom manufacturing defect inspection, reprints, and refund policy.",
       seoKeywords: "refund policy, return policy, packaging hype",
@@ -167,7 +167,7 @@ export const STATIC_PAGES: StaticPageDef[] = [
       intro:
         "Get instant wholesale manufacturing pricing on custom printed boxes, mailers, and folding cartons. Free 3D digital proofs, fast 8-10 days turnaround, and free USA delivery.",
       content: "",
-      seoTitle: "Request a Custom Packaging Quote | Packaging Hype",
+      seoTitle: "Request a Custom Packaging Quote",
       seoDescription:
         "Get instant wholesale manufacturing pricing on custom printed boxes, mailers, and folding cartons. Free 3D digital proofs, fast 8-10 days turnaround, and free USA delivery.",
       seoKeywords: "custom packaging quote, wholesale boxes",

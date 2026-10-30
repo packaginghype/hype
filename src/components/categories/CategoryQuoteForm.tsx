@@ -19,6 +19,10 @@ import {
 interface CategoryQuoteFormProps {
   productName: string;
   startingFrom?: string;
+  originalPrice?: number | string | null;
+  discountedPrice?: number | string | null;
+  priceUnit?: string;
+  inStock?: boolean;
   fullWidthSubmit?: boolean;
   cartItem: {
     id: string;
@@ -40,8 +44,41 @@ export function CategoryQuoteForm({
   productName,
   cartItem,
   startingFrom = "Contact",
+  originalPrice,
+  discountedPrice,
+  priceUnit = "per box",
+  inStock = true,
   fullWidthSubmit = false,
 }: CategoryQuoteFormProps) {
+  const parsePrice = (val: number | string | null | undefined): number | null => {
+    if (val == null) return null;
+    if (typeof val === "number") return isNaN(val) ? null : val;
+    const cleaned = String(val).replace(/[^0-9.]/g, "");
+    if (!cleaned) return null;
+    const num = Number(cleaned);
+    return isNaN(num) ? null : num;
+  };
+
+  const origNum = parsePrice(originalPrice);
+  const discNum = parsePrice(discountedPrice);
+
+  const hasDiscount =
+    discNum != null &&
+    origNum != null &&
+    discNum !== origNum;
+
+  const lowerPrice = hasDiscount ? Math.min(discNum, origNum) : (discNum ?? origNum);
+  const higherPrice = hasDiscount ? Math.max(discNum, origNum) : null;
+
+  const displayDiscounted = lowerPrice != null ? "$" + lowerPrice.toFixed(2) : null;
+  const displayOriginal = higherPrice != null ? "$" + higherPrice.toFixed(2) : null;
+
+  const displaySinglePrice =
+    discNum != null
+      ? "$" + discNum.toFixed(2)
+      : origNum != null
+        ? "$" + origNum.toFixed(2)
+        : startingFrom || "$0.85";
   const router = useRouter();
   const [formData, setFormData] = useState({
     contactName: "",
@@ -150,12 +187,12 @@ export function CategoryQuoteForm({
     >
       {/* Top coral header bar */}
       <div className="flex flex-col gap-3 bg-[#FF5548] px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
-        <h2
+        <p
           style={{ color: "#ffffff", fontWeight: 800 }}
           className="text-[18px] tracking-tight sm:text-[19px]"
         >
           Get Custom Quote
-        </h2>
+        </p>
 
         <div className="flex items-center gap-3 sm:gap-4">
           {/* Starting from + price */}
@@ -163,11 +200,24 @@ export function CategoryQuoteForm({
             <span className="text-[9px] font-medium uppercase leading-none tracking-wide text-white/80">
               Starting from
             </span>
-            <div className="flex items-baseline gap-1 leading-none mt-0.5">
-              <span className="text-[22px] font-extrabold leading-none sm:text-[24px]">
-                {startingFrom}
+            <div className="flex items-baseline gap-1.5 leading-none mt-0.5">
+              {hasDiscount ? (
+                <>
+                  <span className="text-[22px] font-extrabold leading-none sm:text-[24px]">
+                    {displayDiscounted}
+                  </span>
+                  <span className="text-[13px] font-semibold text-white/70 line-through decoration-white/70 leading-none sm:text-[14px]">
+                    {displayOriginal}
+                  </span>
+                </>
+              ) : (
+                <span className="text-[22px] font-extrabold leading-none sm:text-[24px]">
+                  {displaySinglePrice}
+                </span>
+              )}
+              <span className="text-[9px] text-white/80 leading-none">
+                {priceUnit}
               </span>
-              <span className="text-[9px] text-white/80 leading-none">per box</span>
             </div>
           </div>
 
@@ -179,13 +229,16 @@ export function CategoryQuoteForm({
               Availability
             </span>
             <span className="mt-0.5 text-[13px] font-bold leading-none sm:text-[14px]">
-              In Stock
+              {inStock ? "In Stock" : "Out of Stock"}
             </span>
           </div>
 
           <AddToCartButton
             item={{
               ...cartItem,
+              unitPrice: hasDiscount
+                ? discNum
+                : (discNum ?? origNum ?? cartItem.unitPrice ?? null),
               quantity: Math.max(1, Number(formData.quantity) || 1),
             }}
             showIcon={true}

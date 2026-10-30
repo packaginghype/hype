@@ -21,7 +21,7 @@ export async function generateMetadata({
   const title =
     category.cms?.seoEnabled !== false && category.cms?.seoTitle
       ? category.cms.seoTitle
-      : `${category.name} | Custom Packaging Manufacturer`;
+      : category.name;
   const description =
     category.cms?.seoEnabled !== false && category.cms?.seoDescription
       ? category.cms.seoDescription

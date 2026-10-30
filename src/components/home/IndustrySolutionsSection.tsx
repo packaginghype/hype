@@ -148,7 +148,7 @@ export function IndustrySolutionsSection({
                   style={{ width: itemWidth }}
                 >
                   <CatalogTile
-                    href={`/industry/${item.slug}`}
+                    href={`/${item.slug}`}
                     title={item.label}
                     imageUrl={item.imageUrl}
                     imageAlt={item.label}

@@ -1,6 +1,12 @@
 import { looksLikeHtml } from "@/lib/html";
 import { cn } from "@/lib/utils";
 
+function cleanHtmlContent(raw: string): string {
+  if (!raw) return "";
+  // Strip empty paragraphs or linebreaks at the beginning of the content block
+  return raw.replace(/^(?:\s*<(?:p|div)[^>]*>(?:\s|&nbsp;|<br\s*\/?>)*<\/(?:p|div)>)+/gi, "").trim();
+}
+
 export function RichText({
   html,
   className,
@@ -20,10 +26,12 @@ export function RichText({
     );
   }
 
+  const cleaned = cleanHtmlContent(html);
+
   return (
     <div
       className={cn("rich-text", className)}
-      dangerouslySetInnerHTML={{ __html: html }}
+      dangerouslySetInnerHTML={{ __html: cleaned }}
     />
   );
 }

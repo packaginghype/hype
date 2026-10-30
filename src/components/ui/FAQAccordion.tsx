@@ -40,33 +40,36 @@ export function FAQAccordion({
 
           return (
             <div key={index} className="py-3.5 sm:py-4">
-              <button
-                id={buttonId}
-                type="button"
-                aria-expanded={isOpen}
-                aria-controls={panelId}
-                onClick={() => toggleIndex(index)}
-                className="flex w-full items-start justify-between gap-3 rounded-md text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#21AAA5]"
-              >
-                <span className="text-[14px] font-bold leading-snug text-[#172455] sm:text-[15px]">
-                  {item.question}
-                </span>
-                <span
-                  className={cn(
-                    "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors",
-                    isOpen
-                      ? "bg-[#EAF7F6] text-[#21AAA5]"
-                      : "bg-white text-[#172455] shadow-sm"
-                  )}
+              {/* h3 wraps the button — valid HTML; gives FAQ questions semantic heading level */}
+              <h3 className="m-0 p-0 text-base font-normal leading-none">
+                <button
+                  id={buttonId}
+                  type="button"
+                  aria-expanded={isOpen}
+                  aria-controls={panelId}
+                  onClick={() => toggleIndex(index)}
+                  className="flex w-full items-start justify-between gap-3 rounded-md text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#21AAA5]"
                 >
-                  <ChevronDown
+                  <span className="text-[14px] font-bold leading-snug text-[#172455] sm:text-[15px]">
+                    {item.question}
+                  </span>
+                  <span
                     className={cn(
-                      "h-4 w-4 transition-transform duration-200",
-                      isOpen && "rotate-180"
+                      "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors",
+                      isOpen
+                        ? "bg-[#EAF7F6] text-[#21AAA5]"
+                        : "bg-white text-[#172455] shadow-sm"
                     )}
-                  />
-                </span>
-              </button>
+                  >
+                    <ChevronDown
+                      className={cn(
+                        "h-4 w-4 transition-transform duration-200",
+                        isOpen && "rotate-180"
+                      )}
+                    />
+                  </span>
+                </button>
+              </h3>
               <div
                 id={panelId}
                 role="region"
@@ -107,26 +110,29 @@ export function FAQAccordion({
 
         return (
           <div key={index} className="py-4 sm:py-5">
-            <button
-              id={buttonId}
-              type="button"
-              aria-expanded={isOpen}
-              aria-controls={panelId}
-              onClick={() => toggleIndex(index)}
-              className="flex w-full items-center justify-between rounded text-left focus:outline-none focus:ring-2 focus:ring-[#21AAA5] focus:ring-offset-2"
-            >
-              <span className="pr-4 text-base font-bold text-[#172455] sm:text-lg">
-                {item.question}
-              </span>
-              <span
-                className={cn(
-                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#F6F8FA] text-[#172455] transition-transform duration-200",
-                  isOpen ? "rotate-180 bg-[#eaf7f6] text-[#21AAA5]" : ""
-                )}
+            {/* h3 wraps the button — gives FAQ questions H3 semantic heading level */}
+            <h3 className="m-0 p-0 text-base font-normal leading-none">
+              <button
+                id={buttonId}
+                type="button"
+                aria-expanded={isOpen}
+                aria-controls={panelId}
+                onClick={() => toggleIndex(index)}
+                className="flex w-full items-center justify-between rounded text-left focus:outline-none focus:ring-2 focus:ring-[#21AAA5] focus:ring-offset-2"
               >
-                <ChevronDown className="h-4 w-4" />
-              </span>
-            </button>
+                <span className="pr-4 text-base font-bold text-[#172455] sm:text-lg">
+                  {item.question}
+                </span>
+                <span
+                  className={cn(
+                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#F6F8FA] text-[#172455] transition-transform duration-200",
+                    isOpen ? "rotate-180 bg-[#eaf7f6] text-[#21AAA5]" : ""
+                  )}
+                >
+                  <ChevronDown className="h-4 w-4" />
+                </span>
+              </button>
+            </h3>
             <div
               id={panelId}
               role="region"

@@ -25,7 +25,7 @@ export async function generateMetadata({
   const seoOn = product.cms?.seoEnabled !== false;
   const title =
     (seoOn && product.cms?.seoTitle) ||
-    `${product.name} | Custom Box Manufacturer`;
+    product.name;
   const description =
     (seoOn && product.cms?.seoDescription) ||
     stripHtml(product.description) ||
@@ -56,8 +56,8 @@ export default async function ProductDetailRoute({
   }
 
   const [related, relatedBlogs] = await Promise.all([
-    getRelatedProducts(product.categorySlug, product.slug, 4),
-    getProductRelatedBlogs(product.cms?.relatedBlogIds || [], 4),
+    getRelatedProducts(product.categorySlug, product.slug, 12),
+    getProductRelatedBlogs(product.cms?.relatedBlogIds || [], 12),
   ]);
 
   return (

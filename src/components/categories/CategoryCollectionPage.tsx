@@ -111,8 +111,8 @@ export function CategoryCollectionPage({
               {filtered.map((category) => {
                 const itemHref =
                   group === "industries" || category.group === "industries"
-                    ? `/industry/${category.slug}`
-                    : `/category/${category.slug}`;
+                    ? `/${category.slug}`
+                    : `/${category.slug}`;
                 return (
                   <CatalogTile
                     key={category.id}

@@ -116,7 +116,7 @@ export function MobileNavigation({
                 categories.map((item) => (
                   <Link
                     key={item.slug}
-                    href={`/category/${item.slug}`}
+                    href={`/${item.slug}`}
                     onClick={onClose}
                     className="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-[#F6F8FA] hover:text-[#FF5548]"
                   >
@@ -161,7 +161,7 @@ export function MobileNavigation({
               {industries.map((item) => (
                 <Link
                   key={item.slug}
-                  href={`/industry/${item.slug}`}
+                  href={`/${item.slug}`}
                   onClick={onClose}
                   className="block px-3 py-2 text-sm text-gray-700 rounded hover:bg-[#F6F8FA] hover:text-[#FF5548]"
                 >

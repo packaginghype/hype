@@ -429,55 +429,23 @@ export function CategoryForm({
                 }));
               }}
               className={inputClass}
+              placeholder="e.g. Custom CBD Boxes"
             />
-          </div>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div>
-              <FieldLabel>URL / Slug *</FieldLabel>
-              <input
-                required
-                value={values.slug}
-                onChange={(e) => {
-                  setSlugTouched(true);
-                  patch({ slug: slugify(e.target.value) });
-                }}
-                className={inputClass}
-              />
-            </div>
-            <div>
-              <FieldLabel>Collection / Group</FieldLabel>
-              <select
-                value={values.group || group}
-                onChange={(e) =>
-                  patch({ group: e.target.value as CategoryGroupKey })
-                }
-                className={inputClass}
-              >
-                <option value="industries">Industries</option>
-                <option value="materials">Box by Materials</option>
-                <option value="shapes">Shapes & Styles</option>
-                <option value="categories">Categories</option>
-              </select>
-            </div>
-            <div>
-              <FieldLabel>Sort Order</FieldLabel>
-              <input
-                type="number"
-                value={values.sortOrder ?? 0}
-                onChange={(e) =>
-                  patch({ sortOrder: Number(e.target.value) || 0 })
-                }
-                className={inputClass}
-              />
-            </div>
           </div>
           <div>
-            <FieldLabel>Description</FieldLabel>
-            <RichTextEditor
-              value={values.description || ""}
-              onChange={(html) => patch({ description: html })}
-              placeholder="Main category description…"
-            />
+            <FieldLabel>Collection / Group</FieldLabel>
+            <select
+              value={values.group || group}
+              onChange={(e) =>
+                patch({ group: e.target.value as CategoryGroupKey })
+              }
+              className={inputClass}
+            >
+              <option value="industries">Industries</option>
+              <option value="materials">Box by Materials</option>
+              <option value="shapes">Shapes & Styles</option>
+              <option value="categories">Categories</option>
+            </select>
           </div>
         </Section>
 
@@ -1026,6 +994,19 @@ export function CategoryForm({
           value={values.seoEnabled ?? true}
           onChange={(v) => patch({ seoEnabled: v })}
         />
+        <div>
+          <FieldLabel>URL / Slug *</FieldLabel>
+          <input
+            required
+            value={values.slug}
+            onChange={(e) => {
+              setSlugTouched(true);
+              patch({ slug: slugify(e.target.value) });
+            }}
+            className={inputClass}
+            placeholder="e.g. cbd-boxes"
+          />
+        </div>
         <div>
           <FieldLabel>Browser Title *</FieldLabel>
           <input

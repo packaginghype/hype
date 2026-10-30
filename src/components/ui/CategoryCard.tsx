@@ -12,8 +12,8 @@ interface CategoryCardProps {
 export function CategoryCard({ category }: CategoryCardProps) {
   const href =
     category.group === "industries"
-      ? `/industry/${category.slug}`
-      : `/category/${category.slug}`;
+      ? `/${category.slug}`
+      : `/${category.slug}`;
 
   return (
     <Link href={href} className={CATALOG_TILE.shell}>

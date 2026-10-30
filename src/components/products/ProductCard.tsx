@@ -12,6 +12,11 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const origPrice = product.originalPrice ?? product.startingPrice ?? null;
+  const discPrice = product.discountedPrice ?? null;
+  const hasDiscount =
+    discPrice != null && origPrice != null && discPrice < origPrice;
+
   return (
     <div className={`${CATALOG_TILE.shell} cursor-default`}>
       <Link
@@ -36,7 +41,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
       <div className="flex flex-1 flex-col p-4 sm:p-5">
         <Link
-          href={`/category/${product.categorySlug}`}
+          href={`/${product.categorySlug}`}
           className="text-[11px] font-bold uppercase tracking-wider text-[#21AAA5] hover:underline"
         >
           {product.categoryName}
@@ -55,11 +60,22 @@ export function ProductCard({ product }: ProductCardProps) {
             <span className="text-[10px] font-semibold uppercase text-gray-400">
               Pricing Model
             </span>
-            <span className="text-xs font-bold text-[#172455]">
-              {product.startingPrice
-                ? `From $${product.startingPrice.toFixed(2)}/ea`
-                : "Custom Quote"}
-            </span>
+            {hasDiscount ? (
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-xs font-bold text-[#FF5548]">
+                  From ${discPrice!.toFixed(2)}/ea
+                </span>
+                <span className="text-[11px] font-normal text-gray-400 line-through">
+                  ${origPrice!.toFixed(2)}
+                </span>
+              </div>
+            ) : (
+              <span className="text-xs font-bold text-[#172455]">
+                {origPrice
+                  ? `From $${origPrice.toFixed(2)}/ea`
+                  : "Custom Quote"}
+              </span>
+            )}
           </div>
 
           <AddToCartButton
@@ -68,7 +84,7 @@ export function ProductCard({ product }: ProductCardProps) {
               slug: product.slug,
               name: product.name,
               imageUrl: product.imageUrl,
-              unitPrice: product.startingPrice ?? null,
+              unitPrice: discPrice ?? origPrice ?? null,
               quantity: 1,
               href: `/product/${product.slug}`,
             }}

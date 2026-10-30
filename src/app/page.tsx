@@ -23,7 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const canonical =
     (data.seoCanonical || "").trim() || HOME_PAGE_CANONICAL_DEFAULT;
   return {
-    title: data.seoTitle || "Custom Packaging Boxes | Packaging Hype",
+    title: data.seoTitle || "Custom Packaging Boxes",
     description: data.seoDescription || "Premium custom packaging boxes — tailored sizes, free USA shipping, 8-10 day turnaround.",
     keywords: data.seoKeywords || undefined,
     alternates: {

@@ -165,7 +165,7 @@ export const HOME_PAGE_DEFAULTS: HomePageData = {
     "Keep up with the latest packaging design tips, industry guides, material insights, and unboxing innovations for modern brands.",
   blogIds: [],
 
-  seoTitle: "Custom Packaging Boxes | Packaging Hype",
+  seoTitle: "Custom Packaging Boxes",
   seoDescription:
     "Premium custom packaging boxes — tailored sizes, free USA shipping, 8-10 day turnaround. Get a free quote today.",
   seoKeywords: "custom packaging, custom boxes, wholesale packaging",

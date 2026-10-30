@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getAdminSession } from "@/lib/admin-auth";
 import {
@@ -96,6 +97,9 @@ export async function POST(request: Request) {
     entityLabel: product.name,
     summary: `${session.name} created product "${product.name}"`,
   });
+
+  revalidateCatalog();
+  revalidatePath(`/product/${product.slug}`);
 
   return NextResponse.json({ product }, { status: 201 });
 }

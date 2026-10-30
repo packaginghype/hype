@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://packaginghype.com"),
   title: {
     default: "Packaging Hype | Custom Packaging Boxes Manufacturer USA",
-    template: "%s | Packaging Hype",
+    template: "%s",
   },
   description:
     "Packaging Hype manufactures premium custom packaging boxes, folding cartons, corrugated mailers, and flexible barrier bags. Fast turnaround, low 100 MOQ, free design support, and free USA shipping.",

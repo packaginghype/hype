@@ -851,32 +851,35 @@ export function ProductForm({
         </div>
       </Section>
 
-      <Section title="Product Video">
+      <Section title="Product Floating Video (Reel / Demo)">
+        <p className="mb-4 text-xs font-medium text-[#64748B]">
+          Upload a short product demonstration video (MP4). It displays as an interactive floating reel widget in the bottom-right corner of the product page, opening an interactive video modal when clicked.
+        </p>
         <div className="grid gap-5 xl:grid-cols-2">
           <MediaUploadField
             label="Video File"
             value={values.videoUrl || ""}
             onChange={(url) => patch({ videoUrl: url })}
-            recommended="MP4 only, max 5MB, one video per product"
+            recommended="MP4 only, max 5MB (vertical 9:16 recommended)"
             kind="video"
             folder="packaginghype/products/video"
           />
           <MediaUploadField
-            label="Video Thumbnail"
+            label="Video Thumbnail / Poster"
             value={values.videoThumbnailUrl || ""}
             onChange={(url) => patch({ videoThumbnailUrl: url })}
-            recommended="webp, png, jpg, jpeg · max 1MB"
+            recommended="Vertical 9:16 or 1:1 · webp, png, jpg, jpeg · max 1MB"
             folder="packaginghype/products/video-thumb"
           />
         </div>
         <div>
-          <FieldLabel>Video Description</FieldLabel>
+          <FieldLabel>Video Caption / Description (Optional)</FieldLabel>
           <textarea
-            rows={3}
+            rows={2}
             value={values.videoDescription || ""}
             onChange={(e) => patch({ videoDescription: e.target.value })}
             className={inputClass}
-            placeholder="Enter video description"
+            placeholder="Enter a brief caption or highlight for the video modal"
           />
         </div>
       </Section>

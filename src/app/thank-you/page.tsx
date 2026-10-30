@@ -15,7 +15,7 @@ import { Container } from "@/components/ui/Container";
 import { VERIFIED_BUSINESS_INFO } from "@/data/verified-data";
 
 export const metadata: Metadata = {
-  title: "Thank You - Quote Request Received | Packaging Hype",
+  title: "Thank You - Quote Request Received",
   description:
     "Your custom packaging quote request has been received. Our team will contact you within 24 hours with wholesale pricing and a free 3D digital proof.",
   robots: { index: false, follow: false },

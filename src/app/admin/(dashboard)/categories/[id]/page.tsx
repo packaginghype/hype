@@ -74,8 +74,8 @@ export default async function EditCategoryPage({ params }: Props) {
         <Link
           href={
             category.group === "industries"
-              ? `/industry/${category.slug}`
-              : `/category/${category.slug}`
+              ? `/${category.slug}`
+              : `/${category.slug}`
           }
           target="_blank"
           rel="noopener noreferrer"

@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "Blog Article Not Found" };
   }
 
-  const title = post.seoTitle || `${post.title} | Packaging Hype`;
+  const title = post.seoTitle || post.title;
   const description = post.seoDescription || post.excerpt || post.title;
 
   return {

@@ -26,6 +26,7 @@ export const adminProductSchema = z.object({
   startingPrice: z.coerce.number().nonnegative().optional().nullable(),
   originalPrice: z.coerce.number().nonnegative().optional().nullable(),
   discountedPrice: z.coerce.number().nonnegative().optional().nullable(),
+  priceUnit: z.string().optional().nullable(),
   inStock: z.boolean().default(true),
   minQuantity: z.coerce.number().int().min(1).default(100),
   leadTimeDays: z.string().optional().nullable(),
@@ -154,6 +155,7 @@ export function productWriteData(data: AdminProductInput) {
       data.discountedPrice === null || data.discountedPrice === undefined
         ? null
         : data.discountedPrice,
+    priceUnit: data.priceUnit?.trim() || null,
     inStock: data.inStock,
     minQuantity: data.minQuantity,
     leadTimeDays: data.leadTimeDays || "8-10 Business Days",

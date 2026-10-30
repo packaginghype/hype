@@ -65,7 +65,9 @@ export interface ProductItem {
   imageUrl: string;
   imageUrls?: string[];
   startingPrice?: number | null;
+  originalPrice?: number | null;
   discountedPrice?: number | null;
+  priceUnit?: string | null;
   inStock?: boolean;
   minQuantity: number;
   leadTime: string;

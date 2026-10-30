@@ -27,10 +27,18 @@ export function revalidateCatalog() {
   revalidatePath("/category");
   revalidatePath("/products");
   revalidatePath("/product");
+  revalidatePath("/product/[slug]", "page");
+  revalidatePath("/products/[slug]", "page");
+  revalidatePath("/category/[slug]", "page");
+  revalidatePath("/categories/[slug]", "page");
   revalidatePath("/industries");
   revalidatePath("/industry");
+  revalidatePath("/industry/[slug]", "page");
+  revalidatePath("/industries/[slug]", "page");
   revalidatePath("/box-by-material");
+  revalidatePath("/box-by-material/[slug]", "page");
   revalidatePath("/shapes-styles");
+  revalidatePath("/shapes-styles/[slug]", "page");
 }
 
 export function revalidateBlogs() {

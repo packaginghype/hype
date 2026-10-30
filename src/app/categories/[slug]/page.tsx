@@ -10,7 +10,7 @@ export default async function CategoriesSlugRedirect({
   const { slug } = await params;
   const category = await getCategoryBySlug(slug);
   if (category?.group === "industries") {
-    redirect(`/industry/${slug}`);
+    redirect(`/${slug}`);
   }
   if (category?.group === "materials") {
     redirect(`/box-by-material/${slug}`);
@@ -18,5 +18,5 @@ export default async function CategoriesSlugRedirect({
   if (category?.group === "shapes") {
     redirect(`/shapes-styles/${slug}`);
   }
-  redirect(`/category/${slug}`);
+  redirect(`/${slug}`);
 }

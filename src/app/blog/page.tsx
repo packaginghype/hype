@@ -11,7 +11,7 @@ import { formatBlogDate, getBlogsPaged, getBlogFallbackImage } from "@/lib/blogs
 export const revalidate = 120;
 
 export const metadata: Metadata = {
-  title: "Packaging Design & Manufacturing Blog | Packaging Hype",
+  title: "Packaging Design & Manufacturing Blog",
   description:
     "Practical packaging insights, dieline guides, material comparisons, and brand design ideas curated by the Packaging Hype engineering team.",
 };
