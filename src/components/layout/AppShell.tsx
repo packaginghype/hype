@@ -15,12 +15,16 @@ export function AppShell({
   industries,
   materials,
   footerCategories,
+  logoUrl,
+  logoAlt,
 }: {
   children: React.ReactNode;
   categories: NavLink[];
   industries: NavLink[];
   materials: NavLink[];
   footerCategories: CategoryItem[];
+  logoUrl?: string;
+  logoAlt?: string;
 }) {
   const pathname = usePathname();
   const isAdmin = pathname?.startsWith("/admin");
@@ -41,10 +45,12 @@ export function AppShell({
         categories={categories}
         industries={industries}
         materials={materials}
+        logoUrl={logoUrl}
+        logoAlt={logoAlt}
       />
       <main className="flex-1">{children}</main>
       {!hideQuoteCta ? <FooterQuoteCta /> : null}
-      <Footer categories={footerCategories} />
+      <Footer categories={footerCategories} logoUrl={logoUrl} logoAlt={logoAlt} />
     </CartProvider>
   );
 }

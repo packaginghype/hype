@@ -54,7 +54,15 @@ function FooterHeading({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function Footer({ categories }: { categories: CategoryItem[] }) {
+export function Footer({
+  categories,
+  logoUrl,
+  logoAlt,
+}: {
+  categories: CategoryItem[];
+  logoUrl?: string;
+  logoAlt?: string;
+}) {
   const currentYear = new Date().getFullYear();
   const popular = categories.slice(0, 7);
 
@@ -77,13 +85,14 @@ export function Footer({ categories }: { categories: CategoryItem[] }) {
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-x-10 lg:gap-y-0">
           {/* Brand + CTA */}
           <div className="sm:col-span-2 lg:col-span-1">
-            <Link href="/" className="inline-block">
+            <Link href="/" className="inline-block" aria-label={logoAlt || "Packaging Hype"}>
               <Image
-                src="/logo.png"
-                alt="Packaging Hype"
+                src={logoUrl || "/logo.png"}
+                alt={logoAlt || "Packaging Hype"}
                 width={180}
                 height={56}
-                className="h-10 w-auto sm:h-11"
+                className="h-10 w-auto object-contain sm:h-11"
+                unoptimized={Boolean(logoUrl && (logoUrl.endsWith(".svg") || logoUrl.endsWith(".ico")))}
               />
             </Link>
             <p className="mt-4 max-w-sm text-[13.5px] leading-relaxed text-[#2F3A4F]/80">

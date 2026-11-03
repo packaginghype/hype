@@ -35,10 +35,14 @@ export function Header({
   categories,
   industries,
   materials,
+  logoUrl,
+  logoAlt,
 }: {
   categories: NavLink[];
   industries: NavLink[];
   materials: NavLink[];
+  logoUrl?: string;
+  logoAlt?: string;
 }) {
   const router = useRouter();
   const { itemCount } = useCart();
@@ -109,15 +113,16 @@ export function Header({
           <Link
             href="/"
             className="flex shrink-0 items-center gap-2 rounded-sm focus:outline-none focus:ring-2 focus:ring-[#21AAA5]"
-            aria-label="PackagingHype Home"
+            aria-label={logoAlt || "PackagingHype Home"}
           >
             <Image
-              src="/logo.png"
-              alt="Packaging Hype"
+              src={logoUrl || "/logo.png"}
+              alt={logoAlt || "Packaging Hype"}
               width={180}
               height={56}
               priority
-              className="h-9 w-auto rounded-sm sm:h-11"
+              className="h-9 w-auto rounded-sm object-contain sm:h-11"
+              unoptimized={Boolean(logoUrl && (logoUrl.endsWith(".svg") || logoUrl.endsWith(".ico")))}
             />
           </Link>
 
@@ -432,6 +437,8 @@ export function Header({
         categories={categories}
         industries={industries}
         materials={materials}
+        logoUrl={logoUrl}
+        logoAlt={logoAlt}
       />
     </header>
   );

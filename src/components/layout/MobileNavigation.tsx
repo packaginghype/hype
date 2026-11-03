@@ -17,6 +17,8 @@ interface MobileNavigationProps {
   categories: NavLink[];
   industries: NavLink[];
   materials: NavLink[];
+  logoUrl?: string;
+  logoAlt?: string;
 }
 
 export function MobileNavigation({
@@ -25,6 +27,8 @@ export function MobileNavigation({
   categories,
   industries,
   materials,
+  logoUrl,
+  logoAlt,
 }: MobileNavigationProps) {
   const { itemCount } = useCart();
   const [openSection, setOpenSection] = useState<
@@ -60,13 +64,14 @@ export function MobileNavigation({
 
       <div className="fixed inset-y-0 right-0 w-full max-w-xs sm:max-w-sm bg-white shadow-2xl flex flex-col z-50 animate-in slide-in-from-right duration-300">
         <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-white">
-          <Link href="/" onClick={onClose} className="flex items-center gap-2">
+          <Link href="/" onClick={onClose} className="flex items-center gap-2" aria-label={logoAlt || "Packaging Hype"}>
             <Image
-              src="/logo.png"
-              alt="Packaging Hype"
+              src={logoUrl || "/logo.png"}
+              alt={logoAlt || "Packaging Hype"}
               width={150}
               height={48}
-              className="h-9 w-auto rounded-sm"
+              className="h-9 w-auto rounded-sm object-contain"
+              unoptimized={Boolean(logoUrl && (logoUrl.endsWith(".svg") || logoUrl.endsWith(".ico")))}
             />
           </Link>
 

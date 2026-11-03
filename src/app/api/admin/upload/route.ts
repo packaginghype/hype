@@ -17,6 +17,9 @@ const IMAGE_TYPES = new Set([
   "image/png",
   "image/webp",
   "image/gif",
+  "image/svg+xml",
+  "image/x-icon",
+  "image/vnd.microsoft.icon",
 ]);
 const VIDEO_TYPES = new Set(["video/mp4"]);
 
