@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { CACHE_TAGS, CATALOG_REVALIDATE } from "@/lib/cache";
@@ -208,7 +209,7 @@ export async function getBlogsByIds(ids: string[]) {
   )();
 }
 
-export async function getBlogBySlug(slug: string) {
+export const getBlogBySlug = cache(async (slug: string) => {
   return unstable_cache(
     async () => {
       const post = await prisma.blogPost.findFirst({
@@ -219,4 +220,4 @@ export async function getBlogBySlug(slug: string) {
     [`blog-by-slug-${slug}`],
     { tags: [CACHE_TAGS.blogs], revalidate: CATALOG_REVALIDATE }
   )();
-}
+});
