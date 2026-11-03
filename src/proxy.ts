@@ -36,7 +36,7 @@ async function readSession(request: NextRequest) {
   }
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // 1. Enforce non-www URL across the entire site (301 Permanent Redirect)
   const host =
     request.headers.get("x-forwarded-host") ||
@@ -94,3 +94,4 @@ export const config = {
     "/((?!_next/static|_next/image|favicon.ico).*)",
   ],
 };
+
