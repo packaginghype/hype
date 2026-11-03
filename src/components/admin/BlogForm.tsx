@@ -23,6 +23,7 @@ export type BlogFormValues = {
   seoKeywords?: string | null;
   seoDescription?: string | null;
   seoScript?: string | null;
+  canonicalUrl?: string | null;
   isPublished?: boolean;
 };
 
@@ -142,6 +143,7 @@ export function BlogForm({
     seoKeywords: initial?.seoKeywords || "",
     seoDescription: initial?.seoDescription || "",
     seoScript: initial?.seoScript || "",
+    canonicalUrl: initial?.canonicalUrl || "",
     isPublished: initial?.isPublished ?? true,
   });
   const [error, setError] = useState("");
@@ -362,6 +364,18 @@ export function BlogForm({
             className={`${inputClass} font-mono text-[12px]`}
             placeholder='<script type="application/ld+json">…</script>'
           />
+        </div>
+        <div>
+          <FieldLabel>Canonical URL</FieldLabel>
+          <input
+            value={values.canonicalUrl || ""}
+            onChange={(e) => patch({ canonicalUrl: e.target.value })}
+            className={inputClass}
+            placeholder={`https://packaginghype.com/blog/${values.slug || "post-slug"}`}
+          />
+          <p className="mt-1 text-[11px] text-[#6B7280]">
+            Leave empty to use the default URL: https://packaginghype.com/blog/{values.slug || "post-slug"}
+          </p>
         </div>
         <YesNo
           label="Status"

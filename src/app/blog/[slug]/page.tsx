@@ -6,6 +6,7 @@ import { Container } from "@/components/ui/Container";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { RichText } from "@/components/ui/RichText";
 import { BlogShareButtons } from "@/components/blog/BlogShareButtons";
+import { JsonLdScript } from "@/components/seo/JsonLdScript";
 import { Calendar, Clock, ArrowLeft, ArrowRight, BookOpen, Sparkles } from "lucide-react";
 import { formatBlogDate, getBlogBySlug, getPublishedBlogs, getBlogFallbackImage } from "@/lib/blogs";
 
@@ -29,13 +30,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = post.seoTitle || post.title;
   const description = post.seoDescription || post.excerpt || post.title;
 
+  const canonical =
+    ((post as { canonicalUrl?: string | null }).canonicalUrl || "").trim() ||
+    `https://packaginghype.com/blog/${slug}`;
+
   return {
     title,
     description,
     keywords: post.seoKeywords || undefined,
+    alternates: {
+      canonical,
+    },
     openGraph: {
       title,
       description,
+      url: canonical,
       images: post.bannerImageUrl || post.featuredImage || undefined,
     },
   };
@@ -67,9 +76,7 @@ export default async function BlogDetailPage({ params }: Props) {
 
   return (
     <article className="min-h-screen bg-white text-[#172455]">
-      {post.seoScript ? (
-        <div dangerouslySetInnerHTML={{ __html: post.seoScript }} />
-      ) : null}
+      {post.seoScript ? <JsonLdScript source={post.seoScript} /> : null}
 
       {/* ── Breadcrumbs Bar ───────────────────────────────────────── */}
       <div className="border-b border-gray-100 bg-[#FAFAFA]/80">

@@ -219,6 +219,18 @@ export function StaticPageForm({
               className={inputClass}
             />
           </div>
+          <div>
+            <FieldLabel>Canonical URL</FieldLabel>
+            <input
+              value={values.seoCanonical || ""}
+              onChange={(e) => patch({ seoCanonical: e.target.value })}
+              className={inputClass}
+              placeholder={`https://packaginghype.com${path}`}
+            />
+            <p className="mt-1 text-[11px] text-[#6B7280]">
+              Leave empty to default to https://packaginghype.com{path}
+            </p>
+          </div>
         </div>
       </section>
 

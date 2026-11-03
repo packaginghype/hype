@@ -97,8 +97,8 @@ export function RelatedBlogsCarousel({ blogs }: { blogs: RelatedBlogItem[] }) {
                     <p className="text-[11px] font-bold uppercase tracking-wider text-[#FF5548]">
                       Guide
                     </p>
-                    <h3 className="mt-1.5 text-[15px] font-bold leading-snug text-[#172455] transition-colors group-hover:text-[#FF5548]">
-                      <Link href={`/blog/${blog.slug}`} className="focus:outline-none">
+                    <h3 className="mt-1.5 text-[15px] font-bold leading-snug text-[#111111]">
+                      <Link href={`/blog/${blog.slug}`} className="text-[#111111] focus:outline-none">
                         {blog.title}
                       </Link>
                     </h3>
@@ -110,7 +110,7 @@ export function RelatedBlogsCarousel({ blogs }: { blogs: RelatedBlogItem[] }) {
                     <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
                       <Link
                         href={`/blog/${blog.slug}`}
-                        className="inline-flex cursor-pointer items-center gap-1 text-xs font-bold text-[#172455] transition-colors hover:text-[#FF5548]"
+                        className="inline-flex cursor-pointer items-center gap-1 text-xs font-bold text-[#172455]"
                       >
                         Read Article →
                       </Link>

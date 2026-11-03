@@ -5,7 +5,8 @@ import { getPublishedBlogs } from "@/lib/blogs";
 export const revalidate = 120;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://packaginghype.com";
+  const rawBase = process.env.NEXT_PUBLIC_SITE_URL || "https://packaginghype.com";
+  const baseUrl = rawBase.replace(/^https?:\/\/www\./i, "https://");
   const now = new Date();
   const [{ categories, products }, blogs] = await Promise.all([
     getSitemapEntries(),

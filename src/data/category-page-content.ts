@@ -5,6 +5,8 @@ export type CategoryMaterialItem = {
   description: string;
   bestFor: string;
   imageUrl?: string;
+  imageAlt?: string;
+  imageTitle?: string;
 };
 
 function cleanName(name: string) {

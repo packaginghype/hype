@@ -24,10 +24,6 @@ export type ProductImageInput = {
   isPrimary?: boolean;
 };
 
-export type ProductSpecInput = {
-  heading: string;
-  details: string;
-};
 
 export type ProductFaqInput = {
   question: string;
@@ -50,7 +46,6 @@ export type ProductFormValues = {
   name: string;
   slug: string;
   shortDescription?: string | null;
-  fullDescription?: string | null;
   sku?: string | null;
   startingPrice?: number | null;
   originalPrice?: number | null;
@@ -72,12 +67,6 @@ export type ProductFormValues = {
   videoUrl?: string | null;
   videoThumbnailUrl?: string | null;
   videoDescription?: string | null;
-  detailHeading?: string | null;
-  detailShortDescription?: string | null;
-  specsHeading?: string | null;
-  specsDescription?: string | null;
-  specsTableHeading?: string | null;
-  specs?: ProductSpecInput[];
   widgetsContent?: string | null;
   relevantProductsHeading?: string | null;
   relevantProductsDescription?: string | null;
@@ -103,6 +92,7 @@ export type ProductFormValues = {
   seoKeywords?: string | null;
   seoDescription?: string | null;
   seoScript?: string | null;
+  canonicalUrl?: string | null;
   isPublished?: boolean;
   imageUrl?: string | null;
   imageAlt?: string | null;
@@ -210,7 +200,6 @@ export function ProductForm({
     name: initial?.name || "",
     slug: initial?.slug || "",
     shortDescription: initial?.shortDescription || "",
-    fullDescription: initial?.fullDescription || "",
     sku: initial?.sku || "",
     startingPrice: initial?.startingPrice ?? null,
     originalPrice: initial?.originalPrice ?? initial?.startingPrice ?? null,
@@ -237,11 +226,6 @@ export function ProductForm({
     videoUrl: initial?.videoUrl || "",
     videoThumbnailUrl: initial?.videoThumbnailUrl || "",
     videoDescription: initial?.videoDescription || "",
-    detailHeading: initial?.detailHeading || "",
-    detailShortDescription: initial?.detailShortDescription || "",
-    specsHeading: initial?.specsHeading || "",
-    specsDescription: initial?.specsDescription || "",
-    specsTableHeading: initial?.specsTableHeading || "",
     widgetsContent: initial?.widgetsContent || "",
     relevantProductsHeading: initial?.relevantProductsHeading || "Related Products",
     relevantProductsDescription: initial?.relevantProductsDescription || "",
@@ -267,6 +251,7 @@ export function ProductForm({
     seoKeywords: initial?.seoKeywords || "",
     seoDescription: initial?.seoDescription || "",
     seoScript: initial?.seoScript || "",
+    canonicalUrl: initial?.canonicalUrl || "",
     isPublished: initial?.isPublished ?? true,
   });
 
@@ -285,11 +270,6 @@ export function ProductForm({
     return [];
   });
 
-  const [specs, setSpecs] = useState<ProductSpecInput[]>(
-    initial?.specs?.length
-      ? initial.specs
-      : [{ heading: "Specification", details: "" }]
-  );
   const [faqs, setFaqs] = useState<ProductFaqInput[]>(
     initial?.faqs?.length
       ? initial.faqs
@@ -427,7 +407,6 @@ export function ProductForm({
       ...values,
       startingPrice: values.originalPrice,
       images,
-      specs: specs.filter((s) => s.heading.trim() || s.details.trim()),
       faqs: faqs.filter((f) => f.question.trim()),
       merchantImageUrls: (values.merchantImageUrls || []).filter((u) => u.trim()),
       materialsAvailable: values.materialsAvailable || [],
@@ -921,125 +900,6 @@ export function ProductForm({
         </div>
       </Section>
 
-      <Section title="Product Detail">
-        <div>
-          <FieldLabel>Detail Heading</FieldLabel>
-          <input
-            value={values.detailHeading || ""}
-            onChange={(e) => patch({ detailHeading: e.target.value })}
-            className={inputClass}
-            placeholder="Enter Detail Heading"
-          />
-        </div>
-        <div>
-          <FieldLabel>Detail Short Description</FieldLabel>
-          <RichTextEditor
-            value={values.detailShortDescription || ""}
-            onChange={(html) => patch({ detailShortDescription: html })}
-            placeholder="Detail short description…"
-          />
-        </div>
-        <div>
-          <FieldLabel>Full Description</FieldLabel>
-          <RichTextEditor
-            value={values.fullDescription || ""}
-            onChange={(html) => patch({ fullDescription: html })}
-            placeholder="Full product description…"
-          />
-        </div>
-      </Section>
-
-      <Section title="Specifications">
-        <div>
-          <FieldLabel>Specifications Heading</FieldLabel>
-          <input
-            value={values.specsHeading || ""}
-            onChange={(e) => patch({ specsHeading: e.target.value })}
-            className={inputClass}
-          />
-        </div>
-        <div>
-          <FieldLabel>Specification Description</FieldLabel>
-          <RichTextEditor
-            value={values.specsDescription || ""}
-            onChange={(html) => patch({ specsDescription: html })}
-          />
-        </div>
-        <div>
-          <FieldLabel>Table Heading</FieldLabel>
-          <input
-            value={values.specsTableHeading || ""}
-            onChange={(e) => patch({ specsTableHeading: e.target.value })}
-            className={inputClass}
-          />
-        </div>
-
-        <div className="space-y-3">
-          {specs.map((spec, index) => (
-            <div
-              key={index}
-              className="grid gap-3 rounded-[6px] border border-[#E8EAEF] bg-[#F8FAFC] p-3 sm:grid-cols-[180px_1fr_auto]"
-            >
-              <div>
-                <FieldLabel>Heading</FieldLabel>
-                <input
-                  value={spec.heading}
-                  onChange={(e) =>
-                    setSpecs((prev) =>
-                      prev.map((row, i) =>
-                        i === index ? { ...row, heading: e.target.value } : row
-                      )
-                    )
-                  }
-                  className={inputClass}
-                  placeholder="Heading"
-                />
-              </div>
-              <div>
-                <FieldLabel>Details</FieldLabel>
-                <textarea
-                  rows={2}
-                  value={spec.details}
-                  onChange={(e) =>
-                    setSpecs((prev) =>
-                      prev.map((row, i) =>
-                        i === index ? { ...row, details: e.target.value } : row
-                      )
-                    )
-                  }
-                  className={inputClass}
-                  placeholder="Details"
-                />
-              </div>
-              <button
-                type="button"
-                onClick={() =>
-                  setSpecs((prev) =>
-                    prev.length <= 1
-                      ? [{ heading: "", details: "" }]
-                      : prev.filter((_, i) => i !== index)
-                  )
-                }
-                className="mt-6 inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-[4px] bg-[#FF5548] text-white hover:bg-[#e04337]"
-                aria-label="Remove row"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          ))}
-        </div>
-
-        <button
-          type="button"
-          onClick={() =>
-            setSpecs((prev) => [...prev, { heading: "", details: "" }])
-          }
-          className="inline-flex cursor-pointer items-center gap-1.5 rounded-[4px] bg-[#172455] px-3 py-2 text-xs font-bold text-white hover:bg-[#0f1839]"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          Add More
-        </button>
-      </Section>
 
       <Section title="Widgets / Modules Content">
         <div>
@@ -1305,27 +1165,24 @@ export function ProductForm({
               key={index}
               className="space-y-3 rounded-[6px] border border-[#E8EAEF] bg-[#F8FAFC] p-4"
             >
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-sm font-bold text-[#172455]">
-                  Question {index + 1}
-                </p>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setFaqs((prev) =>
-                      prev.length <= 1
-                        ? [{ question: "", answer: "" }]
-                        : prev.filter((_, i) => i !== index)
-                    )
-                  }
-                  className="inline-flex cursor-pointer items-center gap-1 rounded-[4px] px-2 py-1 text-xs font-bold text-[#FF5548] hover:bg-[#FFF5F4]"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                  Remove
-                </button>
-              </div>
               <div>
-                <FieldLabel>Question {index + 1}</FieldLabel>
+                <div className="flex items-center justify-between gap-2">
+                  <FieldLabel>Question {index + 1}</FieldLabel>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFaqs((prev) =>
+                        prev.length <= 1
+                          ? [{ question: "", answer: "" }]
+                          : prev.filter((_, i) => i !== index)
+                      )
+                    }
+                    className="inline-flex cursor-pointer items-center gap-1 rounded-[4px] px-2 py-1 text-xs font-bold text-[#FF5548] hover:bg-[#FFF5F4]"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Remove
+                  </button>
+                </div>
                 <input
                   value={faq.question}
                   onChange={(e) =>
@@ -1511,6 +1368,18 @@ export function ProductForm({
             className={`${inputClass} font-mono text-[12px]`}
             placeholder='<script type="application/ld+json">…</script>'
           />
+        </div>
+        <div>
+          <FieldLabel>Canonical URL</FieldLabel>
+          <input
+            value={values.canonicalUrl || ""}
+            onChange={(e) => patch({ canonicalUrl: e.target.value })}
+            className={inputClass}
+            placeholder={`https://packaginghype.com/product/${values.slug || "product-slug"}`}
+          />
+          <p className="mt-1 text-[11px] text-[#6B7280]">
+            Leave empty to use the default URL: https://packaginghype.com/product/{values.slug || "product-slug"}
+          </p>
         </div>
         <YesNo
           label="Status"

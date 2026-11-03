@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CategoryDetailPage } from "@/components/categories/CategoryDetailPage";
+import { JsonLdScript } from "@/components/seo/JsonLdScript";
 import { getAllProducts, getCategoryBySlug } from "@/lib/catalog";
 import { stripHtml } from "@/lib/html";
 
@@ -26,17 +27,21 @@ export async function generateMetadata({
       ? category.cms.seoDescription
       : stripHtml(category.description);
 
+  const canonical =
+    (category.cms?.canonicalUrl || "").trim() ||
+    `https://packaginghype.com/${slug}`;
+
   return {
     title,
     description,
     keywords: seoOn ? category.cms?.seoKeywords || undefined : undefined,
     alternates: {
-      canonical: `https://packaginghype.com/${slug}`,
+      canonical,
     },
     openGraph: {
       title,
       description,
-      url: `https://packaginghype.com/${slug}`,
+      url: canonical,
     },
   };
 }
@@ -58,6 +63,13 @@ export default async function SlugPage({
 
   const products = await getAllProducts({ categorySlug: category.slug });
 
-  return <CategoryDetailPage category={category} products={products} />;
+  return (
+    <>
+      {category.cms?.seoEnabled !== false && category.cms?.seoScript ? (
+        <JsonLdScript source={category.cms.seoScript} />
+      ) : null}
+      <CategoryDetailPage category={category} products={products} />
+    </>
+  );
 }
 

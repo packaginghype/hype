@@ -254,7 +254,7 @@ export function Header({
                   {materials.map((item) => (
                     <Link
                       key={item.slug}
-                      href={`/box-by-material/${item.slug}`}
+                      href={`/${item.slug}`}
                       className="block rounded px-3 py-2.5 text-sm font-semibold text-[#172455] transition-colors hover:bg-[#F6F8FA] hover:text-[#FF5548]"
                     >
                       {item.name}
@@ -295,7 +295,7 @@ export function Header({
 
             <a
               href={`tel:${VERIFIED_BUSINESS_INFO.phoneRaw}`}
-              className="inline-flex items-center justify-center rounded-full p-1.5 text-[#21AAA5] transition-colors hover:bg-[#EAF7F6] hover:text-[#178f8b] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#21AAA5]/40"
+              className="hidden sm:inline-flex items-center justify-center rounded-full p-1.5 text-[#21AAA5] transition-colors hover:bg-[#EAF7F6] hover:text-[#178f8b] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#21AAA5]/40"
               aria-label={`Call ${VERIFIED_BUSINESS_INFO.phone}`}
               title={VERIFIED_BUSINESS_INFO.phone}
             >
@@ -304,7 +304,7 @@ export function Header({
 
             <Link
               href="/cart"
-              className="relative rounded-md p-2 text-[#172455] transition-colors hover:bg-[#F6F8FA] hover:text-[#FF5548] focus:outline-none focus:ring-2 focus:ring-[#21AAA5]"
+              className="relative hidden sm:block rounded-md p-2 text-[#172455] transition-colors hover:bg-[#F6F8FA] hover:text-[#FF5548] focus:outline-none focus:ring-2 focus:ring-[#21AAA5]"
               aria-label={`View cart${itemCount ? `, ${itemCount} items` : ""}`}
             >
               <ShoppingCart className="h-5 w-5" />
@@ -317,7 +317,7 @@ export function Header({
               href="/quote"
               variant="primary"
               size="md"
-              className="ml-1 hidden shadow-sm sm:inline-flex"
+              className="ml-1 hidden shadow-sm lg:inline-flex"
             >
               <SendHorizontal className="mr-1.5 h-4 w-4" />
               <span>Get a Quote</span>
@@ -326,10 +326,10 @@ export function Header({
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(true)}
-              className="rounded-md p-2 text-[#172455] hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#21AAA5] lg:hidden"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-gray-200 bg-white text-[#172455] shadow-sm transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#21AAA5] lg:hidden"
               aria-label="Open mobile navigation"
             >
-              <Menu className="h-6 w-6" />
+              <Menu className="h-5 w-5" />
             </button>
           </div>
         </Container>

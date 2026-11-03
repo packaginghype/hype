@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import Image from "next/image";
-import { ChevronLeft, ChevronRight, Package } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { CategoryQuoteForm } from "@/components/categories/CategoryQuoteForm";
@@ -30,7 +29,11 @@ export default function ProductHero({
 
   const [active, setActive] = useState(0);
   const [page, setPage] = useState(0);
-  const leftRef = useRef<HTMLDivElement>(null);
+  const [showMore, setShowMore] = useState(false);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+
+  const descRef = useRef<HTMLDivElement>(null);
+  const descWrapRef = useRef<HTMLDivElement>(null);
 
   const current = images[active] || images[0];
   const maxPage = Math.max(0, Math.ceil(images.length / VISIBLE) - 1);
@@ -43,6 +46,19 @@ export default function ProductHero({
     setPage((prev) => (prev === nextPage ? prev : nextPage));
   }, [active, images.length]);
 
+  // Detect if description overflows its container
+  useEffect(() => {
+    const check = () => {
+      const wrap = descWrapRef.current;
+      const inner = descRef.current;
+      if (!wrap || !inner) return;
+      setIsOverflowing(inner.scrollHeight > wrap.clientHeight);
+    };
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, [product.description]);
+
   const prevImage = () => {
     setActive((curr) => (curr - 1 + images.length) % images.length);
   };
@@ -51,20 +67,52 @@ export default function ProductHero({
   };
 
   return (
-    <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-8">
-      {/* Left — breadcrumb → title → copy → form */}
-      <div ref={leftRef} className="min-w-0">
+    <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:gap-8">
+      {/* ── Left column: breadcrumbs → title → description → form ── */}
+      <div className="flex min-w-0 flex-col">
         <Breadcrumbs variant="slash" items={breadcrumbs} />
 
-        <h1 className="mt-4 text-[1.65rem] font-extrabold leading-tight tracking-tight text-[#111111] sm:mt-5 sm:text-[1.9rem] lg:text-[2.05rem]">
+        <h1 className="mt-3 text-left text-[1.65rem] font-extrabold leading-tight tracking-tight text-[#111111] sm:mt-4 sm:text-[1.9rem] lg:text-[2.05rem]">
           {product.name}
         </h1>
+
         {product.description ? (
-          <div className="mt-3 w-full text-[14px] leading-[1.65] text-[#333] sm:text-[14.5px] [&>p]:mb-2 [&>p:last-child]:mb-0">
-            <RichText html={product.description} />
+          <div className="mt-3">
+            {/* Description container — capped height, only shows overflow when not expanded */}
+            <div
+              ref={descWrapRef}
+              className={cn(
+                "relative overflow-hidden transition-all",
+                !showMore && "max-h-[18rem]"
+              )}
+            >
+              <div
+                ref={descRef}
+                className="w-full text-left text-[14px] leading-[1.7] text-[#444] sm:text-[14.5px] [&>p]:mb-2 [&>p:last-child]:mb-0"
+              >
+                <RichText html={product.description} />
+              </div>
+
+              {/* Fade mask when overflow present & collapsed */}
+              {isOverflowing && !showMore && (
+                <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-white to-transparent" />
+              )}
+            </div>
+
+            {/* See More / See Less — only render when description actually overflows */}
+            {isOverflowing && (
+              <button
+                type="button"
+                onClick={() => setShowMore((v) => !v)}
+                className="mt-1.5 text-[13px] font-semibold text-[#FF5548] hover:underline focus:outline-none"
+              >
+                {showMore ? "See Less ↑" : "See More ↓"}
+              </button>
+            )}
           </div>
         ) : null}
 
+        {/* Quote form — always shown below description */}
         <div id="product-quote" className="mt-5 scroll-mt-28 sm:mt-6">
           <CategoryQuoteForm
             productName={product.name}
@@ -86,14 +134,15 @@ export default function ProductHero({
         </div>
       </div>
 
-      {/* Right — gallery: 1:1 square frame adhering to 900x900 admin specs */}
+      {/* ── Right column: main image + thumbnail strip ── */}
       <div className="min-w-0">
-        <div className="group relative aspect-square w-full overflow-hidden rounded-[8px] sm:rounded-[10px] bg-[#F3F3F3]">
+        {/* Main image — slightly reduced height so thumbnails stay in first view */}
+        <div className="group relative aspect-[4/3] w-full overflow-hidden rounded-[8px] sm:rounded-[10px] sm:aspect-square bg-[#F3F3F3]">
           <SafeImage
             src={current || ""}
             alt={product.name}
             fill
-            sizes="(max-width: 1024px) 100vw, 48vw"
+            sizes="(max-width: 1024px) 100vw, 45vw"
             className="object-contain p-2 sm:p-4 transition-opacity duration-300"
             priority
           />
@@ -120,6 +169,7 @@ export default function ProductHero({
           ) : null}
         </div>
 
+        {/* Thumbnail strip */}
         {images.length > 1 ? (
           <div className="relative mt-3 sm:mt-3.5">
             {showArrows ? (

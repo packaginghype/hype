@@ -100,7 +100,7 @@ export async function PUT(request: Request, { params }: Params) {
     summary: `${session.name} updated category "${category.name}"`,
   });
 
-  revalidateCatalog();
+  revalidateCatalog(category.slug);
   return NextResponse.json({ category });
 }
 

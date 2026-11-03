@@ -17,12 +17,20 @@ function expireTag(tag: string) {
   revalidateTag(tag, { expire: 0 });
 }
 
-export function revalidateCatalog() {
+export function revalidateCatalog(slug?: string) {
   expireTag(CACHE_TAGS.nav);
   expireTag(CACHE_TAGS.categories);
   expireTag(CACHE_TAGS.products);
   expireTag(CACHE_TAGS.sitemap);
+  if (slug) {
+    expireTag(`category-${slug}`);
+    expireTag(`product-${slug}`);
+    revalidatePath(`/${slug}`, "page");
+    revalidatePath(`/${slug}`);
+  }
   revalidatePath("/", "layout");
+  revalidatePath("/[slug]", "page");
+  revalidatePath("/[slug]");
   revalidatePath("/categories");
   revalidatePath("/category");
   revalidatePath("/products");

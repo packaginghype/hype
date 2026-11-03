@@ -14,6 +14,9 @@ export async function generateMetadata(): Promise<Metadata> {
     title: data?.seoTitle || def?.defaults.seoTitle || "Shipping & Delivery Policy",
     description: data?.seoDescription || def?.defaults.seoDescription || undefined,
     keywords: data?.seoKeywords || undefined,
+    alternates: {
+      canonical: data?.seoCanonical?.trim() || `https://packaginghype.com/shipping-delivery-policy`,
+    },
   };
 }
 

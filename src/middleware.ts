@@ -37,6 +37,20 @@ async function readSession(request: NextRequest) {
 }
 
 export async function middleware(request: NextRequest) {
+  // 1. Enforce non-www URL across the entire site (301 Permanent Redirect)
+  const host =
+    request.headers.get("x-forwarded-host") ||
+    request.headers.get("host") ||
+    request.nextUrl.host;
+
+  if (host && host.toLowerCase().startsWith("www.")) {
+    const nonWwwHost = host.replace(/^www\./i, "");
+    const url = request.nextUrl.clone();
+    url.host = nonWwwHost;
+    url.protocol = "https:";
+    return NextResponse.redirect(url, 301);
+  }
+
   const { pathname } = request.nextUrl;
 
   if (!pathname.startsWith("/admin")) {
@@ -70,5 +84,13 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: [
+    /*
+     * Match all request paths except for:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    "/((?!_next/static|_next/image|favicon.ico).*)",
+  ],
 };

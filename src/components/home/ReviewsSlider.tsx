@@ -87,7 +87,7 @@ export function ReviewsSlider({
   const transform = canSlide ? `translateX(-${(currentIndex * 100) / list.length}%)` : "none";
 
   return (
-    <section className="border-y border-[#D5E8DC] bg-[#F3FAF6] py-14 sm:py-16 lg:py-20">
+    <section className="bg-white py-10 sm:py-12 lg:py-14">
       <Container>
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">

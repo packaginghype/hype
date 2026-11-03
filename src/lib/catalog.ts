@@ -292,6 +292,7 @@ export const getCategoryBySlug = cache(async (slug: string): Promise<CategoryIte
         seoKeywords: category.seoKeywords || undefined,
         seoDescription: category.seoDescription || undefined,
         seoScript: category.seoScript || undefined,
+        canonicalUrl: category.canonicalUrl || undefined,
         isPublished: category.isPublished,
       };
       if (category.description) {
@@ -553,6 +554,7 @@ export const getProductBySlug = cache(async (slug: string): Promise<ProductItem 
         seoKeywords: product.seoKeywords || undefined,
         seoDescription: product.seoDescription || undefined,
         seoScript: product.seoScript || undefined,
+        canonicalUrl: product.canonicalUrl || undefined,
       };
 
       return item;

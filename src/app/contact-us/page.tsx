@@ -17,6 +17,9 @@ export async function generateMetadata(): Promise<Metadata> {
     title: data?.seoTitle || def?.defaults.seoTitle || "Contact Us",
     description: data?.seoDescription || def?.defaults.seoDescription || undefined,
     keywords: data?.seoKeywords || undefined,
+    alternates: {
+      canonical: data?.seoCanonical?.trim() || `https://packaginghype.com/contact-us`,
+    },
   };
 }
 

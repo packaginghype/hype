@@ -45,6 +45,7 @@ export interface CategoryItem {
     seoKeywords?: string;
     seoDescription?: string;
     seoScript?: string;
+    canonicalUrl?: string;
     isPublished: boolean;
   };
 }
@@ -111,6 +112,7 @@ export interface ProductItem {
     seoKeywords?: string;
     seoDescription?: string;
     seoScript?: string;
+    canonicalUrl?: string;
   };
 }
 

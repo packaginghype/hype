@@ -66,7 +66,6 @@ export default async function EditProductPage({ params }: Props) {
           name: product.name,
           slug: product.slug,
           shortDescription: product.shortDescription,
-          fullDescription: product.fullDescription,
           sku: product.sku,
           startingPrice: product.startingPrice
             ? Number(product.startingPrice)
@@ -101,15 +100,6 @@ export default async function EditProductPage({ params }: Props) {
           videoUrl: product.videoUrl,
           videoThumbnailUrl: product.videoThumbnailUrl,
           videoDescription: product.videoDescription,
-          detailHeading: product.detailHeading,
-          detailShortDescription: product.detailShortDescription,
-          specsHeading: product.specsHeading,
-          specsDescription: product.specsDescription,
-          specsTableHeading: product.specsTableHeading,
-          specs: product.specs.map((s) => ({
-            heading: s.heading,
-            details: s.details,
-          })),
           widgetsContent: product.widgetsContent,
           relevantProductsHeading: product.relevantProductsHeading,
           relevantProductsDescription: product.relevantProductsDescription,

@@ -27,7 +27,7 @@ export function FaqSection({
       : VERIFIED_FAQS;
 
   return (
-    <section className="border-t border-[#E8EAEF] bg-white py-14 sm:py-16 lg:py-20">
+    <section className="bg-[#EEF6FF] py-10 sm:py-12 lg:py-14">
       <Container>
         <div className="mx-auto max-w-2xl text-center lg:mx-0 lg:max-w-none lg:text-left">
           {faqHeading && (

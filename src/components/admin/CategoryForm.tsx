@@ -24,6 +24,8 @@ export type CategoryMaterialInput = {
   description: string;
   bestFor: string;
   imageUrl: string;
+  imageAlt?: string;
+  imageTitle?: string;
 };
 
 export type CategoryWidgetsConfig = {
@@ -183,6 +185,7 @@ export type CategoryFormValues = {
   seoEnabled?: boolean;
   seoKeywords?: string | null;
   seoScript?: string | null;
+  canonicalUrl?: string | null;
   isPublished?: boolean;
 };
 
@@ -319,6 +322,7 @@ export function CategoryForm({
     seoEnabled: initial?.seoEnabled ?? true,
     seoKeywords: initial?.seoKeywords || "",
     seoScript: initial?.seoScript || "",
+    canonicalUrl: initial?.canonicalUrl || "",
     isPublished: initial?.isPublished ?? true,
   });
 
@@ -663,216 +667,9 @@ export function CategoryForm({
         </div>
       </Section>
 
-      <Section title="Material Options">
-        <p className="text-[12px] font-medium text-[#4B5563]">
-          These appear in the &quot;Explore the Material&quot; section on the category page.
-        </p>
+      
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <FieldLabel>Section Heading</FieldLabel>
-            <input
-              value={widgets.materialsHeading}
-              onChange={(e) =>
-                setWidgets((prev) => ({ ...prev, materialsHeading: e.target.value }))
-              }
-              className={inputClass}
-              placeholder="Explore the Material For..."
-            />
-          </div>
-          <div>
-            <FieldLabel>Section Description</FieldLabel>
-            <textarea
-              rows={2}
-              value={widgets.materialsDescription}
-              onChange={(e) =>
-                setWidgets((prev) => ({ ...prev, materialsDescription: e.target.value }))
-              }
-              className={inputClass}
-              placeholder="Discover premium materials like natural kraft..."
-            />
-          </div>
-        </div>
-
-        <div className="space-y-5">
-          {widgets.materials.map((mat, index) => (
-            <div
-              key={index}
-              className="space-y-4 rounded-[6px] border border-[#E8EAEF] bg-[#F8FAFC] p-4"
-            >
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-sm font-bold text-[#172455]">Material {index + 1}</p>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setWidgets((prev) => ({
-                      ...prev,
-                      materials:
-                        prev.materials.length <= 1
-                          ? [{ ...DEFAULT_MATERIAL }]
-                          : prev.materials.filter((_, i) => i !== index),
-                    }))
-                  }
-                  className="inline-flex items-center gap-1 rounded-[4px] px-2 py-1 text-xs font-bold text-[#FF5548] hover:bg-[#FFF5F4]"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                  Remove
-                </button>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <FieldLabel>Title</FieldLabel>
-                  <input
-                    value={mat.title}
-                    onChange={(e) =>
-                      setWidgets((prev) => ({
-                        ...prev,
-                        materials: prev.materials.map((item, i) =>
-                          i === index ? { ...item, title: e.target.value } : item
-                        ),
-                      }))
-                    }
-                    className={inputClass}
-                    placeholder="e.g. White Stock Bakery Boxes"
-                  />
-                </div>
-                <div>
-                  <FieldLabel>Best For</FieldLabel>
-                  <input
-                    value={mat.bestFor}
-                    onChange={(e) =>
-                      setWidgets((prev) => ({
-                        ...prev,
-                        materials: prev.materials.map((item, i) =>
-                          i === index ? { ...item, bestFor: e.target.value } : item
-                        ),
-                      }))
-                    }
-                    className={inputClass}
-                    placeholder="e.g. cosmetics, perfume, and retail gift packaging."
-                  />
-                </div>
-              </div>
-
-              <div>
-                <FieldLabel>Description</FieldLabel>
-                <textarea
-                  rows={2}
-                  value={mat.description}
-                  onChange={(e) =>
-                    setWidgets((prev) => ({
-                      ...prev,
-                      materials: prev.materials.map((item, i) =>
-                        i === index ? { ...item, description: e.target.value } : item
-                      ),
-                    }))
-                  }
-                  className={inputClass}
-                  placeholder="A clean, bright surface ideal for vibrant branding…"
-                />
-              </div>
-
-              <div>
-                <FieldLabel>Image</FieldLabel>
-                <ImageUploadField
-                  value={mat.imageUrl}
-                  onChange={(url) =>
-                    setWidgets((prev) => ({
-                      ...prev,
-                      materials: prev.materials.map((item, i) =>
-                        i === index ? { ...item, imageUrl: url } : item
-                      ),
-                    }))
-                  }
-                  label="Material Image"
-                  recommended="900 × 900 px (1:1 square)"
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <button
-          type="button"
-          onClick={() =>
-            setWidgets((prev) => {
-              const nextIndex = prev.materials.length;
-              return {
-                ...prev,
-                materials: [
-                  ...prev.materials,
-                  {
-                    title: "",
-                    description: "",
-                    bestFor: "",
-                    imageUrl:
-                      CANONICAL_MATERIAL_IMAGES[nextIndex % CANONICAL_MATERIAL_IMAGES.length],
-                  },
-                ],
-              };
-            })
-          }
-          className="inline-flex items-center gap-1.5 rounded-[4px] border border-[#E2E4E8] px-3 py-2 text-xs font-bold text-[#172455] hover:border-[#172455]"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          Add Material
-        </button>
-      </Section>
-
-      <Section title="Design Options">
-        <p className="text-[12px] font-medium text-[#4B5563]">
-          These appear in the &quot;Design Options&quot; section on the category page.
-        </p>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <FieldLabel>Design Section Heading</FieldLabel>
-            <input
-              value={widgets.designHeading}
-              onChange={(e) =>
-                setWidgets((prev) => ({ ...prev, designHeading: e.target.value }))
-              }
-              className={inputClass}
-              placeholder="e.g. Design Options for..."
-            />
-          </div>
-          <div>
-            <FieldLabel>Design Section Description</FieldLabel>
-            <textarea
-              rows={2}
-              value={widgets.designDescription}
-              onChange={(e) =>
-                setWidgets((prev) => ({ ...prev, designDescription: e.target.value }))
-              }
-              className={inputClass}
-              placeholder="Choose from tuck-end, sleeve, mailer..."
-            />
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <FieldLabel>Design Images (up to 3)</FieldLabel>
-          <div className="grid gap-4 sm:grid-cols-3">
-            {[0, 1, 2].map((idx) => (
-              <div key={idx} className="space-y-2">
-                <ImageUploadField
-                  value={widgets.designImages[idx] || ""}
-                  onChange={(url) =>
-                    setWidgets((prev) => {
-                      const copy = [...(prev.designImages || ["", "", ""])];
-                      copy[idx] = url;
-                      return { ...prev, designImages: copy };
-                    })
-                  }
-                  label={`Design Option Image ${idx + 1}`}
-                  recommended="600 × 450px"
-                  folder="packaginghype/categories/design"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      </Section>
+      
 
       <Section title="FAQs">
         <div className="grid gap-4 sm:grid-cols-2">
@@ -927,27 +724,24 @@ export function CategoryForm({
               key={index}
               className="space-y-3 rounded-[6px] border border-[#E8EAEF] bg-[#F8FAFC] p-4"
             >
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-sm font-bold text-[#172455]">
-                  Question {index + 1}
-                </p>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setFaqs((prev) =>
-                      prev.length <= 1
-                        ? [{ question: "", answer: "" }]
-                        : prev.filter((_, i) => i !== index)
-                    )
-                  }
-                  className="inline-flex items-center gap-1 rounded-[4px] px-2 py-1 text-xs font-bold text-[#FF5548] hover:bg-[#FFF5F4]"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                  Remove
-                </button>
-              </div>
               <div>
-                <FieldLabel>Question {index + 1}</FieldLabel>
+                <div className="flex items-center justify-between gap-2">
+                  <FieldLabel>Question {index + 1}</FieldLabel>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFaqs((prev) =>
+                        prev.length <= 1
+                          ? [{ question: "", answer: "" }]
+                          : prev.filter((_, i) => i !== index)
+                      )
+                    }
+                    className="inline-flex items-center gap-1 rounded-[4px] px-2 py-1 text-xs font-bold text-[#FF5548] hover:bg-[#FFF5F4]"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Remove
+                  </button>
+                </div>
                 <input
                   value={faq.question}
                   onChange={(e) =>
@@ -1044,6 +838,18 @@ export function CategoryForm({
             className={inputClass}
             placeholder="Enter script"
           />
+        </div>
+        <div>
+          <FieldLabel>Canonical URL</FieldLabel>
+          <input
+            value={values.canonicalUrl || ""}
+            onChange={(e) => patch({ canonicalUrl: e.target.value })}
+            className={inputClass}
+            placeholder={`https://packaginghype.com/${values.slug || "page-slug"}`}
+          />
+          <p className="mt-1 text-[11px] text-[#6B7280]">
+            Leave empty to use the default URL: https://packaginghype.com/{values.slug || "page-slug"}
+          </p>
         </div>
         <YesNo
           label="Status"

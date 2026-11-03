@@ -21,10 +21,7 @@ import { FAQAccordion } from "@/components/ui/FAQAccordion";
 import { RichText } from "@/components/ui/RichText";
 import {
   getCategoryAboutContent,
-  getCategoryDesignOptions,
   getCategoryHeroCopy,
-  getCategoryMaterialSection,
-  getCategoryMaterials,
 } from "@/data/category-page-content";
 import { isEmptyHtml, stripHtml } from "@/lib/html";
 import type { CategoryItem, ProductItem } from "@/types";
@@ -45,8 +42,7 @@ export function CategoryDetailPage({
     ...category,
     description: stripHtml(category.description),
   });
-  const materialSection = getCategoryMaterialSection(category, products);
-  const design = getCategoryDesignOptions(category, products);
+
 
   const bannerOn = cms?.bannerEnabled !== false;
   const quoteOn = cms?.bannerQuoteEnabled !== false;
@@ -82,7 +78,7 @@ export function CategoryDetailPage({
         <section className="relative">
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-x-0 top-0 bottom-[10.5rem] bg-[#E8F5F2] sm:bottom-[11.5rem] lg:bottom-[12rem]"
+            className="pointer-events-none absolute inset-x-0 top-0 bottom-[10.5rem] bg-white sm:bottom-[11.5rem] lg:bottom-[12rem]"
           />
           <div
             aria-hidden
@@ -112,7 +108,7 @@ export function CategoryDetailPage({
                   )}
                 </h1>
 
-                <div className="mt-3 text-left space-y-2.5 text-[13.5px] leading-[1.65] text-[#2a2a2a] sm:text-[14px] max-h-[175px] sm:max-h-[190px] lg:max-h-[200px] xl:max-h-[220px] overflow-y-auto pr-1.5 [scrollbar-width:thin] [scrollbar-color:#cbd5e1_transparent]">
+                <div className="mt-3 text-left space-y-2.5 text-[13.5px] leading-[1.65] text-[#2a2a2a] sm:text-[14px] max-h-[260px] sm:max-h-[280px] lg:max-h-[300px] xl:max-h-[320px] overflow-y-auto pr-1.5 [scrollbar-width:thin] [scrollbar-color:#cbd5e1_transparent]">
                   {!isEmptyHtml(cms?.bannerDescription || "") ? (
                     <RichText html={cms!.bannerDescription!} className="text-left" />
                   ) : !isEmptyHtml(category.description) &&
@@ -124,7 +120,7 @@ export function CategoryDetailPage({
                 </div>
               </div>
 
-              <div className="relative mx-auto flex h-[240px] w-full max-w-[380px] items-center justify-center sm:h-[300px] sm:max-w-[420px] lg:mx-0 lg:h-[340px] xl:h-[360px] lg:max-w-none">
+              <div className="relative mx-auto flex h-[240px] w-full max-w-[380px] items-center justify-center bg-transparent sm:h-[300px] sm:max-w-[420px] lg:mx-0 lg:h-[340px] xl:h-[360px] lg:max-w-none">
                 {heroImage ? (
                   <SafeImage
                     src={heroImage}
@@ -264,58 +260,8 @@ export function CategoryDetailPage({
         </section>
       ) : null}
 
-      {cms?.featureEnabled !== false ? (
-        <section className="bg-white py-14 sm:py-16 lg:py-20">
-          <Container className={contentWidth}>
-            <div className="text-left">
-              <h2 className="font-heading text-2xl font-extrabold tracking-tight text-[#0B1220] sm:text-3xl lg:text-[2rem]">
-                {materialSection.heading}
-              </h2>
-              <p className="mt-3 text-sm leading-relaxed text-[#444] sm:text-base">
-                {materialSection.description}
-              </p>
-            </div>
+      
 
-            <div className="mt-12 grid grid-cols-1 gap-x-10 gap-y-10 md:grid-cols-2">
-              {materialSection.items.map((item, index) => (
-                <div
-                  key={`${item.title}-${index}`}
-                  className="flex gap-4 sm:gap-5 items-start"
-                >
-                  <div className="relative h-28 w-28 shrink-0 sm:h-36 sm:w-36">
-                    {item.imageUrl ? (
-                      <Image
-                        src={item.imageUrl}
-                        alt={item.title || "Packaging Material"}
-                        fill
-                        sizes="(max-width: 640px) 112px, 144px"
-                        className="object-contain"
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center text-slate-300">
-                        <Package className="h-10 w-10" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="min-w-0 pt-0.5">
-                    <h3 className="text-base font-bold text-[#0B1220] sm:text-lg">
-                      {item.title}
-                    </h3>
-                    <p className="mt-1.5 text-sm leading-relaxed text-[#555]">
-                      {item.description}
-                    </p>
-                    {item.bestFor ? (
-                      <p className="mt-2 text-sm text-[#333]">
-                        <span className="font-bold">Best for:</span> {item.bestFor}
-                      </p>
-                    ) : null}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Container>
-        </section>
-      ) : null}
 
       {hasFaqs ? (
         <section className="border-t border-[#E8EAEF] bg-[#F8FAFC] py-14 sm:py-16">
@@ -375,44 +321,7 @@ export function CategoryDetailPage({
         </section>
       ) : null}
 
-      <section className="bg-white pb-16 pt-4 sm:pb-20 sm:pt-6">
-        <Container className={contentWidth}>
-          <div className="flex flex-col items-center text-center">
-            <Link
-              href="/quote"
-              className="inline-flex rounded-[6px] bg-[#FF5548] px-8 py-3 text-sm font-bold text-white hover:bg-[#e04337] sm:text-base"
-            >
-              Get Free Quote
-            </Link>
-
-            <h2 className="mt-8 font-heading text-2xl font-extrabold tracking-tight text-[#0B1220] sm:text-3xl">
-              {design.heading}
-            </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#444] sm:text-base">
-              {design.description}
-            </p>
-
-            {design.images.length > 0 && (
-              <div className="mt-10 grid w-full grid-cols-1 gap-5 sm:grid-cols-3 sm:gap-6">
-                {design.images.map((src, i) => (
-                  <div
-                    key={`${src}-${i}`}
-                    className="relative aspect-[4/3]"
-                  >
-                    <Image
-                      src={src}
-                      alt={`${design.heading} option ${i + 1}`}
-                      fill
-                      sizes="(max-width: 640px) 100vw, 33vw"
-                      className="object-contain"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </Container>
-      </section>
+      
     </div>
   );
 }

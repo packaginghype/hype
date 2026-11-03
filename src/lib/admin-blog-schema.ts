@@ -18,6 +18,7 @@ export const adminBlogSchema = z.object({
   seoKeywords: z.string().optional().nullable(),
   seoDescription: z.string().optional().nullable(),
   seoScript: z.string().optional().nullable(),
+  canonicalUrl: z.string().optional().nullable(),
   isPublished: z.boolean().optional(),
 });
 
@@ -50,6 +51,7 @@ export function blogWriteData(data: AdminBlogInput) {
     seoKeywords: (data.seoKeywords || "").trim() || null,
     seoDescription: (data.seoDescription || "").trim() || null,
     seoScript: (data.seoScript || "").trim() || null,
+    canonicalUrl: (data.canonicalUrl || "").trim() || null,
     isPublished: data.isPublished ?? true,
   };
 }

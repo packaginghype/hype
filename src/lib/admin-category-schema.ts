@@ -53,6 +53,7 @@ export const adminCategorySchema = z.object({
   seoEnabled: z.boolean().optional().default(true),
   seoKeywords: z.string().optional().nullable(),
   seoScript: z.string().optional().nullable(),
+  canonicalUrl: z.string().optional().nullable().or(z.literal("")),
   isPublished: z.boolean().optional().default(true),
 });
 
@@ -97,6 +98,7 @@ export function categoryWriteData(data: AdminCategoryInput) {
     seoEnabled: data.seoEnabled ?? true,
     seoKeywords: data.seoKeywords || null,
     seoScript: data.seoScript || null,
+    canonicalUrl: data.canonicalUrl?.trim() || null,
     isPublished: data.isPublished ?? true,
   };
 }

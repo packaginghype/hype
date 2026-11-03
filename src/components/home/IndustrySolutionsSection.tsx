@@ -82,7 +82,7 @@ export function IndustrySolutionsSection({
   const transform = canSlide ? `translateX(-${(currentIndex * 100) / items.length}%)` : "none";
 
   return (
-    <section className="relative bg-white py-16 sm:py-20 lg:py-24">
+    <section className="relative bg-[#EEF6FF] py-10 sm:py-12 lg:py-14">
       <Container>
         <div className="mb-10 flex flex-col gap-6 sm:mb-12 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">

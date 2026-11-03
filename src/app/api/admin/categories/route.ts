@@ -62,6 +62,6 @@ export async function POST(request: Request) {
     summary: `${session.name} created category "${category.name}"`,
   });
 
-  revalidateCatalog();
+  revalidateCatalog(category.slug);
   return NextResponse.json({ category }, { status: 201 });
 }

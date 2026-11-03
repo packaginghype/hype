@@ -110,6 +110,7 @@ model Category {
   seoEnabled       Boolean         @default(true)
   seoKeywords      String?         @db.Text
   seoScript        String?         @db.Text
+  canonicalUrl     String?
   isPublished      Boolean         @default(true)
 
   products       ProductCategory[]
@@ -206,6 +207,7 @@ model Product {
   seoKeywords      String?           @db.Text
   seoDescription   String?           @db.Text
   seoScript        String?           @db.Text
+  canonicalUrl     String?
   isPublished      Boolean           @default(true)
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
@@ -300,6 +302,7 @@ model BlogPost {
   seoKeywords          String?  @db.Text
   seoDescription       String?  @db.Text
   seoScript            String?  @db.Text
+  canonicalUrl         String?
   isPublished          Boolean  @default(true)
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt

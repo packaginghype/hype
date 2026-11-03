@@ -56,7 +56,6 @@ export async function PUT(request: Request, { params }: Params) {
   const data = parsed.data;
   const images = normalizeProductImages(data);
   const categoryIds = resolveProductCategoryIds(data);
-  const specs = (data.specs || []).filter((s) => s.heading.trim());
   const faqs = (data.faqs || []).filter((f) => f.question.trim());
   const relatedProductIds = (data.relatedProductIds || []).filter(
     (relatedId) => relatedId !== id
@@ -106,13 +105,6 @@ export async function PUT(request: Request, { params }: Params) {
               })),
             }
           : undefined,
-      specs: {
-        create: specs.map((spec, index) => ({
-          heading: spec.heading.trim(),
-          details: spec.details || "",
-          sortOrder: index,
-        })),
-      },
       faqs: {
         create: faqs.map((faq, index) => ({
           question: faq.question.trim(),

@@ -11,13 +11,10 @@ export async function CategoryShowcase() {
   if (categories.length === 0) return null;
 
   return (
-    <section className="bg-white py-14 sm:py-16 lg:py-20">
+    <section className="bg-[#EEF6FF] py-10 sm:py-12 lg:py-14">
       <Container>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#21AAA5]">
-              Categories
-            </p>
             <h2 className="mt-2 font-heading text-2xl font-extrabold tracking-tight text-[#172455] sm:text-3xl">
               Trending & Popular Packaging Categories
             </h2>

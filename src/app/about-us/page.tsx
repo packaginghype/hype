@@ -15,6 +15,9 @@ export async function generateMetadata(): Promise<Metadata> {
     title: data?.seoTitle || def?.defaults.seoTitle || "About Us",
     description: data?.seoDescription || def?.defaults.seoDescription || undefined,
     keywords: data?.seoKeywords || undefined,
+    alternates: {
+      canonical: data?.seoCanonical?.trim() || `https://packaginghype.com/about-us`,
+    },
   };
 }
 

@@ -21,7 +21,7 @@ export function HomeSeoContent({
   if (!heading && isEmptyHtml(html)) return null;
 
   return (
-    <section className="bg-white py-10 sm:py-14 lg:py-16">
+    <section className="bg-white py-8 sm:py-10 lg:py-12">
       <Container>
         <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-2 lg:gap-8 lg:h-[500px] xl:h-[540px]">
           <div className="order-1 relative aspect-[4/3] min-h-0 overflow-hidden rounded-[16px] bg-[#F3F1EE] lg:order-2 lg:aspect-auto lg:h-full">

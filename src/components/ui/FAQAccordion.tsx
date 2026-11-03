@@ -41,7 +41,7 @@ export function FAQAccordion({
           return (
             <div key={index} className="py-3.5 sm:py-4">
               {/* h3 wraps the button — valid HTML; gives FAQ questions semantic heading level */}
-              <h3 className="m-0 p-0 text-base font-normal leading-none">
+              <h3 className="m-0 p-0">
                 <button
                   id={buttonId}
                   type="button"
@@ -50,7 +50,7 @@ export function FAQAccordion({
                   onClick={() => toggleIndex(index)}
                   className="flex w-full items-start justify-between gap-3 rounded-md text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#21AAA5]"
                 >
-                  <span className="text-[14px] font-bold leading-snug text-[#172455] sm:text-[15px]">
+                  <span className="font-heading text-[15px] font-bold leading-snug tracking-tight text-[#172455] sm:text-[16px]">
                     {item.question}
                   </span>
                   <span
@@ -111,7 +111,7 @@ export function FAQAccordion({
         return (
           <div key={index} className="py-4 sm:py-5">
             {/* h3 wraps the button — gives FAQ questions H3 semantic heading level */}
-            <h3 className="m-0 p-0 text-base font-normal leading-none">
+            <h3 className="m-0 p-0">
               <button
                 id={buttonId}
                 type="button"
@@ -120,7 +120,7 @@ export function FAQAccordion({
                 onClick={() => toggleIndex(index)}
                 className="flex w-full items-center justify-between rounded text-left focus:outline-none focus:ring-2 focus:ring-[#21AAA5] focus:ring-offset-2"
               >
-                <span className="pr-4 text-base font-bold text-[#172455] sm:text-lg">
+                <span className="font-heading pr-4 text-base font-bold tracking-tight text-[#172455] sm:text-[17px]">
                   {item.question}
                 </span>
                 <span

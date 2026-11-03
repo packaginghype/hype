@@ -14,9 +14,9 @@ export default async function AdminDashboardLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-[#F6F8FA]">
+    <div className="flex h-screen overflow-hidden bg-[#F6F8FA]">
       <AdminSidebar adminName={session.name} role={session.role} />
-      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <AdminHeader adminName={session.name} />
         <main className="admin-surface w-full min-w-0 flex-1 overflow-y-auto p-4 sm:p-6">
           {children}

@@ -7,10 +7,6 @@ const imageSchema = z.object({
   isPrimary: z.boolean().optional(),
 });
 
-const specSchema = z.object({
-  heading: z.string(),
-  details: z.string(),
-});
 
 const faqSchema = z.object({
   question: z.string(),
@@ -21,7 +17,6 @@ export const adminProductSchema = z.object({
   name: z.string().min(1),
   slug: z.string().min(1).regex(/^[a-z0-9-]+$/),
   shortDescription: z.string().optional().nullable(),
-  fullDescription: z.string().optional().nullable(),
   sku: z.string().optional().nullable(),
   startingPrice: z.coerce.number().nonnegative().optional().nullable(),
   originalPrice: z.coerce.number().nonnegative().optional().nullable(),
@@ -44,12 +39,6 @@ export const adminProductSchema = z.object({
   videoUrl: z.string().optional().nullable().or(z.literal("")),
   videoThumbnailUrl: z.string().optional().nullable().or(z.literal("")),
   videoDescription: z.string().optional().nullable(),
-  detailHeading: z.string().optional().nullable(),
-  detailShortDescription: z.string().optional().nullable(),
-  specsHeading: z.string().optional().nullable(),
-  specsDescription: z.string().optional().nullable(),
-  specsTableHeading: z.string().optional().nullable(),
-  specs: z.array(specSchema).default([]),
   widgetsContent: z.string().optional().nullable(),
   relevantProductsHeading: z.string().optional().nullable(),
   relevantProductsDescription: z.string().optional().nullable(),
@@ -75,6 +64,7 @@ export const adminProductSchema = z.object({
   seoKeywords: z.string().optional().nullable(),
   seoDescription: z.string().optional().nullable(),
   seoScript: z.string().optional().nullable(),
+  canonicalUrl: z.string().optional().nullable().or(z.literal("")),
   isPublished: z.boolean().default(true),
   /** @deprecated prefer images[] */
   imageUrl: z.string().optional().nullable().or(z.literal("")),
@@ -147,7 +137,6 @@ export function productWriteData(data: AdminProductInput) {
     name: data.name,
     slug: data.slug,
     shortDescription: data.shortDescription || null,
-    fullDescription: data.fullDescription || null,
     sku: data.sku || null,
     startingPrice: original,
     originalPrice: original,
@@ -187,11 +176,6 @@ export function productWriteData(data: AdminProductInput) {
     videoUrl: data.videoUrl?.trim() || null,
     videoThumbnailUrl: data.videoThumbnailUrl?.trim() || null,
     videoDescription: data.videoDescription || null,
-    detailHeading: data.detailHeading || null,
-    detailShortDescription: data.detailShortDescription || null,
-    specsHeading: data.specsHeading || null,
-    specsDescription: data.specsDescription || null,
-    specsTableHeading: data.specsTableHeading || null,
     widgetsContent: data.widgetsContent || null,
     relevantProductsHeading: data.relevantProductsHeading || null,
     relevantProductsDescription: data.relevantProductsDescription || null,
@@ -215,6 +199,7 @@ export function productWriteData(data: AdminProductInput) {
     seoKeywords: data.seoKeywords || null,
     seoDescription: data.seoDescription || null,
     seoScript: data.seoScript || null,
+    canonicalUrl: data.canonicalUrl?.trim() || null,
     isPublished: data.isPublished,
   };
 }

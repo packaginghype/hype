@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, KeyboardEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Calendar, Loader2 } from "lucide-react";
 import { openDatePicker } from "@/lib/utils";
@@ -29,6 +29,56 @@ const fieldClass =
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
   return <p className="mt-1 text-[11px] font-medium text-[#FF5548]">{message}</p>;
+}
+
+// Allow: digits, decimal point, Backspace, Delete, Tab, Arrow keys, Home, End
+function allowDecimalOnly(e: KeyboardEvent<HTMLInputElement>) {
+  const allowed = [
+    "Backspace", "Delete", "Tab", "ArrowLeft", "ArrowRight",
+    "ArrowUp", "ArrowDown", "Home", "End", ".",
+  ];
+  if (allowed.includes(e.key)) return;
+  if (e.key >= "0" && e.key <= "9") return;
+  // Allow Ctrl/Cmd + A/C/V/X
+  if ((e.ctrlKey || e.metaKey) && ["a", "c", "v", "x"].includes(e.key.toLowerCase())) return;
+  e.preventDefault();
+}
+
+// Allow: digits only (no decimal)
+function allowIntegerOnly(e: KeyboardEvent<HTMLInputElement>) {
+  const allowed = [
+    "Backspace", "Delete", "Tab", "ArrowLeft", "ArrowRight",
+    "ArrowUp", "ArrowDown", "Home", "End",
+  ];
+  if (allowed.includes(e.key)) return;
+  if (e.key >= "0" && e.key <= "9") return;
+  if ((e.ctrlKey || e.metaKey) && ["a", "c", "v", "x"].includes(e.key.toLowerCase())) return;
+  e.preventDefault();
+}
+
+// Allow: letters, spaces, hyphens, apostrophes — block digits
+function allowLettersOnly(e: KeyboardEvent<HTMLInputElement>) {
+  const allowed = [
+    "Backspace", "Delete", "Tab", "ArrowLeft", "ArrowRight",
+    "ArrowUp", "ArrowDown", "Home", "End", " ", "-", "'", ".",
+  ];
+  if (allowed.includes(e.key)) return;
+  // Block digits 0-9
+  if (e.key >= "0" && e.key <= "9") { e.preventDefault(); return; }
+  if ((e.ctrlKey || e.metaKey) && ["a", "c", "v", "x"].includes(e.key.toLowerCase())) return;
+  // Allow everything else (letters, including unicode)
+}
+
+// Allow: digits, +, -, (, ), spaces (common phone chars)
+function allowPhoneOnly(e: KeyboardEvent<HTMLInputElement>) {
+  const allowed = [
+    "Backspace", "Delete", "Tab", "ArrowLeft", "ArrowRight",
+    "ArrowUp", "ArrowDown", "Home", "End", "+", "-", "(", ")", " ",
+  ];
+  if (allowed.includes(e.key)) return;
+  if (e.key >= "0" && e.key <= "9") return;
+  if ((e.ctrlKey || e.metaKey) && ["a", "c", "v", "x"].includes(e.key.toLowerCase())) return;
+  e.preventDefault();
 }
 
 const QUANTITIES = ["100", "250", "500", "1000", "2500", "5000", "10000"];
@@ -102,10 +152,10 @@ export function HomeInquirySection({
   function patch(name: string, value: string) {
     setForm((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
-      const message = fieldError(name, value);
+      const msg = fieldError(name, value);
       setErrors((prev) => {
         const next = { ...prev };
-        if (message) next[name] = message;
+        if (msg) next[name] = msg;
         else delete next[name];
         return next;
       });
@@ -113,10 +163,10 @@ export function HomeInquirySection({
   }
 
   function validateField(name: string, value: string) {
-    const message = fieldError(name, value);
+    const msg = fieldError(name, value);
     setErrors((prev) => {
       const next = { ...prev };
-      if (message) next[name] = message;
+      if (msg) next[name] = msg;
       else delete next[name];
       return next;
     });
@@ -191,7 +241,8 @@ export function HomeInquirySection({
       setCaptcha(homeCaptchaSlot.current);
       const refNum = data.quoteNumber || `PH-${Date.now().toString().slice(-6)}`;
       const params = new URLSearchParams({ ref: refNum });
-      if (form.contactName.trim()) params.set("name", form.contactName.trim().split(" ")[0]);
+      if (form.contactName.trim())
+        params.set("name", form.contactName.trim().split(" ")[0]);
       router.push(`/thank-you?${params.toString()}`);
     } catch {
       setStatus("error");
@@ -202,21 +253,25 @@ export function HomeInquirySection({
   }
 
   return (
-    <section className="bg-[#F6F8FA] py-12 sm:py-16 lg:py-20">
+    <section className="bg-[#EEF6FF] py-10 sm:py-12 lg:py-14">
       <Container>
-        <div className="grid items-center gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-12 xl:gap-16">
+        <div className="grid items-start gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-12 xl:gap-16">
+
+          {/* ── Left: Form ── */}
           <form
             onSubmit={onSubmit}
             noValidate
             className="rounded-[16px] border border-[#E5E7EB] bg-white p-4 sm:p-6 lg:p-7"
           >
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {/* Dimensions */}
               <div>
                 <input
                   name="length"
                   value={form.length}
                   onChange={(e) => patch("length", e.target.value)}
                   onBlur={(e) => validateField("length", e.target.value)}
+                  onKeyDown={allowDecimalOnly}
                   placeholder="Length"
                   inputMode="decimal"
                   aria-invalid={Boolean(errors.length)}
@@ -230,6 +285,7 @@ export function HomeInquirySection({
                   value={form.width}
                   onChange={(e) => patch("width", e.target.value)}
                   onBlur={(e) => validateField("width", e.target.value)}
+                  onKeyDown={allowDecimalOnly}
                   placeholder="Width"
                   inputMode="decimal"
                   aria-invalid={Boolean(errors.width)}
@@ -243,6 +299,7 @@ export function HomeInquirySection({
                   value={form.depth}
                   onChange={(e) => patch("depth", e.target.value)}
                   onBlur={(e) => validateField("depth", e.target.value)}
+                  onKeyDown={allowDecimalOnly}
                   placeholder="Depth"
                   inputMode="decimal"
                   aria-invalid={Boolean(errors.depth)}
@@ -251,6 +308,7 @@ export function HomeInquirySection({
                 <FieldError message={errors.depth} />
               </div>
 
+              {/* Unit / Color / Date */}
               <select
                 name="dimensionsUnit"
                 value={form.dimensionsUnit}
@@ -288,6 +346,7 @@ export function HomeInquirySection({
                 <Calendar className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8E95A5]" />
               </div>
 
+              {/* Quantity / Box Type / Name */}
               <div>
                 <select
                   name="quantity"
@@ -326,6 +385,7 @@ export function HomeInquirySection({
                   value={form.contactName}
                   onChange={(e) => patch("contactName", e.target.value)}
                   onBlur={(e) => validateField("contactName", e.target.value)}
+                  onKeyDown={allowLettersOnly}
                   placeholder="Enter Your Name"
                   autoComplete="name"
                   aria-invalid={Boolean(errors.contactName)}
@@ -334,15 +394,17 @@ export function HomeInquirySection({
                 <FieldError message={errors.contactName} />
               </div>
 
+              {/* Phone / Email / Captcha */}
               <div>
                 <input
                   name="phone"
                   value={form.phone}
                   onChange={(e) => patch("phone", e.target.value)}
                   onBlur={(e) => validateField("phone", e.target.value)}
+                  onKeyDown={allowPhoneOnly}
                   placeholder="Phone *"
                   autoComplete="tel"
-                  inputMode="numeric"
+                  inputMode="tel"
                   aria-invalid={Boolean(errors.phone)}
                   className={`${fieldClass} ${errors.phone ? "border-[#FF5548]" : ""}`}
                 />
@@ -368,6 +430,7 @@ export function HomeInquirySection({
                   value={form.captcha}
                   onChange={(e) => patch("captcha", e.target.value)}
                   onBlur={(e) => validateField("captcha", e.target.value)}
+                  onKeyDown={allowIntegerOnly}
                   placeholder={
                     captchaReady
                       ? `Answer ${captcha.a}+${captcha.b}`
@@ -382,6 +445,7 @@ export function HomeInquirySection({
               </div>
             </div>
 
+            {/* Brief textarea */}
             <textarea
               name="brief"
               rows={3}
@@ -419,14 +483,28 @@ export function HomeInquirySection({
             </button>
           </form>
 
-          <div className="max-w-md lg:pl-2">
-            <h2 className="font-heading text-[1.75rem] font-extrabold leading-tight tracking-tight text-[#172455] sm:text-[2rem] lg:text-[2.15rem]">
+          {/* ── Right: Heading panel ── */}
+          <div className="flex flex-col justify-center lg:pl-2">
+            {/* Section label */}
+            <span className="inline-flex w-fit items-center rounded-full bg-[#172455]/8 px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-[#172455]">
+              Get a Quote
+            </span>
+
+            <h2 className="mt-3 font-heading text-[1.75rem] font-extrabold leading-tight tracking-tight text-[#172455] sm:text-[2rem] lg:text-[2.15rem]">
               {inquiryHeading}
             </h2>
+
+            {/* Accent bar */}
+            <span
+              aria-hidden
+              className="mt-4 block h-[3px] w-14 rounded-full bg-[#FF5548]"
+            />
+
             <p className="mt-4 text-[15px] leading-relaxed text-[#4B5563] sm:text-base">
               {inquirySubtext}
             </p>
           </div>
+
         </div>
       </Container>
     </section>

@@ -22,6 +22,9 @@ export async function generateMetadata(): Promise<Metadata> {
     title: data?.seoTitle || def?.defaults.seoTitle || "Request a Quote",
     description: data?.seoDescription || def?.defaults.seoDescription || undefined,
     keywords: data?.seoKeywords || undefined,
+    alternates: {
+      canonical: data?.seoCanonical?.trim() || "https://packaginghype.com/quote",
+    },
   };
 }
 

@@ -51,7 +51,7 @@ export async function BlogPreviewSection({
   const posts = ids.length > 0 ? mapped : mapped.length > 0 ? mapped : DEFAULT_POSTS;
 
   return (
-    <section className="bg-white py-16 sm:py-20 lg:py-24 border-t border-gray-100">
+    <section className="bg-white py-10 sm:py-12 lg:py-14">
       <Container>
         <div className="grid items-start gap-8 lg:grid-cols-[380px_1fr] xl:grid-cols-[410px_1fr] lg:gap-10 xl:gap-12">
           {/* Left Column: Heading + Description + 3D Illustration Card */}

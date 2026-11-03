@@ -7,6 +7,7 @@ import {
   getRelatedProducts,
 } from "@/lib/catalog";
 import { stripHtml } from "@/lib/html";
+import { JsonLdScript } from "@/components/seo/JsonLdScript";
 
 export const revalidate = 120;
 
@@ -31,13 +32,21 @@ export async function generateMetadata({
     stripHtml(product.description) ||
     product.description;
 
+  const canonical =
+    (product.cms?.canonicalUrl || "").trim() ||
+    `https://packaginghype.com/product/${slug}`;
+
   return {
     title,
     description,
     keywords: seoOn ? product.cms?.seoKeywords || undefined : undefined,
+    alternates: {
+      canonical,
+    },
     openGraph: {
       title,
       description,
+      url: canonical,
       images: product.imageUrl ? [{ url: product.imageUrl }] : undefined,
     },
   };
@@ -63,10 +72,7 @@ export default async function ProductDetailRoute({
   return (
     <>
       {product.cms?.seoEnabled !== false && product.cms?.seoScript ? (
-        <div
-          dangerouslySetInnerHTML={{ __html: product.cms.seoScript }}
-          suppressHydrationWarning
-        />
+        <JsonLdScript source={product.cms.seoScript} />
       ) : null}
       <ProductDetailPage
         product={product}

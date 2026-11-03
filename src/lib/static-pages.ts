@@ -8,6 +8,7 @@ export const staticPageSchema = z.object({
   seoTitle: z.string().optional().nullable(),
   seoDescription: z.string().optional().nullable(),
   seoKeywords: z.string().optional().nullable(),
+  seoCanonical: z.string().optional().nullable(),
 });
 
 export type StaticPageData = z.infer<typeof staticPageSchema>;

@@ -14,7 +14,7 @@ export function AdminHeader({ adminName }: { adminName: string }) {
   }
 
   return (
-    <header className="flex shrink-0 items-center justify-between gap-4 border-b border-gray-200 bg-white px-4 py-3 sm:px-6">
+    <header className="sticky top-0 z-30 flex shrink-0 items-center justify-between gap-4 border-b border-[#E2E4E8] bg-white px-4 py-3 shadow-[0_1px_4px_rgba(0,0,0,0.05)] sm:px-6">
       <div className="min-w-0">
         <h1 className="text-sm font-bold text-[#172455]">
           Content & catalog management

@@ -164,8 +164,8 @@ export default function ProductDetailPage({
       {faqs.length > 0 ? (
         <section className="bg-white py-12 sm:py-16">
           <Container className={contentWidth}>
-            <div className={cms?.faqsImageUrl ? "max-w-2xl text-left" : "mx-auto max-w-3xl text-center"}>
-              <h2 className="font-heading text-2xl font-extrabold tracking-tight text-[#111] sm:text-3xl">
+            <div className="max-w-2xl text-left">
+              <h2 className="text-left font-heading text-2xl font-extrabold tracking-tight text-[#111] sm:text-3xl">
                 {cms?.faqsHeading || "Frequently Asked Questions"}
               </h2>
               <p className="mt-2 text-sm text-[#888] sm:text-[15px]">
@@ -209,7 +209,7 @@ export default function ProductDetailPage({
                 </div>
               </div>
             ) : (
-              <div className="mx-auto mt-8 max-w-3xl">
+              <div className="mt-8 max-w-3xl">
                 <ProductFaq items={faqs} />
               </div>
             )}
@@ -220,11 +220,11 @@ export default function ProductDetailPage({
       {related.length > 0 ? (
         <section className="bg-[#F6F8FA] py-12 sm:py-16">
           <Container className={contentWidth}>
-            <h2 className="text-center font-heading text-2xl font-extrabold tracking-tight text-[#111] sm:text-3xl">
+            <h2 className="text-left font-heading text-2xl font-extrabold tracking-tight text-[#111] sm:text-3xl">
               {cms?.relevantProductsHeading || "Related Products"}
             </h2>
             {cms?.relevantProductsDescription ? (
-              <p className="mx-auto mt-2 max-w-2xl text-center text-sm text-[#666]">
+              <p className="mt-2 max-w-2xl text-left text-sm text-[#666]">
                 {cms.relevantProductsDescription}
               </p>
             ) : null}
@@ -236,11 +236,8 @@ export default function ProductDetailPage({
       {relatedBlogs.length > 0 ? (
         <section className="border-t border-gray-100 bg-white py-12 sm:py-16">
           <Container className={contentWidth}>
-            <div className="flex flex-col items-center text-center">
-              <span className="text-xs font-bold uppercase tracking-[0.14em] text-[#21AAA5]">
-                Packaging Guides & Insights
-              </span>
-              <h2 className="mt-2 font-heading text-2xl font-extrabold tracking-tight text-[#111] sm:text-3xl">
+            <div className="flex flex-col items-start text-left">
+              <h2 className="text-left font-heading text-2xl font-extrabold tracking-tight text-[#111] sm:text-3xl">
                 {cms?.relatedBlogsHeading || "Related Articles & Packaging Guides"}
               </h2>
               {cms?.relatedBlogsDescription ? (
