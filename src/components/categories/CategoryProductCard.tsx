@@ -9,6 +9,7 @@ export function CategoryProductCard({ product }: { product: ProductItem }) {
       title={product.name}
       imageUrl={product.imageUrl}
       imageAlt={product.name}
+      variant="product"
     />
   );
 }

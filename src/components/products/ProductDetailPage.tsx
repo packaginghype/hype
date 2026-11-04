@@ -131,7 +131,7 @@ export default function ProductDetailPage({
           <Container className={contentWidth}>
             <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-2 lg:gap-10 lg:h-[480px] xl:h-[520px]">
               {/* Left Column — Designated Image Frame */}
-              <div className="relative aspect-[4/3] sm:aspect-[16/10] lg:aspect-auto h-[320px] sm:h-[380px] lg:h-full w-full overflow-hidden rounded-[16px] sm:rounded-[20px] bg-[#F1F3F5] shadow-sm">
+              <div className="relative aspect-[5/4] h-[320px] w-full overflow-hidden rounded-[16px] bg-[#F1F3F5] shadow-sm sm:h-[380px] sm:rounded-[20px] lg:aspect-auto lg:h-full">
                 {scrollImage ? (
                   <SafeImage
                     src={scrollImage}

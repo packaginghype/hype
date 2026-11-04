@@ -50,7 +50,7 @@ export function CollectionPageSkeleton() {
                 key={i}
                 className="overflow-hidden rounded-2xl border border-[#E8EAEF] bg-white"
               >
-                <div className="aspect-[4/5] animate-pulse bg-[#F5F3EF] sm:aspect-square" />
+                <div className="aspect-[4/3] animate-pulse bg-[#F5F3EF]" />
                 <div className="px-3 py-3.5">
                   <div className="mx-auto h-4 w-2/3 animate-pulse rounded bg-[#E8EAEF]" />
                 </div>

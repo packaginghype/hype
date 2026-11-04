@@ -6,6 +6,7 @@ import { ChevronDown, ChevronUp, Plus, Trash2, X } from "lucide-react";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
 import { MediaUploadField } from "@/components/admin/MediaUploadField";
+import { PRODUCT_IMAGE } from "@/lib/image-presets";
 import {
   CATEGORY_GROUP_META,
   type CategoryGroupKey,
@@ -717,8 +718,8 @@ export function ProductForm({
               },
             ]);
           }}
-          recommended="900 × 900 px (1:1 square)"
-          hint="Max 2MB · JPG, PNG, WEBP"
+          recommended={PRODUCT_IMAGE.recommended}
+          hint={PRODUCT_IMAGE.hint}
           folder="packaginghype/products/gallery"
         />
 
@@ -742,12 +743,12 @@ export function ProductForm({
                   key={`${img.imageUrl}-${index}`}
                   className="flex flex-col overflow-hidden rounded-[8px] border border-[#E8EAEF] bg-white"
                 >
-                  <div className="relative h-[140px] w-full bg-[#F8FAFC]">
+                  <div className={`relative w-full bg-white ${PRODUCT_IMAGE.aspectClass}`}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={img.imageUrl}
                       alt={img.altText || `Image ${index + 1}`}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-contain"
                     />
                     {img.isPrimary ? (
                       <span className="absolute left-2 top-2 rounded-[4px] bg-[#FF5548] px-1.5 py-0.5 text-[10px] font-bold uppercase text-white">
@@ -869,8 +870,8 @@ export function ProductForm({
             label="Thumbnail"
             value={values.thumbnailUrl || ""}
             onChange={(url) => patch({ thumbnailUrl: url })}
-            recommended="900 × 900 px (1:1 square)"
-            hint="Max 2MB · JPG, PNG, WEBP"
+            recommended={PRODUCT_IMAGE.recommended}
+            hint={PRODUCT_IMAGE.hint}
             folder="packaginghype/products/thumb"
           />
           <div>
@@ -1077,7 +1078,7 @@ export function ProductForm({
               label="Image"
               value={values.pageScrollImageUrl || ""}
               onChange={(url) => patch({ pageScrollImageUrl: url })}
-              recommended="1200 × 900 px (landscape) · Max 2MB"
+              recommended="900 × 900 px · Max 2MB"
               folder="packaginghype/products/scroll"
             />
             <div className="grid gap-4 sm:grid-cols-2">

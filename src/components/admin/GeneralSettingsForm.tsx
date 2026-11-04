@@ -10,8 +10,12 @@ import {
   Sparkles,
   Globe,
   ImageIcon,
+  Code2,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
+import { createEmptyScript, type CustomScript } from "@/lib/custom-scripts";
 import type { GeneralSettings } from "@/lib/general-settings-schema";
 import { DEFAULT_GENERAL_SETTINGS } from "@/lib/general-settings-schema";
 
@@ -58,6 +62,15 @@ export function GeneralSettingsForm() {
 
   function patch(partial: Partial<GeneralSettings>) {
     setValues((prev) => ({ ...prev, ...partial }));
+  }
+
+  function updateScript(id: string, partial: Partial<CustomScript>) {
+    setValues((prev) => ({
+      ...prev,
+      customScripts: (prev.customScripts || []).map((script) =>
+        script.id === id ? { ...script, ...partial } : script
+      ),
+    }));
   }
 
   async function handleSave(e?: React.FormEvent) {
@@ -139,6 +152,7 @@ export function GeneralSettingsForm() {
             onChange={(url) => patch({ logoUrl: url })}
             recommended="180 × 56 px or 360 × 112 px"
             hint="Transparent PNG, SVG, or WEBP · Max 1MB"
+            accept="image/png,image/webp,image/svg+xml,image/jpeg"
             folder="packaginghype/site"
           />
 
@@ -155,46 +169,6 @@ export function GeneralSettingsForm() {
             <p className="mt-1 text-[11px] text-[#6B7280]">
               Accessible text used by screen readers and search engines (SEO).
             </p>
-          </div>
-
-          {/* Live Preview */}
-          <div>
-            <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-[#172455]">
-              Live Preview
-            </p>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="rounded-lg border border-[#E8EAEF] bg-white p-4">
-                <span className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-gray-400">
-                  Header Preview (Light)
-                </span>
-                <div className="flex h-16 items-center justify-center rounded bg-gray-50 p-2">
-                  <Image
-                    src={values.logoUrl || "/logo.png"}
-                    alt={values.logoAlt || "Packaging Hype"}
-                    width={180}
-                    height={56}
-                    className="max-h-12 w-auto object-contain"
-                    unoptimized
-                  />
-                </div>
-              </div>
-
-              <div className="rounded-lg border border-[#E8EAEF] bg-white p-4">
-                <span className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-gray-400">
-                  Footer Preview (Dark)
-                </span>
-                <div className="flex h-16 items-center justify-center rounded bg-[#0F1839] p-2">
-                  <Image
-                    src={values.logoUrl || "/logo.png"}
-                    alt={values.logoAlt || "Packaging Hype"}
-                    width={180}
-                    height={56}
-                    className="max-h-12 w-auto object-contain brightness-0 invert"
-                    unoptimized
-                  />
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -225,8 +199,23 @@ export function GeneralSettingsForm() {
             onChange={(url) => patch({ faviconUrl: url })}
             recommended="32 × 32 px, 48 × 48 px, 180 × 180 px or 512 × 512 px (1:1 Square)"
             hint="PNG, ICO, SVG or WEBP · Max 1MB"
+            accept="image/png,image/webp,image/svg+xml,image/x-icon,image/vnd.microsoft.icon,.ico"
             folder="packaginghype/site"
           />
+
+          <div>
+            <FieldLabel>Favicon Alt Text</FieldLabel>
+            <input
+              type="text"
+              value={values.faviconAlt || ""}
+              onChange={(e) => patch({ faviconAlt: e.target.value })}
+              className={inputClass}
+              placeholder="e.g. Packaging Hype icon"
+            />
+            <p className="mt-1 text-[11px] text-[#6B7280]">
+              Used on the favicon preview. Browser tabs do not display image alt text.
+            </p>
+          </div>
 
           {/* Browser Tab Preview */}
           <div>
@@ -237,7 +226,7 @@ export function GeneralSettingsForm() {
               <div className="flex items-center gap-2 rounded-t-md bg-white px-3 py-2 shadow-xs">
                 <Image
                   src={values.faviconUrl || "/favicon.png"}
-                  alt="Favicon"
+                  alt={values.faviconAlt || "Favicon"}
                   width={16}
                   height={16}
                   className="h-4 w-4 shrink-0 rounded-xs object-contain"
@@ -281,6 +270,130 @@ export function GeneralSettingsForm() {
             required
           />
         </div>
+      </div>
+
+      <div className="rounded-[10px] border border-[#E8EAEF] bg-white p-5 shadow-sm sm:p-6">
+        <div className="mb-5 flex flex-col gap-3 border-b border-gray-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#172455]/10 text-[#172455]">
+              <Code2 className="h-4 w-4" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-[#172455]">
+                Global Scripts
+              </h3>
+              <p className="text-xs text-[#6B7280]">
+                Add as many codes as you need. Analytics, Search Console, Tag Manager, and other site-wide snippets.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() =>
+              patch({
+                customScripts: [
+                  ...(values.customScripts || []),
+                  createEmptyScript("header"),
+                ],
+              })
+            }
+            className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-[6px] bg-[#172455] px-4 py-2.5 text-xs font-bold text-white hover:bg-[#121b40]"
+          >
+            <Plus className="h-4 w-4" />
+            Add Script
+          </button>
+        </div>
+
+        {(values.customScripts || []).length === 0 ? (
+          <div className="rounded-lg border border-dashed border-[#D5D8E0] bg-[#F8F9FB] px-6 py-8 text-center">
+            <Code2 className="mx-auto mb-2 h-7 w-7 text-[#9CA3AF]" />
+            <p className="text-sm font-semibold text-[#172455]">
+              No scripts added yet
+            </p>
+            <p className="mt-1 text-xs text-[#6B7280]">
+              Add Google Analytics, Search Console verification, or any tracking code.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {(values.customScripts || []).map((script, index) => (
+              <div
+                key={script.id}
+                className="space-y-3 rounded-lg border border-[#E8EAEF] bg-[#F8F9FB] p-4"
+              >
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                  <div className="grid flex-1 gap-3 sm:grid-cols-2">
+                    <div>
+                      <FieldLabel>Script name</FieldLabel>
+                      <input
+                        type="text"
+                        value={script.name}
+                        onChange={(e) =>
+                          updateScript(script.id, { name: e.target.value })
+                        }
+                        placeholder={`e.g. Google Analytics ${index + 1}`}
+                        className={inputClass}
+                      />
+                    </div>
+                    <div>
+                      <FieldLabel>Placement</FieldLabel>
+                      <select
+                        value={script.placement}
+                        onChange={(e) =>
+                          updateScript(script.id, {
+                            placement:
+                              e.target.value === "footer" ? "footer" : "header",
+                          })
+                        }
+                        className={inputClass}
+                      >
+                        <option value="header">Header (&lt;head&gt;)</option>
+                        <option value="footer">Footer (before &lt;/body&gt;)</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 pb-1">
+                    <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-semibold text-[#172455]">
+                      <input
+                        type="checkbox"
+                        checked={script.enabled}
+                        onChange={(e) =>
+                          updateScript(script.id, { enabled: e.target.checked })
+                        }
+                        className="rounded border-[#D5D8E0]"
+                      />
+                      Enabled
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        patch({
+                          customScripts: (values.customScripts || []).filter(
+                            (item) => item.id !== script.id
+                          ),
+                        })
+                      }
+                      className="cursor-pointer rounded-lg p-2 text-red-500 hover:bg-red-50"
+                      aria-label="Remove script"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+                <textarea
+                  value={script.code}
+                  onChange={(e) =>
+                    updateScript(script.id, { code: e.target.value })
+                  }
+                  rows={5}
+                  spellCheck={false}
+                  placeholder="<script>...</script>"
+                  className={`${inputClass} min-h-[100px] resize-y font-mono text-xs leading-relaxed`}
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Save Button */}

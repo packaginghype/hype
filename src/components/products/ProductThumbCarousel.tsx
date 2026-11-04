@@ -73,7 +73,7 @@ export default function ProductThumbCarousel({
               aria-label={`View image ${index + 1}`}
               aria-current={activeIndex === index}
               className={cn(
-                "relative aspect-[4/3] overflow-hidden rounded-lg border-2 bg-[#F6F8FA] transition-colors",
+                "relative aspect-[4/3] overflow-hidden rounded-lg border-2 bg-white transition-colors",
                 activeIndex === index
                   ? "border-[#FF5548]"
                   : "border-[#E8EAEF] hover:border-[#FF5548]/50"
@@ -84,7 +84,7 @@ export default function ProductThumbCarousel({
                 alt=""
                 fill
                 sizes="220px"
-                className="object-contain p-2"
+                className="object-contain object-center"
               />
             </button>
           );

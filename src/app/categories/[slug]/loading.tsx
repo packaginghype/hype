@@ -70,7 +70,7 @@ export default function CategoryDetailLoading() {
           <div className="mt-10 grid grid-cols-2 gap-5 sm:gap-6 lg:grid-cols-4 lg:gap-7">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="space-y-3">
-                <div className="aspect-square animate-pulse rounded-[6px] bg-[#F6F8FA]" />
+                <div className="aspect-[4/3] animate-pulse rounded-[6px] bg-[#F6F8FA]" />
                 <div className="h-4 w-3/4 animate-pulse rounded bg-[#E8EAEF]" />
                 <div className="h-3.5 w-1/2 animate-pulse rounded bg-[#F1F3F5]" />
               </div>

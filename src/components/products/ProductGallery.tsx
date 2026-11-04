@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, Package } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { cn } from "@/lib/utils";
 
@@ -34,13 +34,13 @@ export default function ProductGallery({
 
   return (
     <div className="space-y-4">
-      <div className="group relative aspect-square overflow-hidden rounded-xl bg-[#F6F8FA]">
+      <div className="group relative aspect-[4/3] overflow-hidden rounded-xl bg-white">
         <SafeImage
           src={current || ""}
           alt={name}
           fill
           sizes="(max-width: 1024px) 100vw, 48vw"
-          className="object-contain p-4 sm:p-6"
+          className="object-contain object-center"
           priority
         />
 
@@ -99,7 +99,7 @@ export default function ProductGallery({
                 return (
                   <div
                     key={`empty-${slot}`}
-                    className="aspect-square"
+                    className="aspect-[4/3]"
                     aria-hidden
                   />
                 );
@@ -112,7 +112,7 @@ export default function ProductGallery({
                   aria-label={`View image ${index + 1}`}
                   aria-current={active === index}
                   className={cn(
-                    "relative aspect-square overflow-hidden rounded-lg border-2 bg-[#F6F8FA] transition-colors",
+                    "relative aspect-[4/3] overflow-hidden rounded-lg border-2 bg-white transition-colors",
                     active === index
                       ? "border-[#FF5548]"
                       : "border-[#E8EAEF] hover:border-[#FF5548]/50"
@@ -123,7 +123,7 @@ export default function ProductGallery({
                     alt=""
                     fill
                     sizes="140px"
-                    className="object-contain p-2"
+                    className="object-contain object-center"
                   />
                 </button>
               );

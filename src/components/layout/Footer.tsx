@@ -92,7 +92,12 @@ export function Footer({
                 width={180}
                 height={56}
                 className="h-10 w-auto object-contain sm:h-11"
-                unoptimized={Boolean(logoUrl && (logoUrl.endsWith(".svg") || logoUrl.endsWith(".ico")))}
+                unoptimized={Boolean(
+                  !logoUrl ||
+                    logoUrl.startsWith("http") ||
+                    logoUrl.endsWith(".svg") ||
+                    logoUrl.endsWith(".ico")
+                )}
               />
             </Link>
             <p className="mt-4 max-w-sm text-[13.5px] leading-relaxed text-[#2F3A4F]/80">

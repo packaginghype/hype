@@ -122,7 +122,12 @@ export function Header({
               height={56}
               priority
               className="h-9 w-auto rounded-sm object-contain sm:h-11"
-              unoptimized={Boolean(logoUrl && (logoUrl.endsWith(".svg") || logoUrl.endsWith(".ico")))}
+              unoptimized={Boolean(
+                !logoUrl ||
+                  logoUrl.startsWith("http") ||
+                  logoUrl.endsWith(".svg") ||
+                  logoUrl.endsWith(".ico")
+              )}
             />
           </Link>
 

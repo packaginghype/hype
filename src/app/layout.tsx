@@ -2,8 +2,15 @@ import type { Metadata, Viewport } from "next";
 import { Poppins, Raleway } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/layout/AppShell";
+import { SiteFooterScripts } from "@/components/layout/SiteFooterScripts";
+import { SiteHeadScripts } from "@/components/layout/SiteHeadScripts";
 import { getNavCategories } from "@/lib/catalog";
 import { getGeneralSettings } from "@/lib/general-settings";
+import {
+  extractGoogleSiteVerification,
+  getEnabledFooterHtml,
+  getEnabledHeadHtml,
+} from "@/lib/parse-site-scripts";
 
 const poppins = Poppins({
   weight: ["400", "500", "600", "700"],
@@ -31,6 +38,9 @@ export async function generateMetadata(): Promise<Metadata> {
   const settings = await getGeneralSettings();
   const favicon = settings.faviconUrl || "/favicon.png";
   const siteName = settings.siteName || "Packaging Hype";
+  const googleVerification = extractGoogleSiteVerification(
+    getEnabledHeadHtml(settings.customScripts)
+  );
 
   return {
     metadataBase: new URL("https://packaginghype.com"),
@@ -52,9 +62,8 @@ export async function generateMetadata(): Promise<Metadata> {
     ],
     authors: [{ name: "Packaging Hype Team" }],
     icons: {
-      icon: [{ url: favicon }],
+      icon: [{ url: favicon, type: favicon.endsWith(".svg") ? "image/svg+xml" : undefined }],
       apple: [{ url: favicon }],
-      shortcut: favicon,
     },
     openGraph: {
       type: "website",
@@ -84,6 +93,9 @@ export async function generateMetadata(): Promise<Metadata> {
       index: true,
       follow: true,
     },
+    ...(googleVerification
+      ? { verification: { google: googleVerification } }
+      : {}),
   };
 }
 
@@ -96,12 +108,13 @@ export default async function RootLayout({
     getNavCategories(),
     getGeneralSettings(),
   ]);
+  const headHtml = getEnabledHeadHtml(settings.customScripts);
+  const footerHtml = getEnabledFooterHtml(settings.customScripts);
 
   return (
     <html lang="en" className={`${poppins.variable} ${raleway.variable} h-full antialiased`}>
       <head>
-        <link rel="icon" href={settings.faviconUrl || "/favicon.png"} />
-        <link rel="apple-touch-icon" href={settings.faviconUrl || "/favicon.png"} />
+        <SiteHeadScripts html={headHtml} />
       </head>
       <body className="min-h-full flex flex-col bg-white text-gray-800">
         <AppShell
@@ -114,6 +127,7 @@ export default async function RootLayout({
         >
           {children}
         </AppShell>
+        <SiteFooterScripts html={footerHtml} />
       </body>
     </html>
   );

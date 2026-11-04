@@ -21,7 +21,7 @@ export function ProductCard({ product }: ProductCardProps) {
     <div className={`${CATALOG_TILE.shell} cursor-default`}>
       <Link
         href={`/product/${product.slug}`}
-        className={`${CATALOG_TILE.media} focus:outline-none`}
+        className={`${CATALOG_TILE.productMedia} focus:outline-none`}
         tabIndex={-1}
         aria-hidden="true"
       >
@@ -30,7 +30,7 @@ export function ProductCard({ product }: ProductCardProps) {
           alt={product.name}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-          className={CATALOG_TILE.mediaImage}
+          className={CATALOG_TILE.productMediaImage}
           loading="lazy"
         />
 

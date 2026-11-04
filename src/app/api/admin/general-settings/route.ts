@@ -40,6 +40,10 @@ export async function PUT(request: Request) {
     logoUrl: parsed.data.logoUrl || DEFAULT_GENERAL_SETTINGS.logoUrl,
     logoAlt: parsed.data.logoAlt || DEFAULT_GENERAL_SETTINGS.logoAlt,
     faviconUrl: parsed.data.faviconUrl || DEFAULT_GENERAL_SETTINGS.faviconUrl,
+    faviconAlt: parsed.data.faviconAlt || DEFAULT_GENERAL_SETTINGS.faviconAlt,
+    headerCode: "",
+    footerCode: "",
+    customScripts: parsed.data.customScripts,
   };
 
   const record = await prisma.sitePage.upsert({

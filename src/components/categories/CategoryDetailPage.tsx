@@ -213,7 +213,7 @@ export function CategoryDetailPage({
         <section className="bg-white pt-4 pb-10 sm:pt-6 sm:pb-12 lg:pt-6 lg:pb-14">
           <Container className={contentWidth}>
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8 lg:h-[500px] xl:h-[540px]">
-              <div className="relative aspect-[4/3] min-h-0 overflow-hidden rounded-[16px] bg-[#F3F1EE] lg:aspect-auto lg:h-full">
+              <div className="relative aspect-[5/4] min-h-0 overflow-hidden rounded-[16px] bg-[#F3F1EE] lg:aspect-auto lg:h-full">
                 {cms?.pageScrollImageUrl ||
                   about.imageUrl ||
                   products[0]?.imageUrl ? (

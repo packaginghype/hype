@@ -12,6 +12,7 @@ type Props = {
   recommended: string;
   hint?: string;
   folder?: string;
+  accept?: string;
   className?: string;
 };
 
@@ -22,6 +23,7 @@ export function ImageUploadField({
   recommended,
   hint = "Max 1MB · JPG, PNG, WEBP",
   folder = "packaginghype/categories",
+  accept = "image/jpeg,image/png,image/webp,image/gif",
   className,
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -139,7 +141,7 @@ export function ImageUploadField({
           <input
             ref={inputRef}
             type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
+            accept={accept}
             className="hidden"
             onChange={(e) => onFile(e.target.files?.[0])}
           />

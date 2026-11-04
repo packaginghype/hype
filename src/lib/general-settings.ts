@@ -1,6 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { CACHE_TAGS, CATALOG_REVALIDATE } from "@/lib/cache";
+import { normalizeCustomScripts } from "@/lib/custom-scripts";
 import {
   DEFAULT_GENERAL_SETTINGS,
   type GeneralSettings,
@@ -25,6 +26,15 @@ export const getGeneralSettings = unstable_cache(
         logoAlt: data.logoAlt?.trim() || DEFAULT_GENERAL_SETTINGS.logoAlt,
         faviconUrl:
           data.faviconUrl?.trim() || DEFAULT_GENERAL_SETTINGS.faviconUrl,
+        faviconAlt:
+          data.faviconAlt?.trim() || DEFAULT_GENERAL_SETTINGS.faviconAlt,
+        headerCode: data.headerCode || "",
+        footerCode: data.footerCode || "",
+        customScripts: normalizeCustomScripts({
+          customScripts: data.customScripts,
+          headerCode: data.headerCode,
+          footerCode: data.footerCode,
+        }),
       };
     } catch {
       return DEFAULT_GENERAL_SETTINGS;

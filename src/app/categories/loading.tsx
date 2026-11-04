@@ -52,7 +52,7 @@ export default function CategoriesLoading() {
           <div className="mt-12 grid grid-cols-2 gap-5 sm:gap-6 lg:grid-cols-4 lg:gap-8">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="space-y-3">
-                <div className="aspect-square animate-pulse rounded-none bg-[#F0EBE3]" />
+                <div className="aspect-[4/3] animate-pulse rounded-none bg-[#F0EBE3]" />
                 <div className="mx-auto h-4 w-2/3 animate-pulse rounded bg-[#E8EAEF]" />
               </div>
             ))}
