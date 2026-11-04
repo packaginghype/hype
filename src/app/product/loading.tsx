@@ -31,7 +31,7 @@ export default function ProductsLoading() {
         <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-4">
           {Array.from({ length: 12 }).map((_, i) => (
             <div key={i} className="space-y-3">
-              <div className="aspect-[4/3] animate-pulse rounded-[5px] bg-[#F1F3F5]" />
+              <div className="aspect-square animate-pulse rounded-[5px] bg-[#F1F3F5]" />
               <div className="h-4 w-3/4 animate-pulse rounded bg-[#E8EAEF]" />
               <div className="h-3.5 w-1/2 animate-pulse rounded bg-[#F1F3F5]" />
             </div>

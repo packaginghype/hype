@@ -27,6 +27,7 @@ const LEGAL_LINKS = [
   { label: "Privacy", href: "/privacy-policy" },
   { label: "Shipping", href: "/shipping-delivery-policy" },
   { label: "Returns", href: "/refund-return-policy" },
+  { label: "Sitemap", href: "/sitemap" },
 ] as const;
 
 function FooterLink({

@@ -6,7 +6,7 @@ import { ChevronDown, ChevronUp, Plus, Trash2, X } from "lucide-react";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
 import { MediaUploadField } from "@/components/admin/MediaUploadField";
-import { PRODUCT_IMAGE } from "@/lib/image-presets";
+import { CARD_IMAGE, PRODUCT_IMAGE } from "@/lib/image-presets";
 import {
   CATEGORY_GROUP_META,
   type CategoryGroupKey,
@@ -870,8 +870,8 @@ export function ProductForm({
             label="Thumbnail"
             value={values.thumbnailUrl || ""}
             onChange={(url) => patch({ thumbnailUrl: url })}
-            recommended={PRODUCT_IMAGE.recommended}
-            hint={PRODUCT_IMAGE.hint}
+            recommended={CARD_IMAGE.recommended}
+            hint={CARD_IMAGE.hint}
             folder="packaginghype/products/thumb"
           />
           <div>

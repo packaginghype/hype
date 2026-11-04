@@ -562,7 +562,8 @@ export function CategoryForm({
             label="Thumbnail Image"
             value={values.imageUrl || ""}
             onChange={(url) => patch({ imageUrl: url })}
-            recommended="1200 × 900 px (4:3)"
+            recommended="900 × 900 px (1:1)"
+            hint="Max 1MB · JPG, PNG, WEBP · upload at 900×900"
             folder="packaginghype/categories/thumb"
           />
           <div className="grid gap-4 sm:grid-cols-2">

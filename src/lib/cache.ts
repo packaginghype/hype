@@ -18,11 +18,17 @@ function expireTag(tag: string) {
   revalidateTag(tag, { expire: 0 });
 }
 
+export function revalidateSitemaps() {
+  expireTag(CACHE_TAGS.sitemap);
+  revalidatePath("/sitemap");
+  revalidatePath("/sitemap.xml");
+}
+
 export function revalidateCatalog(slug?: string) {
   expireTag(CACHE_TAGS.nav);
   expireTag(CACHE_TAGS.categories);
   expireTag(CACHE_TAGS.products);
-  expireTag(CACHE_TAGS.sitemap);
+  revalidateSitemaps();
   if (slug) {
     expireTag(`category-${slug}`);
     expireTag(`product-${slug}`);
@@ -52,14 +58,14 @@ export function revalidateCatalog(slug?: string) {
 
 export function revalidateBlogs() {
   expireTag(CACHE_TAGS.blogs);
-  expireTag(CACHE_TAGS.sitemap);
+  revalidateSitemaps();
   revalidatePath("/blog");
   revalidatePath("/", "layout");
 }
 
 export function revalidateHomePage() {
   expireTag(CACHE_TAGS.home);
-  expireTag(CACHE_TAGS.sitemap);
+  revalidateSitemaps();
   revalidatePath("/", "layout");
   revalidatePath("/");
 }

@@ -2,17 +2,17 @@ import Link from "next/link";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { cn } from "@/lib/utils";
 
-/** Shared catalog tile — matches Erixum-style proportions across categories, industries, and products. */
+/** Shared catalog tile — product cards, category cards, and industry sliders. */
 export const CATALOG_TILE = {
-  /** Product and category cards: 1200×900, no frame. */
-  media: "relative w-full overflow-hidden bg-white aspect-[4/3]",
-  productMedia: "relative w-full overflow-hidden bg-white aspect-[4/3]",
+  /** Card / slider images: 900×900 (1:1). */
+  media: "relative w-full overflow-hidden bg-white aspect-square",
+  productMedia: "relative w-full overflow-hidden bg-white aspect-square",
   productMediaImage: "object-contain object-center",
   mediaImage: "object-contain object-center",
   title:
     "mt-0 px-3 py-3.5 text-center text-sm font-semibold leading-snug text-[#172455] transition-colors duration-200 group-hover:text-[#FF5548] sm:text-[15px] line-clamp-2",
   shell:
-    "group flex h-full flex-col overflow-hidden rounded-2xl bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#21AAA5] focus-visible:ring-offset-2",
+    "group flex h-full flex-col overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-[border-color,box-shadow] duration-200 hover:border-[#D1D5DB] hover:shadow-[0_8px_24px_-12px_rgba(15,23,42,0.14)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#21AAA5] focus-visible:ring-offset-2",
   grid: "grid grid-cols-2 gap-x-4 gap-y-6 sm:gap-x-5 sm:gap-y-8 lg:grid-cols-4 lg:gap-x-6 lg:gap-y-10",
 } as const;
 
@@ -24,7 +24,7 @@ type CatalogTileProps = {
   subtitle?: string | null;
   className?: string;
   sizes?: string;
-  /** Use 4:3 frame for product thumbnails (1200×900). */
+  /** Product thumbnails use the same 900×900 frame as category cards. */
   variant?: "default" | "product";
 };
 

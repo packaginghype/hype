@@ -19,6 +19,7 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { CATEGORY_GROUP_META, type CategoryGroupKey } from "@/lib/category-groups";
 import { FAQAccordion } from "@/components/ui/FAQAccordion";
 import { RichText } from "@/components/ui/RichText";
+import { SeeMoreDescription } from "@/components/ui/SeeMoreDescription";
 import {
   getCategoryAboutContent,
   getCategoryHeroCopy,
@@ -78,7 +79,7 @@ export function CategoryDetailPage({
         <section className="relative">
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-x-0 top-0 bottom-[10.5rem] bg-white sm:bottom-[11.5rem] lg:bottom-[12rem]"
+            className="pointer-events-none absolute inset-x-0 top-0 bottom-[10.5rem] bg-[#E8F5F2] sm:bottom-[11.5rem] lg:bottom-[12rem]"
           />
           <div
             aria-hidden
@@ -108,16 +109,29 @@ export function CategoryDetailPage({
                   )}
                 </h1>
 
-                <div className="mt-3 text-left space-y-2.5 text-[13.5px] leading-[1.65] text-[#2a2a2a] sm:text-[14px] max-h-[260px] sm:max-h-[280px] lg:max-h-[300px] xl:max-h-[320px] overflow-y-auto pr-1.5 [scrollbar-width:thin] [scrollbar-color:#cbd5e1_transparent]">
-                  {!isEmptyHtml(cms?.bannerDescription || "") ? (
-                    <RichText html={cms!.bannerDescription!} className="text-left" />
-                  ) : !isEmptyHtml(category.description) &&
-                    category.description.includes("<") ? (
-                    <RichText html={category.description} className="text-left" />
-                  ) : (
-                    hero.paragraphs.map((p, i) => <p key={i} className="text-left">{p}</p>)
-                  )}
-                </div>
+                {!isEmptyHtml(cms?.bannerDescription || "") ? (
+                  <SeeMoreDescription
+                    title={heroTitle}
+                    html={cms!.bannerDescription!}
+                    lines={6}
+                    fadeFrom="#E8F5F2"
+                  />
+                ) : !isEmptyHtml(category.description) &&
+                  category.description.includes("<") ? (
+                  <SeeMoreDescription
+                    title={heroTitle}
+                    html={category.description}
+                    lines={6}
+                    fadeFrom="#E8F5F2"
+                  />
+                ) : (
+                  <SeeMoreDescription
+                    title={heroTitle}
+                    paragraphs={hero.paragraphs}
+                    lines={6}
+                    fadeFrom="#E8F5F2"
+                  />
+                )}
               </div>
 
               <div className="relative mx-auto flex h-[240px] w-full max-w-[380px] items-center justify-center bg-transparent sm:h-[300px] sm:max-w-[420px] lg:mx-0 lg:h-[340px] xl:h-[360px] lg:max-w-none">
@@ -212,8 +226,8 @@ export function CategoryDetailPage({
       {scrollOn ? (
         <section className="bg-white pt-4 pb-10 sm:pt-6 sm:pb-12 lg:pt-6 lg:pb-14">
           <Container className={contentWidth}>
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8 lg:h-[500px] xl:h-[540px]">
-              <div className="relative aspect-[5/4] min-h-0 overflow-hidden rounded-[16px] bg-[#F3F1EE] lg:aspect-auto lg:h-full">
+            <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-2 lg:gap-10 lg:h-[480px] xl:h-[520px]">
+              <div className="relative aspect-[5/4] h-[320px] w-full overflow-hidden rounded-[16px] bg-[#F1F3F5] shadow-sm sm:h-[380px] sm:rounded-[20px] lg:aspect-auto lg:h-full">
                 {cms?.pageScrollImageUrl ||
                   about.imageUrl ||
                   products[0]?.imageUrl ? (
@@ -224,19 +238,18 @@ export function CategoryDetailPage({
                       products[0].imageUrl
                     }
                     alt={cms?.pageScrollImageAlt || about.heading}
-
                     fill
                     sizes="(max-width: 1024px) 100vw, 50vw"
-                    className="object-contain p-4 sm:p-6 object-center"
+                    className="object-cover object-center"
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center text-slate-300">
-                    <Package className="h-14 w-14" />
+                    <Package className="h-16 w-16" />
                   </div>
                 )}
               </div>
 
-              <div className="reliable-scroll h-[420px] min-h-0 overflow-y-auto pr-3 sm:h-[460px] lg:h-full">
+              <div className="reliable-scroll flex h-[400px] min-h-0 flex-col overflow-y-auto overflow-x-hidden pr-3 sm:h-[440px] sm:pr-4 lg:h-full">
                 {!isEmptyHtml(cms?.pageScrollContent || "") ? (
                   <RichText
                     html={cms!.pageScrollContent!}

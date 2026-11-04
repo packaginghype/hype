@@ -671,21 +671,3 @@ export const getCategoryShowcaseCategories = unstable_cache(
   ["category-showcase"],
   { revalidate: CATALOG_REVALIDATE, tags: [CACHE_TAGS.categories] }
 );
-
-export const getSitemapEntries = unstable_cache(
-  async () => {
-    const [categories, products] = await Promise.all([
-      prisma.category.findMany({
-        where: { isPublished: true },
-        select: { slug: true, group: true, updatedAt: true },
-      }),
-      prisma.product.findMany({
-        where: { isPublished: true },
-        select: { slug: true, updatedAt: true },
-      }),
-    ]);
-    return { categories, products };
-  },
-  ["sitemap-entries"],
-  { revalidate: 3600, tags: [CACHE_TAGS.sitemap, CACHE_TAGS.categories, CACHE_TAGS.products] }
-);

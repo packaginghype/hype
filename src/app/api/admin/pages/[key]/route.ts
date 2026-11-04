@@ -14,7 +14,7 @@ import {
   parseHomePageData,
   formatHomePageZodError,
 } from "@/lib/home-page-schema";
-import { revalidateHomePage } from "@/lib/cache";
+import { revalidateHomePage, revalidateSitemaps } from "@/lib/cache";
 
 type Params = { params: Promise<{ key: string }> };
 
@@ -98,6 +98,7 @@ export async function PUT(request: Request, { params }: Params) {
   } else {
     revalidatePath(def.path);
     if (def.path !== "/") revalidatePath("/");
+    revalidateSitemaps();
   }
 
   return NextResponse.json({ ok: true, data: record.data });

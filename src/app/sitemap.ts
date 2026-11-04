@@ -1,132 +1,44 @@
-import { MetadataRoute } from "next";
-import { getSitemapEntries } from "@/lib/catalog";
-import { getPublishedBlogs } from "@/lib/blogs";
+import type { MetadataRoute } from "next";
+import { getSitemapEntries, getSiteUrl } from "@/lib/sitemap-data";
 
-export const revalidate = 120;
+export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const rawBase = process.env.NEXT_PUBLIC_SITE_URL || "https://packaginghype.com";
-  const baseUrl = rawBase.replace(/^https?:\/\/www\./i, "https://");
-  const now = new Date();
-  const [{ categories, products }, blogs] = await Promise.all([
-    getSitemapEntries(),
-    getPublishedBlogs(),
-  ]);
+  const siteUrl = getSiteUrl();
 
-  const staticRoutes: MetadataRoute.Sitemap = [
-    {
-      url: baseUrl,
-      lastModified: now,
-      changeFrequency: "daily",
-      priority: 1.0,
-    },
-    {
-      url: `${baseUrl}/products`,
-      lastModified: now,
-      changeFrequency: "daily",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/categories`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/industries`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/box-by-material`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/shapes-styles`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/quote`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/blog`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/about-us`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/contact-us`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/privacy-policy`,
-      lastModified: now,
-      changeFrequency: "yearly",
-      priority: 0.3,
-    },
-    {
-      url: `${baseUrl}/terms-and-conditions`,
-      lastModified: now,
-      changeFrequency: "yearly",
-      priority: 0.3,
-    },
-    {
-      url: `${baseUrl}/shipping-delivery-policy`,
-      lastModified: now,
-      changeFrequency: "yearly",
-      priority: 0.3,
-    },
-    {
-      url: `${baseUrl}/refund-return-policy`,
-      lastModified: now,
-      changeFrequency: "yearly",
-      priority: 0.3,
-    },
-  ];
-
-  const categoryRoutes: MetadataRoute.Sitemap = categories.map((cat) => ({
-    url:
-      cat.group === "industries"
-        ? `${baseUrl}/industry/${cat.slug}`
-        : cat.group === "materials"
-          ? `${baseUrl}/box-by-material/${cat.slug}`
-          : cat.group === "shapes"
-            ? `${baseUrl}/shapes-styles/${cat.slug}`
-            : `${baseUrl}/category/${cat.slug}`,
-    lastModified: cat.updatedAt,
-    changeFrequency: "weekly",
-    priority: 0.8,
-  }));
-
-  const productRoutes: MetadataRoute.Sitemap = products.map((prod) => ({
-    url: `${baseUrl}/product/${prod.slug}`,
-    lastModified: prod.updatedAt,
-    changeFrequency: "weekly",
-    priority: 0.8,
-  }));
-
-  const blogRoutes: MetadataRoute.Sitemap = blogs.map((post) => ({
-    url: `${baseUrl}/blog/${post.slug}`,
-    lastModified: post.publishedDate,
-    changeFrequency: "weekly",
-    priority: 0.7,
-  }));
-
-  return [...staticRoutes, ...categoryRoutes, ...productRoutes, ...blogRoutes];
+  try {
+    const entries = await getSitemapEntries();
+    return entries
+      .filter((entry) => entry.indexable)
+      .map((entry) => ({
+        url: entry.path === "/" ? siteUrl : `${siteUrl}${entry.path}`,
+        lastModified: entry.lastModified || new Date(),
+        changeFrequency: entry.changeFrequency,
+        priority: entry.priority,
+      }));
+  } catch (error) {
+    console.error("Sitemap generation error:", error);
+    const now = new Date();
+    return [
+      { url: siteUrl, lastModified: now, changeFrequency: "daily", priority: 1 },
+      {
+        url: `${siteUrl}/product`,
+        lastModified: now,
+        changeFrequency: "daily",
+        priority: 0.9,
+      },
+      {
+        url: `${siteUrl}/blog`,
+        lastModified: now,
+        changeFrequency: "weekly",
+        priority: 0.8,
+      },
+      {
+        url: `${siteUrl}/sitemap`,
+        lastModified: now,
+        changeFrequency: "monthly",
+        priority: 0.4,
+      },
+    ];
+  }
 }
