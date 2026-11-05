@@ -43,12 +43,47 @@ export function extractPublicId(url: string): string | null {
   }
 }
 
+function cloudinaryErrorMessage(error: unknown): string {
+  if (error instanceof Error && error.message) return error.message;
+  if (error && typeof error === "object") {
+    const o = error as Record<string, unknown>;
+    if (typeof o.message === "string" && o.message.trim()) return o.message;
+    const nested = o.error;
+    if (nested && typeof nested === "object") {
+      const n = nested as Record<string, unknown>;
+      if (typeof n.message === "string" && n.message.trim()) return n.message;
+    }
+  }
+  return "Apply slug failed";
+}
+
+async function resourceExists(
+  publicId: string,
+  resourceType: "image" | "video"
+): Promise<{ secure_url: string; public_id: string; format?: string } | null> {
+  try {
+    const existing = await cloudinary.api.resource(publicId, {
+      resource_type: resourceType,
+    });
+    if (typeof existing?.secure_url === "string") {
+      return {
+        secure_url: existing.secure_url,
+        public_id:
+          typeof existing.public_id === "string" ? existing.public_id : publicId,
+        format: typeof existing.format === "string" ? existing.format : undefined,
+      };
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
 /**
- * Copy an existing asset to folder/slug and return clean `/media/...` URL.
+ * Copy/move an existing asset to folder/slug and return clean `/media/...` URL.
  *
- * Uses upload-from-URL (not rename) so the old public_id keeps working until
- * the admin form is saved and deleteRemovedCloudinaryAssets cleans it up.
- * Cloudinary rename would 404 the live site immediately before save.
+ * Prefer copy-via-upload (keeps old id until form save). Falls back to rename
+ * when remote upload is blocked. Recovers if an earlier rename already moved it.
  */
 export async function renameCloudinaryAsset(options: {
   url: string;
@@ -68,7 +103,8 @@ export async function renameCloudinaryAsset(options: {
   const resourceType = options.resourceType || "image";
   const toId = `${folder}/${slug}`;
   const extMatch = options.url.match(/\.([a-z0-9]{2,5})(?:\?|$)/i);
-  const ext = extMatch?.[1] || (resourceType === "video" ? "mp4" : "webp");
+  const ext =
+    extMatch?.[1] || (resourceType === "video" ? "mp4" : "webp");
 
   if (fromId === toId) {
     return { url: `/media/${toId}.${ext}`, publicId: toId };
@@ -77,54 +113,74 @@ export async function renameCloudinaryAsset(options: {
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
   if (!cloudName) throw new Error("Cloudinary is not configured");
 
-  // Fetch from the current public_id (not /media rewrite) so copy works
-  // even when the admin field stores a same-origin media path.
-  const sourceUrl = `https://res.cloudinary.com/${cloudName}/${resourceType}/upload/${fromId}`;
+  const source = await resourceExists(fromId, resourceType);
 
-  let result: { secure_url?: string; public_id?: string };
+  // Already moved to slug in a previous attempt — just point the form at it.
+  if (!source) {
+    const target = await resourceExists(toId, resourceType);
+    if (target) {
+      return {
+        url: toMediaUrl(target.secure_url),
+        publicId: target.public_id,
+      };
+    }
+    throw new Error(
+      "Current image is missing on Cloudinary (deleted or already renamed). Re-upload the image, then apply the slug."
+    );
+  }
+
+  const sourceCandidates = [
+    source.secure_url,
+    options.url.startsWith("http") ? options.url.split("#")[0] : null,
+    `https://res.cloudinary.com/${cloudName}/${resourceType}/upload/${fromId}.${source.format || ext}`,
+    `https://res.cloudinary.com/${cloudName}/${resourceType}/upload/${fromId}`,
+  ].filter((u): u is string => Boolean(u));
+
+  let lastError: unknown = null;
+  for (const sourceUrl of sourceCandidates) {
+    try {
+      const result = await cloudinary.uploader.upload(sourceUrl, {
+        folder,
+        public_id: slug,
+        resource_type: resourceType,
+        overwrite: true,
+        invalidate: true,
+        unique_filename: false,
+        use_filename: false,
+      });
+      const secure =
+        typeof result?.secure_url === "string"
+          ? result.secure_url
+          : `https://res.cloudinary.com/${cloudName}/${resourceType}/upload/${toId}.${ext}`;
+      return {
+        url: toMediaUrl(secure),
+        publicId: typeof result?.public_id === "string" ? result.public_id : toId,
+      };
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  // Last resort: native rename (old URL stops working until the form is saved).
   try {
-    result = await cloudinary.uploader.upload(sourceUrl, {
-      public_id: toId,
+    const result = await cloudinary.uploader.rename(fromId, toId, {
       resource_type: resourceType,
       overwrite: true,
       invalidate: true,
-      unique_filename: false,
-      use_filename: false,
     });
+    const secure =
+      typeof result?.secure_url === "string"
+        ? result.secure_url
+        : `https://res.cloudinary.com/${cloudName}/${resourceType}/upload/${toId}.${ext}`;
+    return {
+      url: toMediaUrl(secure),
+      publicId: typeof result?.public_id === "string" ? result.public_id : toId,
+    };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    if (/not found|404|resource could not be found/i.test(msg)) {
-      // Recovery: earlier rename may have already moved the file to the slug.
-      try {
-        const existing = await cloudinary.api.resource(toId, {
-          resource_type: resourceType,
-        });
-        if (typeof existing?.secure_url === "string") {
-          return {
-            url: toMediaUrl(existing.secure_url),
-            publicId:
-              typeof existing.public_id === "string" ? existing.public_id : toId,
-          };
-        }
-      } catch {
-        // target missing too
-      }
-      throw new Error(
-        "Current image is missing on Cloudinary (often after an earlier rename). Re-upload the image, then apply the slug."
-      );
-    }
-    throw err;
+    lastError = err;
   }
 
-  const secure =
-    typeof result?.secure_url === "string"
-      ? result.secure_url
-      : `https://res.cloudinary.com/${cloudName}/${resourceType}/upload/${toId}.${ext}`;
-
-  return {
-    url: toMediaUrl(secure),
-    publicId: typeof result?.public_id === "string" ? result.public_id : toId,
-  };
+  throw new Error(cloudinaryErrorMessage(lastError));
 }
 
 /**

@@ -164,9 +164,17 @@ export async function PATCH(request: Request) {
       mediaPath: renamed.url,
     });
   } catch (error) {
-    console.error("Rename asset failed", error);
-    const message =
-      error instanceof Error ? error.message : "Rename failed";
+    console.error("Apply slug failed", error);
+    let message = "Apply slug failed";
+    if (error instanceof Error && error.message) {
+      message = error.message;
+    } else if (error && typeof error === "object") {
+      const o = error as { message?: unknown; error?: { message?: unknown } };
+      if (typeof o.message === "string" && o.message.trim()) message = o.message;
+      else if (typeof o.error?.message === "string" && o.error.message.trim()) {
+        message = o.error.message;
+      }
+    }
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

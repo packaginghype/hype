@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronDown, ChevronUp, Plus, Trash2, X } from "lucide-react";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
@@ -11,6 +11,114 @@ import {
   CATEGORY_GROUP_META,
   type CategoryGroupKey,
 } from "@/lib/category-groups";
+import { slugify } from "@/lib/utils";
+
+const GALLERY_FOLDER = "packaginghype/products/gallery";
+
+function mediaFilenameSlug(url: string): string {
+  const base = url.split("?")[0].split("/").pop() || "";
+  return slugify(base.replace(/\.[a-z0-9]{2,5}$/i, ""));
+}
+
+function GalleryImageSlugField({
+  url,
+  suggestedSlug,
+  onApplied,
+}: {
+  url: string;
+  suggestedSlug: string;
+  onApplied: (nextUrl: string) => void;
+}) {
+  const [slug, setSlug] = useState(() => slugify(suggestedSlug));
+  const [slugTouched, setSlugTouched] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [applied, setApplied] = useState(false);
+
+  useEffect(() => {
+    if (!slugTouched) setSlug(slugify(suggestedSlug));
+  }, [suggestedSlug, slugTouched]);
+
+  const previewSlug = slugify(slug.replace(/\.[a-z0-9]{2,5}$/i, ""));
+  const ext =
+    url.match(/\.([a-z0-9]{2,5})(?:\?|$)/i)?.[1]?.toLowerCase() || "webp";
+  const alreadyOn =
+    Boolean(previewSlug) &&
+    (url.includes(`/${previewSlug}.`) || url.endsWith(`/${previewSlug}`));
+
+  async function applySlug() {
+    if (!previewSlug) {
+      setError("Set a slug first");
+      return;
+    }
+    setError("");
+    setApplied(false);
+    setBusy(true);
+    try {
+      const res = await fetch("/api/admin/upload", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url,
+          slug: previewSlug,
+          folder: GALLERY_FOLDER,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Apply slug failed");
+        return;
+      }
+      onApplied(data.url);
+      setApplied(true);
+    } catch {
+      setError("Apply slug failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="space-y-1.5">
+      <p className="text-[10px] font-bold uppercase tracking-wider text-[#172455]">
+        Image slug
+      </p>
+      <input
+        type="text"
+        value={slug}
+        onChange={(e) => {
+          setSlugTouched(true);
+          setSlug(e.target.value);
+          setApplied(false);
+        }}
+        onBlur={() =>
+          setSlug(slugify(slug.replace(/\.[a-z0-9]{2,5}$/i, "")))
+        }
+        className="w-full rounded-[4px] border border-[#E2E4E8] bg-white px-2.5 py-1.5 text-xs font-medium text-[#172455] outline-none focus:border-[#FF5548]"
+        placeholder="e.g. custom-boxes-1"
+      />
+      <p className="break-all font-mono text-[10px] text-[#21AAA5]">
+        /media/{GALLERY_FOLDER}/{previewSlug || "[slug]"}.{ext}
+      </p>
+      <button
+        type="button"
+        disabled={busy || !previewSlug || alreadyOn}
+        onClick={() => void applySlug()}
+        className="inline-flex h-8 w-full cursor-pointer items-center justify-center rounded-[4px] border border-[#21AAA5] bg-white text-[11px] font-bold text-[#21AAA5] hover:bg-[#EAF7F6] disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {busy ? "Working…" : alreadyOn ? "On slug URL" : "Apply slug"}
+      </button>
+      {applied ? (
+        <p className="text-[10px] font-semibold text-emerald-700">
+          Copied — save product to publish
+        </p>
+      ) : null}
+      {error ? (
+        <p className="text-[10px] font-medium text-red-600">{error}</p>
+      ) : null}
+    </div>
+  );
+}
 
 export type CategoryOption = {
   id: string;
@@ -587,7 +695,7 @@ export function ProductForm({
             <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-[#172455]">
               Breadcrumb path
             </p>
-            <div className="max-h-[220px] min-h-[140px] space-y-2 overflow-y-auto overscroll-contain pr-1">
+            <div className="max-h-[220px] min-h-[140px] space-y-2 overflow-y-auto pr-1">
               {crumbIds.length === 0 ? (
                 <p className="flex h-[120px] items-center justify-center rounded-[6px] border border-dashed border-[#E2E4E8] bg-white text-[12px] font-medium text-[#9CA3AF]">
                   No crumbs yet — click tags below to build the path
@@ -670,7 +778,7 @@ export function ProductForm({
                 <p className="mb-2 shrink-0 text-[12px] font-bold uppercase tracking-wider text-[#172455]">
                   {CATEGORY_GROUP_META[group].label}
                 </p>
-                <div className="min-h-0 flex-1 content-start overflow-y-auto overscroll-contain">
+                <div className="min-h-0 flex-1 content-start overflow-y-auto">
                   <div className="flex flex-wrap gap-2">
                     {items.length === 0 ? (
                       <p className="text-[12px] text-[#9CA3AF]">No items yet.</p>
@@ -720,8 +828,10 @@ export function ProductForm({
           }}
           recommended={PRODUCT_IMAGE.recommended}
           hint={PRODUCT_IMAGE.hint}
-          folder="packaginghype/products/gallery"
-          defaultSlug={values.slug || ""}
+          folder={GALLERY_FOLDER}
+          defaultSlug={
+            values.slug ? `${values.slug}-${images.length + 1}` : ""
+          }
         />
 
         <div>
@@ -731,10 +841,9 @@ export function ProductForm({
               ({images.length})
             </span>
           </p>
-          {/* Fixed min-height + scroll so adding cards doesn't shove the whole form */}
-          <div className="min-h-[300px] max-h-[640px] overflow-y-auto overscroll-contain rounded-[8px] border border-[#E8EAEF] bg-[#F8FAFC] p-3">
+          <div className="rounded-[8px] border border-[#E8EAEF] bg-[#F8FAFC] p-3">
           {images.length === 0 ? (
-            <div className="flex h-[276px] items-center justify-center rounded-[6px] border border-dashed border-[#E2E4E8] bg-white text-[12px] font-medium text-[#9CA3AF]">
+            <div className="flex h-[160px] items-center justify-center rounded-[6px] border border-dashed border-[#E2E4E8] bg-white text-[12px] font-medium text-[#9CA3AF]">
               No gallery images yet — upload above
             </div>
           ) : (
@@ -749,6 +858,7 @@ export function ProductForm({
                     <img
                       src={img.imageUrl}
                       alt={img.altText || `Image ${index + 1}`}
+                      draggable={false}
                       className="h-full w-full object-contain"
                     />
                     {img.isPrimary ? (
@@ -761,6 +871,22 @@ export function ProductForm({
                     <p className="text-[11px] font-bold uppercase tracking-wider text-[#172455]">
                       Image {index + 1}
                     </p>
+                    <GalleryImageSlugField
+                      url={img.imageUrl}
+                      suggestedSlug={
+                        mediaFilenameSlug(img.imageUrl) ||
+                        (values.slug
+                          ? `${values.slug}-${index + 1}`
+                          : `image-${index + 1}`)
+                      }
+                      onApplied={(nextUrl) =>
+                        setImages((prev) =>
+                          prev.map((item, i) =>
+                            i === index ? { ...item, imageUrl: nextUrl } : item
+                          )
+                        )
+                      }
+                    />
                     <input
                       value={img.altText || ""}
                       onChange={(e) =>
@@ -1255,9 +1381,9 @@ export function ProductForm({
               ({(values.merchantImageUrls || []).length})
             </span>
           </p>
-          <div className="min-h-[200px] max-h-[420px] overflow-y-auto overscroll-contain rounded-[8px] border border-[#E8EAEF] bg-[#F8FAFC] p-3">
+          <div className="rounded-[8px] border border-[#E8EAEF] bg-[#F8FAFC] p-3">
             {(values.merchantImageUrls || []).length === 0 ? (
-              <div className="flex h-[176px] items-center justify-center rounded-[6px] border border-dashed border-[#E2E4E8] bg-white text-[12px] font-medium text-[#9CA3AF]">
+              <div className="flex h-[140px] items-center justify-center rounded-[6px] border border-dashed border-[#E2E4E8] bg-white text-[12px] font-medium text-[#9CA3AF]">
                 No merchant images yet — upload above
               </div>
             ) : (
@@ -1272,6 +1398,7 @@ export function ProductForm({
                       <img
                         src={url}
                         alt={`Merchant ${index + 1}`}
+                        draggable={false}
                         className="h-full w-full object-cover"
                       />
                     </div>

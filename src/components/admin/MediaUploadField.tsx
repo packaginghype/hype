@@ -116,7 +116,8 @@ export function MediaUploadField({
               src={value}
               alt="Preview"
               fill
-              className="object-cover"
+              draggable={false}
+              className="pointer-events-none object-cover"
               sizes="112px"
               unoptimized
             />

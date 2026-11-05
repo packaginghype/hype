@@ -242,7 +242,8 @@ export function ImageUploadField({
               src={value}
               alt="Preview"
               fill
-              className="object-cover"
+              draggable={false}
+              className="pointer-events-none object-cover"
               sizes="120px"
               unoptimized
               onError={() => setImgError(true)}

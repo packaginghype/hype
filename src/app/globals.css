@@ -476,6 +476,7 @@ a:not([class*="text-"]):not([class*="bg-"]):not([class*="btn"]):not([role="butto
   min-height: 240px;
   max-height: 520px;
   overflow-y: auto;
+  overscroll-behavior-y: auto;
   font-size: 14px !important;
   line-height: 1.6 !important;
   color: #172455 !important;
@@ -562,6 +563,12 @@ a:not([class*="text-"]):not([class*="bg-"]):not([class*="btn"]):not([role="butto
 .admin-surface select {
   color: #172455;
   background-color: #ffffff;
+}
+
+/* Images shouldn't eat wheel/drag — page scroll stays on main admin surface */
+.admin-surface img {
+  -webkit-user-drag: none;
+  user-select: none;
 }
 
 .admin-surface input::placeholder,
