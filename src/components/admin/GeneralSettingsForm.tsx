@@ -13,11 +13,18 @@ import {
   Code2,
   Plus,
   Trash2,
+  PanelsTopLeft,
 } from "lucide-react";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
 import { createEmptyScript, type CustomScript } from "@/lib/custom-scripts";
-import type { GeneralSettings } from "@/lib/general-settings-schema";
-import { DEFAULT_GENERAL_SETTINGS } from "@/lib/general-settings-schema";
+import {
+  createEmptyFooterColumn,
+  createEmptyFooterLink,
+  DEFAULT_GENERAL_SETTINGS,
+  newFooterId,
+  type FooterMenuColumn,
+  type GeneralSettings,
+} from "@/lib/general-settings-schema";
 
 const inputClass =
   "w-full rounded-[6px] border border-[#E2E4E8] bg-white px-3 py-2.5 text-sm font-medium text-[#172455] placeholder:text-[#9CA3AF] outline-none transition-all focus:border-[#FF5548] focus:ring-2 focus:ring-[#FF5548]/10";
@@ -69,6 +76,35 @@ export function GeneralSettingsForm() {
       ...prev,
       customScripts: (prev.customScripts || []).map((script) =>
         script.id === id ? { ...script, ...partial } : script
+      ),
+    }));
+  }
+
+  function updateColumn(id: string, partial: Partial<FooterMenuColumn>) {
+    setValues((prev) => ({
+      ...prev,
+      footerColumns: (prev.footerColumns || []).map((col) =>
+        col.id === id ? { ...col, ...partial } : col
+      ),
+    }));
+  }
+
+  function updateColumnLink(
+    columnId: string,
+    linkId: string,
+    partial: { label?: string; href?: string }
+  ) {
+    setValues((prev) => ({
+      ...prev,
+      footerColumns: (prev.footerColumns || []).map((col) =>
+        col.id !== columnId
+          ? col
+          : {
+              ...col,
+              links: col.links.map((link) =>
+                link.id === linkId ? { ...link, ...partial } : link
+              ),
+            }
       ),
     }));
   }
@@ -269,6 +305,305 @@ export function GeneralSettingsForm() {
             placeholder="Packaging Hype"
             required
           />
+        </div>
+      </div>
+
+      {/* Footer menu columns */}
+      <div className="rounded-[10px] border border-[#E8EAEF] bg-white p-5 shadow-sm sm:p-6">
+        <div className="mb-5 flex flex-col gap-3 border-b border-gray-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#21AAA5]/10 text-[#21AAA5]">
+              <PanelsTopLeft className="h-4 w-4" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-[#172455]">
+                Footer menu columns
+              </h3>
+              <p className="text-xs text-[#6B7280]">
+                Add up to 5 menu columns next to the brand block (Shop, Categories,
+                Company, etc.).
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            disabled={(values.footerColumns || []).length >= 5}
+            onClick={() =>
+              patch({
+                footerColumns: [
+                  ...(values.footerColumns || []),
+                  createEmptyFooterColumn("links"),
+                ],
+              })
+            }
+            className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-[6px] bg-[#172455] px-4 py-2.5 text-xs font-bold text-white hover:bg-[#121b40] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Plus className="h-4 w-4" />
+            Add column
+          </button>
+        </div>
+
+        {(values.footerColumns || []).length === 0 ? (
+          <div className="rounded-lg border border-dashed border-[#D5D8E0] bg-[#F8F9FB] px-6 py-8 text-center">
+            <p className="text-sm font-semibold text-[#172455]">
+              No footer columns yet
+            </p>
+            <p className="mt-1 text-xs text-[#6B7280]">
+              Add Shop, Popular Categories, Company, or any custom menu column.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {(values.footerColumns || []).map((col, index) => (
+              <div
+                key={col.id}
+                className="space-y-3 rounded-lg border border-[#E8EAEF] bg-[#F8F9FB] p-4"
+              >
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                  <div className="grid flex-1 gap-3 sm:grid-cols-3">
+                    <div>
+                      <FieldLabel>Column title</FieldLabel>
+                      <input
+                        type="text"
+                        value={col.title}
+                        onChange={(e) =>
+                          updateColumn(col.id, { title: e.target.value })
+                        }
+                        className={inputClass}
+                        placeholder={`Column ${index + 1}`}
+                      />
+                    </div>
+                    <div>
+                      <FieldLabel>Content type</FieldLabel>
+                      <select
+                        value={col.mode}
+                        onChange={(e) =>
+                          updateColumn(col.id, {
+                            mode:
+                              e.target.value === "categories"
+                                ? "categories"
+                                : "links",
+                          })
+                        }
+                        className={inputClass}
+                      >
+                        <option value="links">Custom links</option>
+                        <option value="categories">
+                          Auto — popular categories
+                        </option>
+                      </select>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-4 pb-1 sm:pt-6">
+                      <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-semibold text-[#172455]">
+                        <input
+                          type="checkbox"
+                          checked={col.enabled !== false}
+                          onChange={(e) =>
+                            updateColumn(col.id, { enabled: e.target.checked })
+                          }
+                          className="rounded border-[#D5D8E0]"
+                        />
+                        Enabled
+                      </label>
+                      <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-semibold text-[#172455]">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(col.includeCustomPages)}
+                          onChange={(e) =>
+                            updateColumn(col.id, {
+                              includeCustomPages: e.target.checked,
+                            })
+                          }
+                          className="rounded border-[#D5D8E0]"
+                        />
+                        CMS footer pages
+                      </label>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      patch({
+                        footerColumns: (values.footerColumns || []).filter(
+                          (c) => c.id !== col.id
+                        ),
+                      })
+                    }
+                    className="cursor-pointer self-start rounded-lg p-2 text-red-500 hover:bg-red-50 lg:self-end"
+                    aria-label="Remove column"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+
+                {col.mode === "categories" ? (
+                  <div className="max-w-xs">
+                    <FieldLabel>Categories to show</FieldLabel>
+                    <input
+                      type="number"
+                      min={1}
+                      max={12}
+                      value={col.categoriesLimit ?? 7}
+                      onChange={(e) =>
+                        updateColumn(col.id, {
+                          categoriesLimit:
+                            Number.parseInt(e.target.value, 10) || 7,
+                        })
+                      }
+                      className={inputClass}
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <FieldLabel>Links</FieldLabel>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          updateColumn(col.id, {
+                            links: [...col.links, createEmptyFooterLink()],
+                          })
+                        }
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-[#21AAA5] hover:text-[#178f8b]"
+                      >
+                        <Plus className="h-3.5 w-3.5" />
+                        Add link
+                      </button>
+                    </div>
+                    {col.links.map((link) => (
+                      <div
+                        key={link.id}
+                        className="grid gap-2 sm:grid-cols-[1fr_1.2fr_auto]"
+                      >
+                        <input
+                          type="text"
+                          value={link.label}
+                          onChange={(e) =>
+                            updateColumnLink(col.id, link.id, {
+                              label: e.target.value,
+                            })
+                          }
+                          placeholder="Label"
+                          className={inputClass}
+                        />
+                        <input
+                          type="text"
+                          value={link.href}
+                          onChange={(e) =>
+                            updateColumnLink(col.id, link.id, {
+                              href: e.target.value,
+                            })
+                          }
+                          placeholder="/path or https://…"
+                          className={inputClass}
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            updateColumn(col.id, {
+                              links: col.links.filter((l) => l.id !== link.id),
+                            })
+                          }
+                          className="cursor-pointer rounded-lg p-2 text-red-500 hover:bg-red-50"
+                          aria-label="Remove link"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Legal / bottom bar links */}
+        <div className="mt-6 border-t border-gray-100 pt-5">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div>
+              <h4 className="text-sm font-bold text-[#172455]">
+                Bottom bar legal links
+              </h4>
+              <p className="text-xs text-[#6B7280]">
+                Terms, Privacy, Shipping, and other links under the footer.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                patch({
+                  footerLegalLinks: [
+                    ...(values.footerLegalLinks || []),
+                    {
+                      id: newFooterId("legal"),
+                      label: "New link",
+                      href: "/",
+                    },
+                  ],
+                })
+              }
+              className="inline-flex items-center gap-1 text-[11px] font-bold text-[#21AAA5] hover:text-[#178f8b]"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add link
+            </button>
+          </div>
+          <div className="space-y-2">
+            {(values.footerLegalLinks || []).map((link) => (
+              <div
+                key={link.id}
+                className="grid gap-2 sm:grid-cols-[1fr_1.2fr_auto]"
+              >
+                <input
+                  type="text"
+                  value={link.label}
+                  onChange={(e) =>
+                    patch({
+                      footerLegalLinks: (values.footerLegalLinks || []).map(
+                        (l) =>
+                          l.id === link.id
+                            ? { ...l, label: e.target.value }
+                            : l
+                      ),
+                    })
+                  }
+                  placeholder="Label"
+                  className={inputClass}
+                />
+                <input
+                  type="text"
+                  value={link.href}
+                  onChange={(e) =>
+                    patch({
+                      footerLegalLinks: (values.footerLegalLinks || []).map(
+                        (l) =>
+                          l.id === link.id
+                            ? { ...l, href: e.target.value }
+                            : l
+                      ),
+                    })
+                  }
+                  placeholder="/path"
+                  className={inputClass}
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    patch({
+                      footerLegalLinks: (values.footerLegalLinks || []).filter(
+                        (l) => l.id !== link.id
+                      ),
+                    })
+                  }
+                  className="cursor-pointer rounded-lg p-2 text-red-500 hover:bg-red-50"
+                  aria-label="Remove legal link"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 

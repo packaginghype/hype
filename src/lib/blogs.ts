@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { CACHE_TAGS, CATALOG_REVALIDATE } from "@/lib/cache";
+import { CACHE_TAGS, CATALOG_REVALIDATE } from "@/lib/cache-tags";
 
 export function formatBlogDate(date: Date | string) {
   const d = date instanceof Date ? date : new Date(date);

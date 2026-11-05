@@ -19,7 +19,6 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { CATEGORY_GROUP_META, type CategoryGroupKey } from "@/lib/category-groups";
 import { FAQAccordion } from "@/components/ui/FAQAccordion";
 import { RichText } from "@/components/ui/RichText";
-import { SeeMoreDescription } from "@/components/ui/SeeMoreDescription";
 import {
   getCategoryAboutContent,
   getCategoryHeroCopy,
@@ -109,29 +108,26 @@ export function CategoryDetailPage({
                   )}
                 </h1>
 
-                {!isEmptyHtml(cms?.bannerDescription || "") ? (
-                  <SeeMoreDescription
-                    title={heroTitle}
-                    html={cms!.bannerDescription!}
-                    lines={6}
-                    fadeFrom="#E8F5F2"
-                  />
-                ) : !isEmptyHtml(category.description) &&
-                  category.description.includes("<") ? (
-                  <SeeMoreDescription
-                    title={heroTitle}
-                    html={category.description}
-                    lines={6}
-                    fadeFrom="#E8F5F2"
-                  />
-                ) : (
-                  <SeeMoreDescription
-                    title={heroTitle}
-                    paragraphs={hero.paragraphs}
-                    lines={6}
-                    fadeFrom="#E8F5F2"
-                  />
-                )}
+                <div className="mt-3 max-h-[260px] space-y-2.5 overflow-y-auto pr-1.5 text-left text-[13.5px] leading-[1.65] text-[#2a2a2a] [scrollbar-color:#cbd5e1_transparent] [scrollbar-width:thin] sm:max-h-[280px] sm:text-[14px] lg:max-h-[300px] xl:max-h-[320px]">
+                  {!isEmptyHtml(cms?.bannerDescription || "") ? (
+                    <RichText
+                      html={cms!.bannerDescription!}
+                      className="text-left"
+                    />
+                  ) : !isEmptyHtml(category.description) &&
+                    category.description.includes("<") ? (
+                    <RichText
+                      html={category.description}
+                      className="text-left"
+                    />
+                  ) : (
+                    hero.paragraphs.map((p, i) => (
+                      <p key={i} className="text-left">
+                        {p}
+                      </p>
+                    ))
+                  )}
+                </div>
               </div>
 
               <div className="relative mx-auto flex h-[240px] w-full max-w-[380px] items-center justify-center bg-transparent sm:h-[300px] sm:max-w-[420px] lg:mx-0 lg:h-[340px] xl:h-[360px] lg:max-w-none">
@@ -227,7 +223,7 @@ export function CategoryDetailPage({
         <section className="bg-white pt-4 pb-10 sm:pt-6 sm:pb-12 lg:pt-6 lg:pb-14">
           <Container className={contentWidth}>
             <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-2 lg:gap-10 lg:h-[480px] xl:h-[520px]">
-              <div className="relative aspect-[5/4] h-[320px] w-full overflow-hidden rounded-[16px] bg-[#F1F3F5] shadow-sm sm:h-[380px] sm:rounded-[20px] lg:aspect-auto lg:h-full">
+              <div className="relative aspect-[5/4] h-[320px] w-full overflow-hidden rounded-[16px] bg-white shadow-sm sm:h-[380px] sm:rounded-[20px] lg:aspect-auto lg:h-full">
                 {cms?.pageScrollImageUrl ||
                   about.imageUrl ||
                   products[0]?.imageUrl ? (
@@ -240,7 +236,7 @@ export function CategoryDetailPage({
                     alt={cms?.pageScrollImageAlt || about.heading}
                     fill
                     sizes="(max-width: 1024px) 100vw, 50vw"
-                    className="object-cover object-center"
+                    className="object-contain object-center"
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center text-slate-300">
@@ -290,17 +286,13 @@ export function CategoryDetailPage({
 
             {cms?.faqsImageUrl ? (
               <div className="mt-8 grid grid-cols-1 items-stretch gap-5 lg:mt-10 lg:grid-cols-2 lg:gap-6 lg:h-[540px] xl:h-[580px]">
-                <div className="relative min-h-[280px] overflow-hidden rounded-[16px] bg-[#EAF2ED] sm:min-h-[340px] lg:min-h-0 lg:h-full">
+                <div className="relative min-h-[280px] overflow-hidden rounded-[16px] bg-white sm:min-h-[340px] lg:min-h-0 lg:h-full">
                   <SafeImage
                     src={cms.faqsImageUrl}
                     alt={cms.faqsImageAlt || `FAQs about ${heroTitle}`}
                     fill
                     sizes="(max-width: 1024px) 100vw, 50vw"
-                    className="object-cover object-center"
-                  />
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0F1839]/20 via-transparent to-transparent"
+                    className="object-contain object-center p-2 sm:p-3"
                   />
                 </div>
 

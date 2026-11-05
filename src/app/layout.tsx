@@ -5,6 +5,10 @@ import { AppShell } from "@/components/layout/AppShell";
 import { SiteFooterScripts } from "@/components/layout/SiteFooterScripts";
 import { SiteHeadScripts } from "@/components/layout/SiteHeadScripts";
 import { getNavCategories } from "@/lib/catalog";
+import {
+  getFooterCustomPageLinks,
+  getHeaderCustomPageLinks,
+} from "@/lib/custom-pages";
 import { getGeneralSettings } from "@/lib/general-settings";
 import {
   extractGoogleSiteVerification,
@@ -104,9 +108,11 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [nav, settings] = await Promise.all([
+  const [nav, settings, headerPages, footerPages] = await Promise.all([
     getNavCategories(),
     getGeneralSettings(),
+    getHeaderCustomPageLinks(),
+    getFooterCustomPageLinks(),
   ]);
   const headHtml = getEnabledHeadHtml(settings.customScripts);
   const footerHtml = getEnabledFooterHtml(settings.customScripts);
@@ -122,8 +128,12 @@ export default async function RootLayout({
           industries={nav.industries.map((c) => ({ name: c.name, slug: c.slug }))}
           materials={nav.materials.map((c) => ({ name: c.name, slug: c.slug }))}
           footerCategories={nav.categories}
+          headerPages={headerPages}
+          footerPages={footerPages}
           logoUrl={settings.logoUrl}
           logoAlt={settings.logoAlt}
+          footerColumns={settings.footerColumns}
+          footerLegalLinks={settings.footerLegalLinks}
         >
           {children}
         </AppShell>

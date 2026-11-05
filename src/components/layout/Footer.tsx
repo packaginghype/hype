@@ -4,31 +4,14 @@ import Image from "next/image";
 import { Mail, Phone } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { VERIFIED_BUSINESS_INFO } from "@/data/verified-data";
+import {
+  DEFAULT_FOOTER_COLUMNS,
+  DEFAULT_FOOTER_LEGAL_LINKS,
+  type FooterLegalLink,
+  type FooterMenuColumn,
+} from "@/lib/general-settings-schema";
 import type { CategoryItem } from "@/types";
-
-const SHOP_LINKS = [
-  { label: "Industries", href: "/industries" },
-  { label: "Box by Material", href: "/box-by-material" },
-  { label: "Shapes & Styles", href: "/shapes-styles" },
-  { label: "All Products", href: "/products" },
-  { label: "All Categories", href: "/categories" },
-] as const;
-
-const COMPANY_LINKS = [
-  { label: "About Us", href: "/about-us" },
-  { label: "Blog & Guides", href: "/blog" },
-  { label: "Contact Us", href: "/contact-us" },
-  { label: "Get a Quote", href: "/quote" },
-  { label: "Cart", href: "/cart" },
-] as const;
-
-const LEGAL_LINKS = [
-  { label: "Terms", href: "/terms-and-conditions" },
-  { label: "Privacy", href: "/privacy-policy" },
-  { label: "Shipping", href: "/shipping-delivery-policy" },
-  { label: "Returns", href: "/refund-return-policy" },
-  { label: "Sitemap", href: "/sitemap" },
-] as const;
+import { cn } from "@/lib/utils";
 
 function FooterLink({
   href,
@@ -55,17 +38,45 @@ function FooterHeading({ children }: { children: React.ReactNode }) {
   );
 }
 
+function gridClass(menuCount: number): string {
+  // brand + menu columns
+  const total = 1 + menuCount;
+  if (total >= 6) return "lg:grid-cols-6";
+  if (total === 5) return "lg:grid-cols-5";
+  if (total === 4) return "lg:grid-cols-4";
+  if (total === 3) return "lg:grid-cols-3";
+  return "lg:grid-cols-2";
+}
+
 export function Footer({
   categories,
+  customPages = [],
   logoUrl,
   logoAlt,
+  footerColumns,
+  footerLegalLinks,
 }: {
   categories: CategoryItem[];
+  customPages?: { label: string; href: string; slug: string }[];
   logoUrl?: string;
   logoAlt?: string;
+  footerColumns?: FooterMenuColumn[];
+  footerLegalLinks?: FooterLegalLink[];
 }) {
   const currentYear = new Date().getFullYear();
-  const popular = categories.slice(0, 7);
+  const columns = (footerColumns?.length
+    ? footerColumns
+    : DEFAULT_FOOTER_COLUMNS
+  )
+    .filter((c) => c.enabled !== false)
+    .slice(0, 5);
+
+  const legal =
+    footerLegalLinks && footerLegalLinks.length > 0
+      ? footerLegalLinks
+      : DEFAULT_FOOTER_LEGAL_LINKS;
+
+  const customPagesUsed = { current: false };
 
   return (
     <footer className="relative overflow-hidden text-[#172455]">
@@ -83,10 +94,19 @@ export function Footer({
       />
 
       <Container className="relative py-12 sm:py-14 lg:py-16">
-        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-x-10 lg:gap-y-0">
-          {/* Brand + CTA */}
+        <div
+          className={cn(
+            "grid grid-cols-1 gap-10 sm:grid-cols-2 lg:gap-x-8 lg:gap-y-0",
+            gridClass(columns.length)
+          )}
+        >
+          {/* Brand — always first */}
           <div className="sm:col-span-2 lg:col-span-1">
-            <Link href="/" className="inline-block" aria-label={logoAlt || "Packaging Hype"}>
+            <Link
+              href="/"
+              className="inline-block"
+              aria-label={logoAlt || "Packaging Hype"}
+            >
               <Image
                 src={logoUrl || "/logo.png"}
                 alt={logoAlt || "Packaging Hype"}
@@ -108,7 +128,10 @@ export function Footer({
                 href={`tel:${VERIFIED_BUSINESS_INFO.phoneRaw}`}
                 className="flex items-center gap-2.5 text-[13.5px] font-semibold text-[#172455] transition-colors hover:text-[#FF5548]"
               >
-                <Phone className="h-4 w-4 shrink-0 text-[#21AAA5]" aria-hidden />
+                <Phone
+                  className="h-4 w-4 shrink-0 text-[#21AAA5]"
+                  aria-hidden
+                />
                 {VERIFIED_BUSINESS_INFO.phone}
               </a>
               <a
@@ -121,63 +144,68 @@ export function Footer({
             </div>
           </div>
 
-          {/* Shop */}
-          <div>
-            <FooterHeading>Shop</FooterHeading>
-            <ul className="mt-4 space-y-2.5">
-              {SHOP_LINKS.map((link) => (
-                <li key={link.href}>
-                  <FooterLink href={link.href}>{link.label}</FooterLink>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {columns.map((col) => {
+            const showCustom =
+              Boolean(col.includeCustomPages) && !customPagesUsed.current;
+            if (showCustom) customPagesUsed.current = true;
 
-          {/* Popular categories */}
-          <div>
-            <FooterHeading>Popular Categories</FooterHeading>
-            <ul className="mt-4 space-y-2.5">
-              {popular.length > 0 ? (
-                popular.map((cat) => (
-                  <li key={cat.id}>
-                    <FooterLink href={`/${cat.slug}`}>
-                      {cat.name}
-                    </FooterLink>
-                  </li>
-                ))
-              ) : (
-                <li className="text-[13px] text-[#2F3A4F]/60">
-                  No categories added yet
-                </li>
-              )}
-              {categories.length > popular.length ? (
-                <li>
-                  <Link
-                    href="/categories"
-                    className="text-[13.5px] font-semibold text-[#21AAA5] transition-colors hover:text-[#FF5548]"
-                  >
-                    View all categories
-                  </Link>
-                </li>
-              ) : null}
-            </ul>
-          </div>
+            const popular =
+              col.mode === "categories"
+                ? categories.slice(0, col.categoriesLimit || 7)
+                : [];
 
-          {/* Company */}
-          <div>
-            <FooterHeading>Company</FooterHeading>
-            <ul className="mt-4 space-y-2.5">
-              {COMPANY_LINKS.map((link) => (
-                <li key={link.href}>
-                  <FooterLink href={link.href}>{link.label}</FooterLink>
-                </li>
-              ))}
-            </ul>
-          </div>
+            return (
+              <div key={col.id}>
+                <FooterHeading>{col.title}</FooterHeading>
+                <ul className="mt-4 space-y-2.5">
+                  {col.mode === "categories" ? (
+                    popular.length > 0 ? (
+                      <>
+                        {popular.map((cat) => (
+                          <li key={cat.id}>
+                            <FooterLink href={`/${cat.slug}`}>
+                              {cat.name}
+                            </FooterLink>
+                          </li>
+                        ))}
+                        {categories.length > popular.length ? (
+                          <li>
+                            <Link
+                              href="/categories"
+                              className="text-[13.5px] font-semibold text-[#21AAA5] transition-colors hover:text-[#FF5548]"
+                            >
+                              View all categories
+                            </Link>
+                          </li>
+                        ) : null}
+                      </>
+                    ) : (
+                      <li className="text-[13px] text-[#2F3A4F]/60">
+                        No categories added yet
+                      </li>
+                    )
+                  ) : (
+                    col.links.map((link) => (
+                      <li key={link.id}>
+                        <FooterLink href={link.href}>{link.label}</FooterLink>
+                      </li>
+                    ))
+                  )}
+
+                  {showCustom
+                    ? customPages.map((page) => (
+                        <li key={page.slug}>
+                          <FooterLink href={page.href}>{page.label}</FooterLink>
+                        </li>
+                      ))
+                    : null}
+                </ul>
+              </div>
+            );
+          })}
         </div>
       </Container>
 
-      {/* Bottom bar */}
       <div className="relative border-t border-[#B9D6C6]/70 bg-white/30">
         <Container className="flex flex-col gap-3 py-5 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-center text-[12px] text-[#4B5568] sm:text-left">
@@ -185,8 +213,8 @@ export function Footer({
           </p>
           <nav aria-label="Legal">
             <ul className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 sm:justify-end">
-              {LEGAL_LINKS.map((link) => (
-                <li key={link.href}>
+              {legal.map((link) => (
+                <li key={link.id}>
                   <Link
                     href={link.href}
                     className="text-[12px] text-[#4B5568] transition-colors hover:text-[#FF5548]"

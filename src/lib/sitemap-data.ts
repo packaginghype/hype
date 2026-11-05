@@ -1,6 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { CACHE_TAGS } from "@/lib/cache";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export type SitemapSection =
   | "main"
@@ -47,7 +47,7 @@ export function getSiteUrl() {
  * HTML sitemap uses every entry. XML sitemap keeps indexable entries only.
  */
 async function loadSitemapEntries(): Promise<SitemapEntry[]> {
-  const [categories, products, blogs] = await Promise.all([
+  const [categories, products, blogs, customPages] = await Promise.all([
     prisma.category.findMany({
       where: { isPublished: true },
       select: {
@@ -73,6 +73,11 @@ async function loadSitemapEntries(): Promise<SitemapEntry[]> {
       where: { isPublished: true },
       select: { title: true, slug: true, updatedAt: true },
       orderBy: { publishedDate: "desc" },
+    }),
+    prisma.customPage.findMany({
+      where: { published: true },
+      select: { title: true, slug: true, updatedAt: true },
+      orderBy: [{ menuOrder: "asc" }, { title: "asc" }],
     }),
   ]);
 
@@ -229,6 +234,19 @@ async function loadSitemapEntries(): Promise<SitemapEntry[]> {
   ];
   policies.forEach(push);
 
+  for (const page of customPages) {
+    if (!page.slug) continue;
+    push({
+      path: `/${page.slug}`,
+      label: page.title || page.slug,
+      section: "pages",
+      lastModified: toDate(page.updatedAt) || now,
+      changeFrequency: "monthly",
+      priority: 0.5,
+      indexable: true,
+    });
+  }
+
   for (const category of categories) {
     if (!category.slug) continue;
     const section: SitemapSection =
@@ -289,6 +307,7 @@ export const getSitemapEntries = unstable_cache(
       CACHE_TAGS.categories,
       CACHE_TAGS.products,
       CACHE_TAGS.blogs,
+      CACHE_TAGS.pages,
     ],
   }
 );

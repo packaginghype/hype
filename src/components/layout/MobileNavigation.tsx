@@ -10,6 +10,7 @@ import { useCart } from "@/components/cart/CartProvider";
 import { cn } from "@/lib/utils";
 
 type NavLink = { name: string; slug: string };
+type MenuPageLink = { label: string; href: string; slug: string };
 
 interface MobileNavigationProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ interface MobileNavigationProps {
   categories: NavLink[];
   industries: NavLink[];
   materials: NavLink[];
+  customPages?: MenuPageLink[];
   logoUrl?: string;
   logoAlt?: string;
 }
@@ -27,6 +29,7 @@ export function MobileNavigation({
   categories,
   industries,
   materials,
+  customPages = [],
   logoUrl,
   logoAlt,
 }: MobileNavigationProps) {
@@ -243,6 +246,17 @@ export function MobileNavigation({
           >
             Blogs
           </Link>
+
+          {customPages.map((page) => (
+            <Link
+              key={page.slug}
+              href={page.href}
+              onClick={onClose}
+              className="block rounded px-3 py-2.5 text-base font-semibold text-[#172455] hover:bg-[#F6F8FA]"
+            >
+              {page.label}
+            </Link>
+          ))}
 
           <Link
             href="/cart"

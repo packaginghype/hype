@@ -131,14 +131,14 @@ export default function ProductDetailPage({
           <Container className={contentWidth}>
             <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-2 lg:gap-10 lg:h-[480px] xl:h-[520px]">
               {/* Left Column — Designated Image Frame */}
-              <div className="relative aspect-[5/4] h-[320px] w-full overflow-hidden rounded-[16px] bg-[#F1F3F5] shadow-sm sm:h-[380px] sm:rounded-[20px] lg:aspect-auto lg:h-full">
+              <div className="relative aspect-[5/4] h-[320px] w-full overflow-hidden rounded-[16px] bg-white shadow-sm sm:h-[380px] sm:rounded-[20px] lg:aspect-auto lg:h-full">
                 {scrollImage ? (
                   <SafeImage
                     src={scrollImage}
                     alt={cms?.pageScrollImageAlt || product.name}
                     fill
                     sizes="(max-width: 1024px) 100vw, 50vw"
-                    className="object-cover object-center"
+                    className="object-contain object-center"
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center text-slate-300">
@@ -176,15 +176,14 @@ export default function ProductDetailPage({
 
             {cms?.faqsImageUrl ? (
               <div className="mt-8 grid grid-cols-1 items-stretch gap-5 lg:mt-10 lg:grid-cols-2 lg:gap-6 lg:h-[540px] xl:h-[580px]">
-                <div className="relative min-h-[280px] overflow-hidden rounded-[16px] bg-[#EAF2ED] sm:min-h-[340px] lg:min-h-0 lg:h-full">
+                <div className="relative min-h-[280px] overflow-hidden rounded-[16px] bg-white sm:min-h-[340px] lg:min-h-0 lg:h-full">
                   <SafeImage
                     src={cms.faqsImageUrl}
                     alt={cms.faqsImageAlt || `${product.name} FAQs`}
                     fill
                     sizes="(max-width: 1024px) 100vw, 50vw"
-                    className="object-cover object-center"
+                    className="object-contain object-center p-2 sm:p-3"
                   />
-
                 </div>
 
                 <div className="flex min-h-0 flex-col overflow-hidden rounded-[16px] border border-[#E5E9F0] bg-white lg:h-full">

@@ -15,6 +15,7 @@ import {
   validateEmail,
   validatePhone,
 } from "@/lib/quote-form-validation";
+import { cn } from "@/lib/utils";
 
 interface CategoryQuoteFormProps {
   productName: string;
@@ -24,6 +25,7 @@ interface CategoryQuoteFormProps {
   priceUnit?: string;
   inStock?: boolean;
   fullWidthSubmit?: boolean;
+  className?: string;
   cartItem: {
     id: string;
     slug: string;
@@ -49,6 +51,7 @@ export function CategoryQuoteForm({
   priceUnit = "per box",
   inStock = true,
   fullWidthSubmit = false,
+  className,
 }: CategoryQuoteFormProps) {
   const parsePrice = (val: number | string | null | undefined): number | null => {
     if (val == null) return null;
@@ -183,7 +186,10 @@ export function CategoryQuoteForm({
   return (
     <div
       style={{ maxWidth: "900px" }}
-      className="mx-auto w-full max-w-[900px] overflow-hidden rounded-[10px] border border-[#E5E7EB] bg-white shadow-[0_12px_36px_-12px_rgba(15,23,42,0.14)]"
+      className={cn(
+        "mx-auto w-full max-w-[900px] overflow-hidden rounded-[10px] border border-[#E5E7EB] bg-white shadow-[0_12px_36px_-12px_rgba(15,23,42,0.14)]",
+        className
+      )}
     >
       {/* Top coral header bar */}
       <div className="flex flex-col gap-3 bg-[#FF5548] px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">

@@ -1,17 +1,7 @@
 import { revalidatePath, revalidateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 
-export const CACHE_TAGS = {
-  nav: "nav",
-  categories: "categories",
-  products: "products",
-  blogs: "blogs",
-  sitemap: "sitemap",
-  home: "home",
-  settings: "settings",
-} as const;
-
-/** Seconds — public catalog ISR / data cache window */
-export const CATALOG_REVALIDATE = 120;
+export { CACHE_TAGS, CATALOG_REVALIDATE } from "@/lib/cache-tags";
 
 function expireTag(tag: string) {
   // Next 16: second arg required — expire immediately after admin writes
@@ -73,4 +63,18 @@ export function revalidateHomePage() {
 export function revalidateGeneralSettings() {
   expireTag(CACHE_TAGS.settings);
   revalidatePath("/", "layout");
+}
+
+export function revalidateCustomPages(slug?: string) {
+  expireTag(CACHE_TAGS.pages);
+  expireTag(CACHE_TAGS.nav);
+  revalidateSitemaps();
+  revalidatePath("/", "layout");
+  revalidatePath("/[slug]", "page");
+  revalidatePath("/[slug]");
+  if (slug) {
+    expireTag(`page-${slug}`);
+    revalidatePath(`/${slug}`, "page");
+    revalidatePath(`/${slug}`);
+  }
 }

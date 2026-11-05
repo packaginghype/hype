@@ -1,7 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { parseHomePageData, HOME_PAGE_DEFAULTS, type HomePageData } from "@/lib/home-page-schema";
-import { CACHE_TAGS, CATALOG_REVALIDATE } from "@/lib/cache";
+import { CACHE_TAGS, CATALOG_REVALIDATE } from "@/lib/cache-tags";
 
 /** Fetch home page CMS data from DB. Returns defaults if not set yet. */
 export const getHomePageData = unstable_cache(

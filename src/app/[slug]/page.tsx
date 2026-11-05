@@ -1,8 +1,10 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CategoryDetailPage } from "@/components/categories/CategoryDetailPage";
+import { CustomPageView } from "@/components/pages/CustomPageView";
 import { JsonLdScript } from "@/components/seo/JsonLdScript";
 import { getAllProducts, getCategoryBySlug } from "@/lib/catalog";
+import { getCustomPageBySlug } from "@/lib/custom-pages";
 import { stripHtml } from "@/lib/html";
 
 export const revalidate = 120;
@@ -13,8 +15,30 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const category = await getCategoryBySlug(slug);
 
+  const customPage = await getCustomPageBySlug(slug);
+  if (customPage) {
+    const title = customPage.seoTitle || customPage.heading || customPage.title;
+    const description =
+      customPage.seoDescription || customPage.intro || undefined;
+    const canonical =
+      (customPage.seoCanonical || "").trim() ||
+      `https://packaginghype.com/${slug}`;
+
+    return {
+      title,
+      description,
+      keywords: customPage.seoKeywords || undefined,
+      alternates: { canonical },
+      openGraph: {
+        title,
+        description,
+        url: canonical,
+      },
+    };
+  }
+
+  const category = await getCategoryBySlug(slug);
   if (!category) {
     return { title: "Page Not Found" };
   }
@@ -53,8 +77,22 @@ export default async function SlugPage({
 }) {
   const { slug } = await params;
 
-  // Single lookup covers both categories and industries
-  // (both are stored in the same Category table with a `type` discriminator)
+  const customPage = await getCustomPageBySlug(slug);
+  if (customPage) {
+    return (
+      <CustomPageView
+        title={customPage.title}
+        eyebrow={customPage.eyebrow}
+        heading={customPage.heading}
+        intro={customPage.intro}
+        content={customPage.content}
+        sections={customPage.sections}
+        layout={customPage.layout}
+      />
+    );
+  }
+
+  // Categories / industries / materials (same Category table)
   const category = await getCategoryBySlug(slug);
 
   if (!category) {
@@ -72,4 +110,3 @@ export default async function SlugPage({
     </>
   );
 }
-

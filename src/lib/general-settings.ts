@@ -1,9 +1,11 @@
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { CACHE_TAGS, CATALOG_REVALIDATE } from "@/lib/cache";
+import { CACHE_TAGS, CATALOG_REVALIDATE } from "@/lib/cache-tags";
 import { normalizeCustomScripts } from "@/lib/custom-scripts";
 import {
   DEFAULT_GENERAL_SETTINGS,
+  normalizeFooterColumns,
+  normalizeFooterLegalLinks,
   type GeneralSettings,
 } from "@/lib/general-settings-schema";
 
@@ -35,6 +37,8 @@ export const getGeneralSettings = unstable_cache(
           headerCode: data.headerCode,
           footerCode: data.footerCode,
         }),
+        footerColumns: normalizeFooterColumns(data.footerColumns),
+        footerLegalLinks: normalizeFooterLegalLinks(data.footerLegalLinks),
       };
     } catch {
       return DEFAULT_GENERAL_SETTINGS;

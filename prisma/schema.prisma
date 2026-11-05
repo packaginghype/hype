@@ -377,3 +377,33 @@ model SitePage {
 
   @@index([key])
 }
+
+/// Admin-created static content pages with optional header/footer menu placement.
+model CustomPage {
+  id              String   @id @default(cuid())
+  title           String
+  slug            String   @unique
+  menuLabel       String?
+  showInHeader    Boolean  @default(false)
+  showInFooter    Boolean  @default(false)
+  menuOrder       Int      @default(0)
+  published       Boolean  @default(true)
+  eyebrow         String?
+  heading         String?
+  intro           String?  @db.Text
+  content         String?  @db.Text
+  /// Page builder widgets: text, image, columns, CTA, gallery, etc.
+  sections        Json     @default("[]")
+  /// Page chrome: bg, width, hero style, card, breadcrumbs
+  layout          Json     @default("{}")
+  seoTitle        String?
+  seoDescription  String?  @db.Text
+  seoKeywords     String?
+  seoCanonical    String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([published, showInHeader, menuOrder])
+  @@index([published, showInFooter, menuOrder])
+  @@index([slug])
+}

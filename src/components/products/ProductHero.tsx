@@ -11,6 +11,8 @@ import type { ProductItem } from "@/types";
 
 const VISIBLE = 4;
 const THUMB_GAP_PX = 10;
+/** Whole lines only — never clip mid-glyph */
+const DESC_LINE_CLAMP = "line-clamp-7";
 
 type Crumb = { label: string; href?: string };
 
@@ -73,8 +75,12 @@ export default function ProductHero({
       setIsOverflowing(inner.scrollHeight - inner.clientHeight > 1);
     };
     check();
+    const id = requestAnimationFrame(check);
     window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
+    return () => {
+      cancelAnimationFrame(id);
+      window.removeEventListener("resize", check);
+    };
   }, [product.description]);
 
   useEffect(() => {
@@ -104,9 +110,9 @@ export default function ProductHero({
 
   return (
     <div>
-      {/* Quote + main image share one row so bottoms align with no empty gap */}
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:items-stretch lg:gap-8">
-        <div className="flex min-w-0 flex-col">
+        {/* Left: title, longer description, quote form stretched to gallery bottom */}
+        <div className="flex min-h-0 min-w-0 flex-col">
           <Breadcrumbs variant="slash" items={breadcrumbs} />
 
           <h1 className="mt-3 text-left text-[1.65rem] font-extrabold leading-tight tracking-tight text-[#111111] sm:mt-4 sm:text-[1.9rem] lg:text-[2.05rem]">
@@ -114,10 +120,14 @@ export default function ProductHero({
           </h1>
 
           {product.description ? (
-            <div className="relative mt-3">
+            <div className="relative mt-3 shrink-0">
               <div
                 ref={descRef}
-                className="max-h-[5.1em] overflow-hidden text-left text-[14px] leading-[1.7] text-[#444] sm:text-[14.5px] [&_p]:mb-0"
+                className={cn(
+                  DESC_LINE_CLAMP,
+                  "text-left text-[14px] leading-[1.7] text-[#444] sm:text-[14.5px]",
+                  "[&_p]:mb-0 [&_p+p]:mt-[0.85em]"
+                )}
               >
                 <RichText html={product.description} />
               </div>
@@ -126,7 +136,7 @@ export default function ProductHero({
                 <button
                   type="button"
                   onClick={() => setDescOpen(true)}
-                  className="absolute bottom-0 right-0 cursor-pointer bg-white pl-1 text-[13px] font-semibold leading-[1.7] text-[#FF5548] before:absolute before:inset-y-0 before:right-full before:w-10 before:bg-gradient-to-r before:from-transparent before:to-white hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5548]/40"
+                  className="absolute bottom-0 right-0 z-[1] cursor-pointer bg-white pl-1 text-[13px] font-semibold leading-[1.7] text-[#FF5548] before:absolute before:inset-y-0 before:right-full before:w-12 before:bg-gradient-to-r before:from-transparent before:to-white hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5548]/40"
                 >
                   … See More
                 </button>
@@ -171,7 +181,10 @@ export default function ProductHero({
             </div>
           ) : null}
 
-          <div id="product-quote" className="mt-5 scroll-mt-28 sm:mt-6">
+          <div
+            id="product-quote"
+            className="mt-auto scroll-mt-28 pt-5 sm:pt-6"
+          >
             <CategoryQuoteForm
               productName={product.name}
               startingFrom={startingFrom}
@@ -192,119 +205,117 @@ export default function ProductHero({
           </div>
         </div>
 
-        {/* Main image only — height matches the left column on desktop */}
-        <div className="group relative aspect-[4/3] min-h-[260px] w-full overflow-hidden rounded-[8px] bg-white sm:rounded-[10px] lg:aspect-auto lg:min-h-0 lg:h-full">
-          {images.map((src, index) => (
-            <div
-              key={`${src}-main-${index}`}
-              className={cn(
-                "absolute inset-0 transition-opacity duration-300 ease-out",
-                active === index ? "opacity-100" : "pointer-events-none opacity-0"
-              )}
-              aria-hidden={active !== index}
-            >
-              <SafeImage
-                src={src}
-                alt={product.name}
-                fill
-                sizes="(max-width: 1024px) 100vw, 45vw"
-                className="object-contain object-center"
-                priority={index === 0}
-              />
-            </div>
-          ))}
-
-          {images.length > 1 ? (
-            <>
-              <button
-                type="button"
-                onClick={prevImage}
-                aria-label="Previous image"
-                className="absolute left-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-gray-200 bg-white/95 text-[#172455] shadow-md transition-all hover:scale-105 hover:border-[#FF5548] hover:text-[#FF5548] focus:outline-none"
+        {/* Right: main image + thumbnails — sets the stretch height for the form */}
+        <div className="flex min-w-0 flex-col gap-3 sm:gap-3.5">
+          <div className="group relative aspect-[4/3] min-h-[260px] w-full flex-1 overflow-hidden rounded-[8px] bg-white sm:rounded-[10px] lg:min-h-[320px]">
+            {images.map((src, index) => (
+              <div
+                key={`${src}-main-${index}`}
+                className={cn(
+                  "absolute inset-0 transition-opacity duration-300 ease-out",
+                  active === index ? "opacity-100" : "pointer-events-none opacity-0"
+                )}
+                aria-hidden={active !== index}
               >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-              <button
-                type="button"
-                onClick={nextImage}
-                aria-label="Next image"
-                className="absolute right-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-gray-200 bg-white/95 text-[#172455] shadow-md transition-all hover:scale-105 hover:border-[#FF5548] hover:text-[#FF5548] focus:outline-none"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </button>
-            </>
-          ) : null}
-        </div>
-      </div>
+                <SafeImage
+                  src={src}
+                  alt={product.name}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 45vw"
+                  className="object-contain object-center"
+                  priority={index === 0}
+                />
+              </div>
+            ))}
 
-      {/* Thumbnails — slide one image at a time */}
-      {images.length > 1 ? (
-        <div className="mt-3 grid grid-cols-1 gap-6 sm:mt-3.5 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:gap-8">
-          <div className="hidden lg:block" aria-hidden />
-          <div className="relative min-w-0">
-            {showThumbArrows ? (
+            {images.length > 1 ? (
               <>
                 <button
                   type="button"
-                  aria-label="Previous thumbnail"
-                  disabled={thumbOffset <= 0}
-                  onClick={() => slideThumbs(-1)}
-                  className="absolute -left-2 top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white text-[#172455] shadow-md transition-all hover:text-[#FF5548] disabled:cursor-not-allowed disabled:opacity-30"
+                  onClick={prevImage}
+                  aria-label="Previous image"
+                  className="absolute left-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-gray-200 bg-white/95 text-[#172455] shadow-md transition-all hover:scale-105 hover:border-[#FF5548] hover:text-[#FF5548] focus:outline-none"
                 >
-                  <ChevronLeft className="h-4 w-4" />
+                  <ChevronLeft className="h-5 w-5" />
                 </button>
                 <button
                   type="button"
-                  aria-label="Next thumbnail"
-                  disabled={thumbOffset >= maxThumbOffset}
-                  onClick={() => slideThumbs(1)}
-                  className="absolute -right-2 top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white text-[#172455] shadow-md transition-all hover:text-[#FF5548] disabled:cursor-not-allowed disabled:opacity-30"
+                  onClick={nextImage}
+                  aria-label="Next image"
+                  className="absolute right-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-gray-200 bg-white/95 text-[#172455] shadow-md transition-all hover:scale-105 hover:border-[#FF5548] hover:text-[#FF5548] focus:outline-none"
                 >
-                  <ChevronRight className="h-4 w-4" />
+                  <ChevronRight className="h-5 w-5" />
                 </button>
               </>
             ) : null}
+          </div>
 
-            <div ref={thumbViewportRef} className="overflow-hidden">
-              <div
-                className="flex transition-transform duration-300 ease-out will-change-transform"
-                style={{
-                  gap: `${THUMB_GAP_PX}px`,
-                  transform: `translate3d(-${thumbOffset * thumbStep}px, 0, 0)`,
-                }}
-              >
-                {images.map((src, index) => (
+          {images.length > 1 ? (
+            <div className="relative min-w-0 shrink-0">
+              {showThumbArrows ? (
+                <>
                   <button
-                    key={`${src}-thumb-${index}`}
                     type="button"
-                    onClick={() => setActive(index)}
-                    aria-label={`View image ${index + 1}`}
-                    className={cn(
-                      "relative aspect-[4/3] shrink-0 overflow-hidden rounded-[6px] bg-white transition-[border-color,box-shadow] duration-200 sm:rounded-[8px]",
-                      active === index
-                        ? "border-2 border-[#FF5548] shadow-sm"
-                        : "border border-[#E5E7EB] hover:border-[#cbd5e1]"
-                    )}
-                    style={{
-                      width: thumbItemWidth
-                        ? `${thumbItemWidth}px`
-                        : `calc((100% - ${(VISIBLE - 1) * THUMB_GAP_PX}px) / ${VISIBLE})`,
-                    }}
+                    aria-label="Previous thumbnail"
+                    disabled={thumbOffset <= 0}
+                    onClick={() => slideThumbs(-1)}
+                    className="absolute -left-2 top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white text-[#172455] shadow-md transition-all hover:text-[#FF5548] disabled:cursor-not-allowed disabled:opacity-30"
                   >
-                    <SafeImage
-                      src={src}
-                      alt=""
-                      fill
-                      sizes="140px"
-                      className="object-contain object-center"
-                    />
+                    <ChevronLeft className="h-4 w-4" />
                   </button>
-                ))}
+                  <button
+                    type="button"
+                    aria-label="Next thumbnail"
+                    disabled={thumbOffset >= maxThumbOffset}
+                    onClick={() => slideThumbs(1)}
+                    className="absolute -right-2 top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white text-[#172455] shadow-md transition-all hover:text-[#FF5548] disabled:cursor-not-allowed disabled:opacity-30"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </>
+              ) : null}
+
+              <div ref={thumbViewportRef} className="overflow-hidden">
+                <div
+                  className="flex transition-transform duration-300 ease-out will-change-transform"
+                  style={{
+                    gap: `${THUMB_GAP_PX}px`,
+                    transform: `translate3d(-${thumbOffset * thumbStep}px, 0, 0)`,
+                  }}
+                >
+                  {images.map((src, index) => (
+                    <button
+                      key={`${src}-thumb-${index}`}
+                      type="button"
+                      onClick={() => setActive(index)}
+                      aria-label={`View image ${index + 1}`}
+                      className={cn(
+                        "relative aspect-[4/3] shrink-0 overflow-hidden rounded-[6px] bg-white transition-[border-color,box-shadow] duration-200 sm:rounded-[8px]",
+                        active === index
+                          ? "border-2 border-[#FF5548] shadow-sm"
+                          : "border border-[#E5E7EB] hover:border-[#cbd5e1]"
+                      )}
+                      style={{
+                        width: thumbItemWidth
+                          ? `${thumbItemWidth}px`
+                          : `calc((100% - ${(VISIBLE - 1) * THUMB_GAP_PX}px) / ${VISIBLE})`,
+                      }}
+                    >
+                      <SafeImage
+                        src={src}
+                        alt=""
+                        fill
+                        sizes="140px"
+                        className="object-contain object-center"
+                      />
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
+          ) : null}
         </div>
-      ) : null}
+      </div>
     </div>
   );
 }

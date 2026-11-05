@@ -44,6 +44,8 @@ export async function PUT(request: Request) {
     headerCode: "",
     footerCode: "",
     customScripts: parsed.data.customScripts,
+    footerColumns: (parsed.data.footerColumns || []).slice(0, 5),
+    footerLegalLinks: parsed.data.footerLegalLinks || [],
   };
 
   const record = await prisma.sitePage.upsert({

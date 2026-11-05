@@ -5,9 +5,14 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { FooterQuoteCta } from "@/components/layout/FooterQuoteCta";
 import { CartProvider } from "@/components/cart/CartProvider";
+import type {
+  FooterLegalLink,
+  FooterMenuColumn,
+} from "@/lib/general-settings-schema";
 import type { CategoryItem } from "@/types";
 
 type NavLink = { name: string; slug: string };
+type MenuPageLink = { label: string; href: string; slug: string };
 
 export function AppShell({
   children,
@@ -15,16 +20,24 @@ export function AppShell({
   industries,
   materials,
   footerCategories,
+  headerPages = [],
+  footerPages = [],
   logoUrl,
   logoAlt,
+  footerColumns,
+  footerLegalLinks,
 }: {
   children: React.ReactNode;
   categories: NavLink[];
   industries: NavLink[];
   materials: NavLink[];
   footerCategories: CategoryItem[];
+  headerPages?: MenuPageLink[];
+  footerPages?: MenuPageLink[];
   logoUrl?: string;
   logoAlt?: string;
+  footerColumns?: FooterMenuColumn[];
+  footerLegalLinks?: FooterLegalLink[];
 }) {
   const pathname = usePathname();
   const isAdmin = pathname?.startsWith("/admin");
@@ -45,12 +58,20 @@ export function AppShell({
         categories={categories}
         industries={industries}
         materials={materials}
+        customPages={headerPages}
         logoUrl={logoUrl}
         logoAlt={logoAlt}
       />
       <main className="flex-1">{children}</main>
       {!hideQuoteCta ? <FooterQuoteCta /> : null}
-      <Footer categories={footerCategories} logoUrl={logoUrl} logoAlt={logoAlt} />
+      <Footer
+        categories={footerCategories}
+        customPages={footerPages}
+        logoUrl={logoUrl}
+        logoAlt={logoAlt}
+        footerColumns={footerColumns}
+        footerLegalLinks={footerLegalLinks}
+      />
     </CartProvider>
   );
 }

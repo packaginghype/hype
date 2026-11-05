@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "CustomPage" ADD COLUMN IF NOT EXISTS "sections" JSONB NOT NULL DEFAULT '[]';

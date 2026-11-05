@@ -31,16 +31,20 @@ const QUICK_SEARCHES = [
   { label: "Cosmetic Boxes", href: "/search?q=cosmetic" },
 ] as const;
 
+type MenuPageLink = { label: string; href: string; slug: string };
+
 export function Header({
   categories,
   industries,
   materials,
+  customPages = [],
   logoUrl,
   logoAlt,
 }: {
   categories: NavLink[];
   industries: NavLink[];
   materials: NavLink[];
+  customPages?: MenuPageLink[];
   logoUrl?: string;
   logoAlt?: string;
 }) {
@@ -288,6 +292,12 @@ export function Header({
             <Link href="/blog" className={navLinkClass}>
               Blogs
             </Link>
+
+            {customPages.map((page) => (
+              <Link key={page.slug} href={page.href} className={navLinkClass}>
+                {page.label}
+              </Link>
+            ))}
           </nav>
 
           <div className="flex shrink-0 items-center gap-0.5 sm:gap-1.5">
@@ -439,6 +449,7 @@ export function Header({
         categories={categories}
         industries={industries}
         materials={materials}
+        customPages={customPages}
         logoUrl={logoUrl}
         logoAlt={logoAlt}
       />

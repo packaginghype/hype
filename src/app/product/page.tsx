@@ -1,136 +1,117 @@
 import { Metadata } from "next";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { Container } from "@/components/ui/Container";
-import { SectionHeading } from "@/components/ui/SectionHeading";
-import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
-import { Pagination } from "@/components/ui/Pagination";
-import { CategoryProductCard } from "@/components/categories/CategoryProductCard";
-import { CATALOG_TILE } from "@/components/ui/CatalogTile";
+import { SafeImage } from "@/components/ui/SafeImage";
 import { QuoteCTA } from "@/components/ui/QuoteCTA";
 import {
-  getAllCategories,
-  getProductsPaged,
-  getPublishedProductCount,
-} from "@/lib/catalog";
+  ProductsCatalogSearch,
+  ProductsLoadMoreGrid,
+} from "@/components/products/ProductsCatalogClient";
+import { getAllProducts } from "@/lib/catalog";
 
 export const metadata: Metadata = {
   title: "Custom Packaging Products & Boxes Catalog",
   description:
-    "Browse our verified catalog of custom packaging boxes, folding cartons, corrugated mailers, and flexible barrier packaging. Wholesale pricing with low 100 MOQ.",
+    "Find the perfect packaging solution tailored to your business needs. Browse our wholesale catalog of custom boxes organized by industry — retail, e-commerce, food, cosmetics, and more.",
 };
 
 export const revalidate = 120;
 
-const PAGE_SIZE = 16;
-
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string; q?: string; page?: string }>;
+  searchParams: Promise<{ q?: string }>;
 }) {
-  const { category, q, page: pageParam } = await searchParams;
-  const pageNum = Math.max(1, Number.parseInt(pageParam || "1", 10) || 1);
+  const { q } = await searchParams;
+  const query = q?.trim() || "";
 
-  const [paged, categories, totalCount] = await Promise.all([
-    getProductsPaged({
-      categorySlug: category,
-      query: q,
-      page: pageNum,
-      pageSize: PAGE_SIZE,
-    }),
-    getAllCategories(),
-    getPublishedProductCount(),
-  ]);
+  const products = await getAllProducts({
+    query: query || undefined,
+  });
 
-  const { products, total, page, totalPages } = paged;
-  const filterParams = { category, q };
+  const heroImage =
+    products.find((p) => p.imageUrl)?.imageUrl ||
+    "/images/hero-packaging.jpg";
 
   return (
-    <div className="min-h-screen bg-white py-10 sm:py-14">
-      <Container>
-        <Breadcrumbs items={[{ label: "Products Catalog" }]} />
+    <div className="min-h-screen bg-white">
+      <Container className="pb-6 pt-6 sm:pb-8 sm:pt-8 lg:pt-10">
+        {/* Breadcrumbs — Erixum style: Home > Products */}
+        <nav aria-label="Breadcrumb" className="mb-3 text-sm text-gray-600 min-[1200px]:mb-2 min-[1400px]:mb-6">
+          <ol className="inline space-x-2">
+            <li className="inline items-center">
+              <Link
+                href="/"
+                className="transition-colors duration-200 hover:text-[#FF5548]"
+              >
+                Home
+              </Link>
+              <span className="mx-2 text-gray-400">&gt;</span>
+            </li>
+            <li className="inline items-center">
+              <span className="font-medium text-[#172455]">Products</span>
+            </li>
+          </ol>
+        </nav>
 
-        <div className="mb-8 mt-6">
-          <SectionHeading
-            badge="Wholesale Packaging Catalog"
-            title={q ? `Search results for “${q}”` : "Custom Boxes & Packaging Products"}
-            description={
-              q
-                ? `${total} product${total === 1 ? "" : "s"} matched your search.`
-                : `Browse ${totalCount} custom packaging products. Filter by category and open any card for details.`
-            }
-            align="left"
-            className="mb-6 max-w-3xl"
-          />
+        {/* Hero: copy + CTA | image */}
+        <div className="grid grid-cols-1 items-start justify-center gap-8 min-[1200px]:grid-cols-2 min-[1400px]:grid-cols-[1fr_648px] xl:gap-16">
+          <div>
+            <h1 className="font-heading text-[24px] font-bold leading-8 text-[#172455] md:text-[36px] md:leading-[44px]">
+              {query
+                ? `Search results for “${query}”`
+                : "Packaging Boxes Solutions by Industry Needs"}
+            </h1>
+            <p className="mt-4 text-base leading-relaxed text-[#374151] md:mt-6">
+              {query
+                ? `${products.length} product${products.length === 1 ? "" : "s"} matched your search. Refine your query or browse the full catalog below.`
+                : "Find the perfect packaging solution tailored to your business needs. Our premium packaging collection is thoughtfully organized by industry from retail and e-commerce to food, cosmetics, and more. Each solution is designed to provide specialized protection, enhance product presentation, and strengthen your brand identity, ensuring your products stand out while staying safe and professionally packaged."}
+            </p>
+            <div className="mt-4 text-center sm:text-start">
+              <Link
+                href="/quote"
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-[#FF5548] px-6 py-3 text-base font-bold text-white transition-colors hover:bg-[#e04337] sm:text-lg"
+              >
+                Request a Quote
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
 
-          <div className="flex items-center gap-2 overflow-x-auto pb-3 pt-1 scrollbar-none">
-            <Link
-              href={q ? `/products?q=${encodeURIComponent(q)}` : "/products"}
-              className={`whitespace-nowrap rounded-full px-4 py-2 text-xs font-bold transition-colors ${
-                !category
-                  ? "bg-[#172455] text-white"
-                  : "border border-gray-200 bg-white text-gray-700 hover:border-gray-400"
-              }`}
-            >
-              All Products ({totalCount})
-            </Link>
-
-            {categories.slice(0, 12).map((cat) => {
-              const isActive = category === cat.slug;
-              const href = q
-                ? `/products?category=${cat.slug}&q=${encodeURIComponent(q)}`
-                : `/products?category=${cat.slug}`;
-              return (
-                <Link
-                  key={cat.id}
-                  href={href}
-                  className={`whitespace-nowrap rounded-full px-4 py-2 text-xs font-bold transition-colors ${
-                    isActive
-                      ? "bg-[#172455] text-white"
-                      : "border border-gray-200 bg-white text-gray-700 hover:border-gray-400"
-                  }`}
-                >
-                  {cat.name}
-                  {typeof cat.productCount === "number"
-                    ? ` (${cat.productCount})`
-                    : ""}
-                </Link>
-              );
-            })}
+          <div className="relative min-h-[240px] w-full overflow-hidden rounded-2xl bg-[#F6F8FA] min-[1200px]:h-[450px] min-[1400px]:h-[523px]">
+            <SafeImage
+              src={heroImage}
+              alt="Custom printed packaging wholesale boxes"
+              fill
+              sizes="(max-width: 1200px) 100vw, 648px"
+              className="object-cover object-center"
+              priority
+            />
           </div>
         </div>
 
-        {products.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-gray-200 py-16 text-center">
-            <p className="text-sm font-medium text-gray-500">
-              No packaging products found in this selection.
-            </p>
-          </div>
-        ) : (
-          <>
-            <div className={CATALOG_TILE.grid}>
-              {products.map((product) => (
-                <CategoryProductCard key={product.id} product={product} />
-              ))}
-            </div>
+        {/* Search */}
+        <div className="mt-10 sm:mt-12">
+          <ProductsCatalogSearch initialQuery={query} />
+        </div>
 
-            <div className="mt-10 flex flex-col items-center gap-3">
-              <p className="text-[13px] text-gray-500">
-                Showing {(page - 1) * PAGE_SIZE + 1}–
-                {Math.min(page * PAGE_SIZE, total)} of {total}
-              </p>
-              <Pagination
-                page={page}
-                totalPages={totalPages}
-                basePath="/products"
-                params={filterParams}
-              />
-            </div>
-          </>
-        )}
+        {/* Product grid heading */}
+        <div>
+          <h2 className="font-heading text-3xl font-extrabold text-[#172455]">
+            Discover Popular Packaging Boxes
+          </h2>
+          <p className="mt-2 max-w-4xl text-base leading-relaxed text-[#4B5563]">
+            Supercharge your brand through the power of custom boxes and custom
+            packaging that&apos;s big on wow-factor. With low minimums, free
+            design expertise, super fast delivery and unlimited customization
+          </p>
+        </div>
+
+        <ProductsLoadMoreGrid products={products} />
       </Container>
 
-      <div className="mt-16">
+      <div className="mt-4 sm:mt-8">
         <QuoteCTA />
       </div>
     </div>

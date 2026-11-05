@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "CustomPage" ADD COLUMN IF NOT EXISTS "layout" JSONB NOT NULL DEFAULT '{}';
