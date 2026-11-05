@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
 import { getAdminSession } from "@/lib/admin-auth";
-import { deleteCloudinaryAsset } from "@/lib/cloudinary";
+import {
+  deleteCloudinaryAsset,
+  renameCloudinaryAsset,
+} from "@/lib/cloudinary";
 import { toMediaUrl } from "@/lib/media-url";
 import { slugify } from "@/lib/utils";
 
@@ -115,6 +118,55 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Upload failed", error);
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+  }
+}
+
+/**
+ * PATCH /api/admin/upload
+ * Body: { url, slug, folder, resourceType? }
+ * Renames an existing Cloudinary asset to folder/slug (exact media URL).
+ */
+export async function PATCH(request: Request) {
+  const session = await getAdminSession();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const body = await request.json();
+    const url = typeof body?.url === "string" ? body.url : "";
+    const slug = typeof body?.slug === "string" ? body.slug : "";
+    const folder =
+      typeof body?.folder === "string"
+        ? body.folder
+        : "packaginghype/products";
+    const resourceType: "image" | "video" =
+      body?.resourceType === "video" ? "video" : "image";
+
+    if (!url || !slug) {
+      return NextResponse.json(
+        { error: "url and slug are required" },
+        { status: 400 }
+      );
+    }
+
+    const renamed = await renameCloudinaryAsset({
+      url,
+      folder,
+      slug,
+      resourceType,
+    });
+
+    return NextResponse.json({
+      url: renamed.url,
+      publicId: renamed.publicId,
+      mediaPath: renamed.url,
+    });
+  } catch (error) {
+    console.error("Rename asset failed", error);
+    const message =
+      error instanceof Error ? error.message : "Rename failed";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 

@@ -53,9 +53,48 @@ export function ImageUploadField({
 
   const cleanFolder = folder.replace(/^\/+|\/+$/g, "");
   const previewSlug = slugify(slug.replace(/\.[a-z0-9]{2,5}$/i, ""));
+  const currentExt =
+    value.match(/\.([a-z0-9]{2,5})(?:\?|$)/i)?.[1]?.toLowerCase() || "webp";
   const previewPath = previewSlug
-    ? `/media/${cleanFolder}/${previewSlug}.webp`
+    ? `/media/${cleanFolder}/${previewSlug}.${currentExt}`
     : `/media/${cleanFolder}/[auto-id].webp`;
+  const alreadyOnSlug =
+    Boolean(value) &&
+    Boolean(previewSlug) &&
+    (value.includes(`/${previewSlug}.`) ||
+      value.endsWith(`/${previewSlug}`) ||
+      value.includes(`/${cleanFolder}/${previewSlug}.`));
+
+  async function applySlugToCurrent() {
+    if (!value || !previewSlug) {
+      setError("Set a slug first, then apply.");
+      return;
+    }
+    setError("");
+    setUploading(true);
+    try {
+      const res = await fetch("/api/admin/upload", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: value,
+          slug: previewSlug,
+          folder: cleanFolder,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Rename failed");
+        return;
+      }
+      onChange(data.url);
+      setShowUrl(true);
+    } catch {
+      setError("Rename failed. Try again.");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function onFile(file: File | undefined) {
     if (!file) return;
@@ -131,12 +170,35 @@ export function ImageUploadField({
             className="w-full rounded-[6px] border border-[#E2E4E8] bg-white px-3 py-2 text-sm font-medium text-[#172455] placeholder:text-[#9CA3AF] outline-none focus:border-[#FF5548] focus:ring-2 focus:ring-[#FF5548]/10"
           />
           <p className="mt-1 break-all font-mono text-[11px] text-[#21AAA5]">
-            {previewPath}
+            Target: {previewPath}
           </p>
-          <p className="mt-0.5 text-[11px] text-[#6B7280]">
-            Same slug re-upload overwrites that exact URL. Leave empty for a random
-            Cloudinary id.
-          </p>
+          {value ? (
+            <p className="mt-0.5 break-all font-mono text-[11px] text-[#6B7280]">
+              Current: {value}
+            </p>
+          ) : null}
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              disabled={
+                uploading || !value || !previewSlug || alreadyOnSlug
+              }
+              onClick={() => void applySlugToCurrent()}
+              className="inline-flex h-8 cursor-pointer items-center rounded-[5px] border border-[#21AAA5] bg-white px-3 text-[11px] font-bold text-[#21AAA5] hover:bg-[#EAF7F6] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {uploading ? "Working…" : "Apply slug to current image"}
+            </button>
+            {alreadyOnSlug ? (
+              <span className="text-[11px] font-semibold text-emerald-700">
+                Already on this slug URL
+              </span>
+            ) : (
+              <span className="text-[11px] text-[#6B7280]">
+                Renames existing file — no re-upload needed. Or choose file to
+                upload fresh with this slug.
+              </span>
+            )}
+          </div>
         </div>
       ) : null}
 

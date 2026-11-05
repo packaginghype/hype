@@ -1,4 +1,6 @@
 import { v2 as cloudinary } from "cloudinary";
+import { extractCloudinaryPublicId, toMediaUrl } from "@/lib/media-url";
+import { slugify } from "@/lib/utils";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -8,28 +10,79 @@ cloudinary.config({
 });
 
 /**
- * Checks whether a URL is a Cloudinary URL hosted under our cloud account.
+ * Checks whether a URL is a Cloudinary URL hosted under our cloud account,
+ * or a same-origin `/media/...` rewrite of one.
  */
 function isCloudinaryUrl(url: string | null | undefined): boolean {
   if (!url) return false;
+  if (url.startsWith("/media/")) return true;
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
   if (!cloudName) return false;
   return url.includes(`res.cloudinary.com/${cloudName}`);
 }
 
 /**
- * Extracts the Cloudinary public_id from a secure URL.
- * e.g. "https://res.cloudinary.com/mycloud/image/upload/v123/folder/file.jpg"
- *       → "folder/file"
+ * Extracts the Cloudinary public_id (no file extension).
+ * Accepts full Cloudinary URLs or `/media/folder/file.ext`.
  */
-function extractPublicId(url: string): string | null {
+export function extractPublicId(url: string): string | null {
   try {
+    if (url.startsWith("/media/")) {
+      const path = url.replace(/^\/media\//, "").split("?")[0];
+      return path.replace(/\.[a-z0-9]{2,5}$/i, "") || null;
+    }
+    const fromClean = extractCloudinaryPublicId(url);
+    if (fromClean) {
+      return fromClean.replace(/\.[a-z0-9]{2,5}$/i, "") || null;
+    }
     // Match anything after /upload/vXXXXX/ or /upload/
     const match = url.match(/\/upload\/(?:v\d+\/)?(.+?)(?:\.[^.]+)?$/);
     return match ? match[1] : null;
   } catch {
     return null;
   }
+}
+
+/**
+ * Rename an existing asset to folder/slug and return clean `/media/...` URL.
+ */
+export async function renameCloudinaryAsset(options: {
+  url: string;
+  folder: string;
+  slug: string;
+  resourceType?: "image" | "video";
+}): Promise<{ url: string; publicId: string }> {
+  const fromId = extractPublicId(options.url);
+  if (!fromId) {
+    throw new Error("Could not read current image public id");
+  }
+
+  const folder = options.folder.replace(/^\/+|\/+$/g, "").replace(/\/+/g, "/");
+  const slug = slugify(options.slug.replace(/\.[a-z0-9]{2,5}$/i, ""));
+  if (!slug) throw new Error("Slug is required");
+
+  const toId = `${folder}/${slug}`;
+  if (fromId === toId) {
+    const extMatch = options.url.match(/\.([a-z0-9]{2,5})(?:\?|$)/i);
+    const ext = extMatch?.[1] || "webp";
+    return { url: `/media/${toId}.${ext}`, publicId: toId };
+  }
+
+  const result = await cloudinary.uploader.rename(fromId, toId, {
+    resource_type: options.resourceType || "image",
+    overwrite: true,
+    invalidate: true,
+  });
+
+  const secure =
+    typeof result?.secure_url === "string"
+      ? result.secure_url
+      : `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/${toId}`;
+
+  return {
+    url: toMediaUrl(secure),
+    publicId: typeof result?.public_id === "string" ? result.public_id : toId,
+  };
 }
 
 /**
