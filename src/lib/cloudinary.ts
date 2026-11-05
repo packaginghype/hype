@@ -44,7 +44,11 @@ export function extractPublicId(url: string): string | null {
 }
 
 /**
- * Rename an existing asset to folder/slug and return clean `/media/...` URL.
+ * Copy an existing asset to folder/slug and return clean `/media/...` URL.
+ *
+ * Uses upload-from-URL (not rename) so the old public_id keeps working until
+ * the admin form is saved and deleteRemovedCloudinaryAssets cleans it up.
+ * Cloudinary rename would 404 the live site immediately before save.
  */
 export async function renameCloudinaryAsset(options: {
   url: string;
@@ -61,23 +65,61 @@ export async function renameCloudinaryAsset(options: {
   const slug = slugify(options.slug.replace(/\.[a-z0-9]{2,5}$/i, ""));
   if (!slug) throw new Error("Slug is required");
 
+  const resourceType = options.resourceType || "image";
   const toId = `${folder}/${slug}`;
+  const extMatch = options.url.match(/\.([a-z0-9]{2,5})(?:\?|$)/i);
+  const ext = extMatch?.[1] || (resourceType === "video" ? "mp4" : "webp");
+
   if (fromId === toId) {
-    const extMatch = options.url.match(/\.([a-z0-9]{2,5})(?:\?|$)/i);
-    const ext = extMatch?.[1] || "webp";
     return { url: `/media/${toId}.${ext}`, publicId: toId };
   }
 
-  const result = await cloudinary.uploader.rename(fromId, toId, {
-    resource_type: options.resourceType || "image",
-    overwrite: true,
-    invalidate: true,
-  });
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+  if (!cloudName) throw new Error("Cloudinary is not configured");
+
+  // Fetch from the current public_id (not /media rewrite) so copy works
+  // even when the admin field stores a same-origin media path.
+  const sourceUrl = `https://res.cloudinary.com/${cloudName}/${resourceType}/upload/${fromId}`;
+
+  let result: { secure_url?: string; public_id?: string };
+  try {
+    result = await cloudinary.uploader.upload(sourceUrl, {
+      public_id: toId,
+      resource_type: resourceType,
+      overwrite: true,
+      invalidate: true,
+      unique_filename: false,
+      use_filename: false,
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (/not found|404|resource could not be found/i.test(msg)) {
+      // Recovery: earlier rename may have already moved the file to the slug.
+      try {
+        const existing = await cloudinary.api.resource(toId, {
+          resource_type: resourceType,
+        });
+        if (typeof existing?.secure_url === "string") {
+          return {
+            url: toMediaUrl(existing.secure_url),
+            publicId:
+              typeof existing.public_id === "string" ? existing.public_id : toId,
+          };
+        }
+      } catch {
+        // target missing too
+      }
+      throw new Error(
+        "Current image is missing on Cloudinary (often after an earlier rename). Re-upload the image, then apply the slug."
+      );
+    }
+    throw err;
+  }
 
   const secure =
     typeof result?.secure_url === "string"
       ? result.secure_url
-      : `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/${toId}`;
+      : `https://res.cloudinary.com/${cloudName}/${resourceType}/upload/${toId}.${ext}`;
 
   return {
     url: toMediaUrl(secure),

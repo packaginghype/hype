@@ -40,6 +40,7 @@ export function ImageUploadField({
   const [imgError, setImgError] = useState(false);
   const [slug, setSlug] = useState(() => slugify(defaultSlug || ""));
   const [slugTouched, setSlugTouched] = useState(false);
+  const [slugApplied, setSlugApplied] = useState(false);
 
   useEffect(() => {
     setImgError(false);
@@ -71,6 +72,7 @@ export function ImageUploadField({
       return;
     }
     setError("");
+    setSlugApplied(false);
     setUploading(true);
     try {
       const res = await fetch("/api/admin/upload", {
@@ -84,13 +86,14 @@ export function ImageUploadField({
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Rename failed");
+        setError(data.error || "Apply slug failed");
         return;
       }
       onChange(data.url);
       setShowUrl(true);
+      setSlugApplied(true);
     } catch {
-      setError("Rename failed. Try again.");
+      setError("Apply slug failed. Try again.");
     } finally {
       setUploading(false);
     }
@@ -188,14 +191,19 @@ export function ImageUploadField({
             >
               {uploading ? "Working…" : "Apply slug to current image"}
             </button>
-            {alreadyOnSlug ? (
+            {slugApplied ? (
+              <span className="text-[11px] font-semibold text-emerald-700">
+                Copied to slug URL — save this form to publish (old file stays
+                until save).
+              </span>
+            ) : alreadyOnSlug ? (
               <span className="text-[11px] font-semibold text-emerald-700">
                 Already on this slug URL
               </span>
             ) : (
               <span className="text-[11px] text-[#6B7280]">
-                Renames existing file — no re-upload needed. Or choose file to
-                upload fresh with this slug.
+                Copies to the slug URL without breaking the live image. Save the
+                form after. Or choose file to upload fresh with this slug.
               </span>
             )}
           </div>

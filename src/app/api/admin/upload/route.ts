@@ -124,7 +124,8 @@ export async function POST(request: Request) {
 /**
  * PATCH /api/admin/upload
  * Body: { url, slug, folder, resourceType? }
- * Renames an existing Cloudinary asset to folder/slug (exact media URL).
+ * Copies an existing Cloudinary asset to folder/slug (exact media URL).
+ * Old public_id is left intact until the parent form save cleans it up.
  */
 export async function PATCH(request: Request) {
   const session = await getAdminSession();
