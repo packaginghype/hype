@@ -12,7 +12,6 @@ import {
   Search,
   ShoppingCart,
   X,
-  ArrowRight,
 } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
@@ -25,10 +24,10 @@ type NavLink = { name: string; slug: string };
 type DropdownKey = "categories" | "industries" | "materials" | null;
 
 const QUICK_SEARCHES = [
-  { label: "Kraft Boxes", href: "/product?q=kraft" },
-  { label: "Mailer Boxes", href: "/product?q=mailer" },
-  { label: "Rigid Boxes", href: "/product?q=rigid" },
-  { label: "Cosmetic Boxes", href: "/product?q=cosmetic" },
+  { label: "Kraft Boxes", href: "/search?q=kraft" },
+  { label: "Mailer Boxes", href: "/search?q=mailer" },
+  { label: "Rigid Boxes", href: "/search?q=rigid" },
+  { label: "Cosmetic Boxes", href: "/search?q=cosmetic" },
 ] as const;
 
 export function Header({
@@ -93,7 +92,7 @@ export function Header({
     const q = searchQuery.trim();
     if (!q) return;
     closeSearch();
-    router.push(`/product?q=${encodeURIComponent(q)}`);
+    router.push(`/search?q=${encodeURIComponent(q)}`);
   }
 
   const navLinkClass =
@@ -123,10 +122,7 @@ export function Header({
               priority
               className="h-9 w-auto rounded-sm object-contain sm:h-11"
               unoptimized={Boolean(
-                !logoUrl ||
-                  logoUrl.startsWith("http") ||
-                  logoUrl.endsWith(".svg") ||
-                  logoUrl.endsWith(".ico")
+                logoUrl?.endsWith(".svg") || logoUrl?.endsWith(".ico")
               )}
             />
           </Link>
@@ -346,93 +342,75 @@ export function Header({
       </div>
 
       {isSearchOpen ? (
-        <div className="fixed inset-0 z-50 flex items-start justify-center px-4 pb-8 pt-[12vh] sm:pt-[16vh]">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center px-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={searchTitleId}
+        >
           <button
             type="button"
             aria-label="Close search"
-            className="absolute inset-0 bg-[#0F1839]/55 backdrop-blur-[3px] transition-opacity"
+            className="absolute inset-0 bg-[#0B1A2E]/70 backdrop-blur-md transition-opacity"
             onClick={closeSearch}
           />
 
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={searchTitleId}
-            className="relative z-10 w-full max-w-xl overflow-hidden rounded-[14px] border border-white/20 bg-white shadow-[0_24px_80px_-20px_rgba(15,24,57,0.55)]"
+          <button
+            type="button"
+            onClick={closeSearch}
+            className="absolute right-5 top-5 z-20 rounded-full p-2 text-white/80 transition-colors hover:bg-white/10 hover:text-white sm:right-8 sm:top-8"
+            aria-label="Close"
           >
-            <div className="flex items-center justify-between border-b border-[#EEF1F6] px-4 py-3 sm:px-5">
-              <div>
-                <p
-                  id={searchTitleId}
-                  className="text-sm font-bold text-[#172455]"
-                >
-                  Search products
-                </p>
-                <p className="mt-0.5 text-[12px] text-[#6B7280]">
-                  Find boxes by name, material, or style
-                </p>
-              </div>
+            <X className="h-6 w-6" />
+          </button>
+
+          <form
+            onSubmit={onSearchSubmit}
+            className="relative z-10 flex w-full max-w-3xl flex-col items-center gap-6 px-2 sm:gap-8"
+          >
+            <p
+              id={searchTitleId}
+              className="text-center text-sm font-bold uppercase tracking-[0.18em] text-white sm:text-base"
+            >
+              Start typing and press enter
+            </p>
+
+            <label htmlFor="header-search-input" className="sr-only">
+              Search products
+            </label>
+            <div className="relative flex w-full max-w-2xl px-2 sm:px-4">
+              <input
+                id="header-search-input"
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                autoComplete="off"
+                className="w-full border-0 border-b-2 border-white bg-transparent px-2 py-3 pr-12 text-xl text-white outline-none placeholder:text-white/50 sm:px-4 sm:text-2xl"
+                placeholder=""
+              />
               <button
-                type="button"
-                onClick={closeSearch}
-                className="rounded-md p-2 text-[#6B7280] transition-colors hover:bg-[#F6F8FA] hover:text-[#172455]"
-                aria-label="Close"
+                type="submit"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-white transition-transform hover:scale-110 sm:right-4"
+                aria-label="Search"
               >
-                <X className="h-5 w-5" />
+                <Search className="h-6 w-6" strokeWidth={2} />
               </button>
             </div>
 
-            <form onSubmit={onSearchSubmit} className="p-4 sm:p-5">
-              <label htmlFor="header-search-input" className="sr-only">
-                Search products
-              </label>
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-[#9CA3AF]" />
-                <input
-                  id="header-search-input"
-                  ref={searchInputRef}
-                  type="search"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Try kraft boxes, mailers, rigid…"
-                  autoComplete="off"
-                  className="w-full rounded-[10px] border border-[#E2E4E8] bg-[#F8FAFC] py-3.5 pl-11 pr-[7.5rem] text-[15px] text-[#172455] outline-none transition-[border-color,background-color,box-shadow] placeholder:text-[#9CA3AF] focus:border-[#FF5548] focus:bg-white focus:shadow-[0_0_0_3px_rgba(255,85,72,0.12)]"
-                />
-                <button
-                  type="submit"
-                  className="absolute right-1.5 top-1/2 inline-flex -translate-y-1/2 items-center gap-1.5 rounded-[8px] bg-[#FF5548] px-3.5 py-2 text-[13px] font-bold text-white transition-colors hover:bg-[#e04337]"
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {QUICK_SEARCHES.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={closeSearch}
+                  className="rounded-full border border-white/25 bg-white/5 px-3.5 py-1.5 text-[12.5px] font-semibold text-white/90 transition-colors hover:border-white/50 hover:bg-white/10"
                 >
-                  Search
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </button>
-              </div>
-
-              <div className="mt-4">
-                <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#9CA3AF]">
-                  Popular searches
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {QUICK_SEARCHES.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={closeSearch}
-                      className="rounded-full border border-[#E8EAEF] bg-[#F8FAFC] px-3 py-1.5 text-[12.5px] font-semibold text-[#172455] transition-colors hover:border-[#FF5548]/40 hover:bg-[#FFF5F4] hover:text-[#FF5548]"
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              <p className="mt-4 hidden items-center gap-2 text-[11px] text-[#9CA3AF] sm:flex">
-                <kbd className="rounded border border-[#E2E4E8] bg-[#F6F8FA] px-1.5 py-0.5 font-sans text-[10px] font-semibold text-[#6B7280]">
-                  Esc
-                </kbd>
-                to close
-              </p>
-            </form>
-          </div>
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </form>
         </div>
       ) : null}
 

@@ -72,10 +72,7 @@ export function MobileNavigation({
               height={48}
               className="h-9 w-auto rounded-sm object-contain"
               unoptimized={Boolean(
-                !logoUrl ||
-                  logoUrl.startsWith("http") ||
-                  logoUrl.endsWith(".svg") ||
-                  logoUrl.endsWith(".ico")
+                logoUrl?.endsWith(".svg") || logoUrl?.endsWith(".ico")
               )}
             />
           </Link>

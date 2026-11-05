@@ -17,11 +17,6 @@ export function QuoteCTA() {
       />
 
       <Container className="relative z-10 mx-auto max-w-4xl text-center">
-        <span className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-[#21AAA5]">
-          <Sparkles className="h-3.5 w-3.5" />
-          Fast Turnaround • Zero Setup Fees
-        </span>
-
         <h2 className="text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
           Ready to Elevate Your Brand With Custom Packaging?
         </h2>

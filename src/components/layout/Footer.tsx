@@ -94,10 +94,7 @@ export function Footer({
                 height={56}
                 className="h-10 w-auto object-contain sm:h-11"
                 unoptimized={Boolean(
-                  !logoUrl ||
-                    logoUrl.startsWith("http") ||
-                    logoUrl.endsWith(".svg") ||
-                    logoUrl.endsWith(".ico")
+                  logoUrl?.endsWith(".svg") || logoUrl?.endsWith(".ico")
                 )}
               />
             </Link>
