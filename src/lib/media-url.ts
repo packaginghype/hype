@@ -1,6 +1,6 @@
 /**
  * Serve Cloudinary assets as clean same-origin paths:
- * `/media/folder/filename` — no host, transforms, version, or extension.
+ * `/media/folder/filename.jpg` — no host, transforms, or version.
  */
 
 const CLOUDINARY_HOST = "res.cloudinary.com";
@@ -14,21 +14,16 @@ function isTransformSegment(segment: string): boolean {
   return /^[a-z]{1,4}_.+/i.test(segment);
 }
 
-/** Strip delivery transforms, version folder, and file extension → public_id. */
-function toPublicId(parts: string[]): string | null {
+/** Strip delivery transforms + version → folder/filename.ext */
+function toAssetPath(parts: string[]): string | null {
   let i = 0;
   while (i < parts.length && isTransformSegment(parts[i])) i += 1;
   if (i < parts.length && /^v\d+$/.test(parts[i])) i += 1;
   if (i >= parts.length) return null;
-
-  const idParts = parts.slice(i);
-  const last = idParts[idParts.length - 1];
-  // Drop extension (.jpg / .webp / …) — Cloudinary public_id has none
-  idParts[idParts.length - 1] = last.replace(/\.[a-z0-9]+$/i, "");
-  return idParts.join("/") || null;
+  return parts.slice(i).join("/") || null;
 }
 
-/** Cloudinary public_id from a full delivery URL. */
+/** Cloudinary folder/file path (keeps extension) from a full delivery URL. */
 export function extractCloudinaryPublicId(src: string): string | null {
   try {
     const url = new URL(src);
@@ -38,7 +33,7 @@ export function extractCloudinaryPublicId(src: string): string | null {
     if (idx === -1) return null;
 
     const parts = url.pathname.slice(idx + marker.length).split("/").filter(Boolean);
-    return toPublicId(parts);
+    return toAssetPath(parts);
   } catch {
     return null;
   }
@@ -57,17 +52,17 @@ export function isCloudinaryDeliveryUrl(src: string): boolean {
   );
 }
 
-/** Normalize an existing `/media/...` path down to folder/filename. */
+/** Normalize an existing `/media/...` path (drop transforms/version, keep ext). */
 function cleanMediaPath(src: string): string {
   const raw = src.replace(/^\/media\//, "").split("?")[0];
   const parts = raw.split("/").filter(Boolean);
-  const publicId = toPublicId(parts);
-  return publicId ? `/media/${publicId}` : src.split("?")[0];
+  const assetPath = toAssetPath(parts);
+  return assetPath ? `/media/${assetPath}` : src.split("?")[0];
 }
 
 /**
  * Same-origin clean URL for a Cloudinary asset.
- * Always `/media/{folder}/{filename}` — quality/size live in the rewrite only.
+ * `/media/{folder}/{filename}.jpg` — quality/size live in the rewrite only.
  */
 export function toMediaUrl(
   src: string,
@@ -77,8 +72,8 @@ export function toMediaUrl(
   if (src.startsWith("/media/")) return cleanMediaPath(src);
   if (src.startsWith("/") && !src.startsWith("//")) return src;
 
-  const publicId = extractCloudinaryPublicId(src);
-  if (!publicId) return src;
+  const assetPath = extractCloudinaryPublicId(src);
+  if (!assetPath) return src;
 
-  return `/media/${publicId}`;
+  return `/media/${assetPath}`;
 }

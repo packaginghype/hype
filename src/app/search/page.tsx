@@ -49,13 +49,20 @@ export default async function SearchPage({ searchParams }: Props) {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero — Erixum-style dark search banner */}
-      <section className="bg-[#172455]">
+      {/* Hero — soft teal banner, matches category/home theme */}
+      <section className="bg-[#E8F5F2]">
         <div className="mx-auto w-full max-w-[95%] px-4 py-10 sm:max-w-[85%] sm:px-6 sm:py-16 md:max-w-[80%] lg:max-w-[75%] lg:py-20 xl:max-w-[65%] 2xl:max-w-[60%]">
-          <h1 className="text-center text-2xl font-bold text-[#FF5548] sm:text-3xl">
-            {query ? `Search Results for: ${query}` : "Search Products"}
+          <h1 className="text-center text-2xl font-bold text-[#172455] sm:text-3xl">
+            {query ? (
+              <>
+                Search Results for:{" "}
+                <span className="text-[#FF5548]">{query}</span>
+              </>
+            ) : (
+              "Search Products"
+            )}
           </h1>
-          <p className="mx-auto mt-4 max-w-3xl text-center text-sm leading-relaxed text-white/90 sm:text-[15px]">
+          <p className="mx-auto mt-4 max-w-3xl text-center text-sm leading-relaxed text-[#4B5563] sm:text-[15px]">
             Explore our range of products that match exactly what you&apos;re
             looking for. Still have questions? Enter a new search below or contact
             us through live chat, one of our online forms, or give us a call at{" "}
