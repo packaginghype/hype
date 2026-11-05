@@ -28,6 +28,7 @@ import {
 } from "@/lib/page-layout";
 import {
   COLOR_PRESETS,
+  DEFAULT_WIDGET_STYLE,
   parsePageWidgets,
   type PageWidget,
 } from "@/lib/page-widgets";
@@ -165,6 +166,7 @@ function initialSections(initial?: CustomPageFormValues | null): PageWidget[] {
       {
         id: "legacy-content",
         type: "richText",
+        style: { ...DEFAULT_WIDGET_STYLE },
         title: "",
         html: initial.content,
       },
