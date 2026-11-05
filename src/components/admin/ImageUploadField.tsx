@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { ImagePlus, Loader2, Trash2, Link2, Upload } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, slugify } from "@/lib/utils";
 
 type Props = {
   label: string;
@@ -14,6 +14,10 @@ type Props = {
   folder?: string;
   accept?: string;
   className?: string;
+  /** Prefill image filename slug (e.g. product/category slug) */
+  defaultSlug?: string;
+  /** Show the image slug field (default true) */
+  showSlugField?: boolean;
 };
 
 export function ImageUploadField({
@@ -25,6 +29,8 @@ export function ImageUploadField({
   folder = "packaginghype/categories",
   accept = "image/jpeg,image/png,image/webp,image/gif",
   className,
+  defaultSlug = "",
+  showSlugField = true,
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -32,10 +38,24 @@ export function ImageUploadField({
   const [showUrl, setShowUrl] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [slug, setSlug] = useState(() => slugify(defaultSlug || ""));
+  const [slugTouched, setSlugTouched] = useState(false);
 
   useEffect(() => {
     setImgError(false);
   }, [value]);
+
+  useEffect(() => {
+    if (!slugTouched && defaultSlug) {
+      setSlug(slugify(defaultSlug));
+    }
+  }, [defaultSlug, slugTouched]);
+
+  const cleanFolder = folder.replace(/^\/+|\/+$/g, "");
+  const previewSlug = slugify(slug.replace(/\.[a-z0-9]{2,5}$/i, ""));
+  const previewPath = previewSlug
+    ? `/media/${cleanFolder}/${previewSlug}.webp`
+    : `/media/${cleanFolder}/[auto-id].webp`;
 
   async function onFile(file: File | undefined) {
     if (!file) return;
@@ -45,7 +65,10 @@ export function ImageUploadField({
     try {
       const body = new FormData();
       body.append("file", file);
-      body.append("folder", folder);
+      body.append("folder", cleanFolder);
+      if (previewSlug) {
+        body.append("slug", previewSlug);
+      }
 
       const res = await fetch("/api/admin/upload", {
         method: "POST",
@@ -89,6 +112,34 @@ export function ImageUploadField({
         </button>
       </div>
 
+      {showSlugField ? (
+        <div>
+          <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-[#172455]">
+            Image slug / filename
+          </p>
+          <input
+            type="text"
+            value={slug}
+            onChange={(e) => {
+              setSlugTouched(true);
+              setSlug(e.target.value);
+            }}
+            onBlur={() =>
+              setSlug(slugify(slug.replace(/\.[a-z0-9]{2,5}$/i, "")))
+            }
+            placeholder="e.g. custom-tie-boxes"
+            className="w-full rounded-[6px] border border-[#E2E4E8] bg-white px-3 py-2 text-sm font-medium text-[#172455] placeholder:text-[#9CA3AF] outline-none focus:border-[#FF5548] focus:ring-2 focus:ring-[#FF5548]/10"
+          />
+          <p className="mt-1 break-all font-mono text-[11px] text-[#21AAA5]">
+            {previewPath}
+          </p>
+          <p className="mt-0.5 text-[11px] text-[#6B7280]">
+            Same slug re-upload overwrites that exact URL. Leave empty for a random
+            Cloudinary id.
+          </p>
+        </div>
+      ) : null}
+
       <div
         onDragEnter={(e) => {
           e.preventDefault();
@@ -129,7 +180,9 @@ export function ImageUploadField({
           ) : (
             <div className="flex h-full flex-col items-center justify-center gap-1 text-[#9CA3AF]">
               <ImagePlus className="h-6 w-6" />
-              <span className="text-[10px] font-semibold">{imgError ? "Preview error" : "Preview"}</span>
+              <span className="text-[10px] font-semibold">
+                {imgError ? "Preview error" : "Preview"}
+              </span>
             </div>
           )}
         </div>
@@ -188,7 +241,7 @@ export function ImageUploadField({
               type="url"
               value={value}
               onChange={(e) => onChange(e.target.value)}
-              placeholder="https://res.cloudinary.com/…"
+              placeholder="/media/… or https://res.cloudinary.com/…"
               tabIndex={showUrl ? 0 : -1}
               className={cn(
                 "w-full rounded-[4px] border border-[#E2E4E8] bg-white px-3 py-2 text-sm font-medium text-[#172455] placeholder:text-[#9CA3AF] outline-none focus:border-[#FF5548]",

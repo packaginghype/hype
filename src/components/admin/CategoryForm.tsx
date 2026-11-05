@@ -535,6 +535,7 @@ export function CategoryForm({
           onChange={(url) => patch({ bannerImageUrl: url })}
           recommended="1200 × 840 px · Aspect 10:7 · Max 1.5MB"
           folder="packaginghype/categories/banner"
+          defaultSlug={values.slug ? `${values.slug}-banner` : ""}
         />
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
@@ -565,6 +566,7 @@ export function CategoryForm({
             recommended="900 × 900 px (1:1)"
             hint="Max 1MB · JPG, PNG, WEBP · upload at 900×900"
             folder="packaginghype/categories/thumb"
+            defaultSlug={values.slug || ""}
           />
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
@@ -633,6 +635,7 @@ export function CategoryForm({
               onChange={(url) => patch({ pageScrollImageUrl: url })}
               recommended="900 × 900 px · Max 2MB"
               folder="packaginghype/categories/scroll"
+              defaultSlug={values.slug ? `${values.slug}-scroll` : ""}
             />
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
@@ -703,6 +706,7 @@ export function CategoryForm({
               onChange={(url) => patch({ faqsImageUrl: url })}
               recommended="800 × 800 or 1200 × 900 px · Max 2MB"
               folder="packaginghype/categories/faqs"
+              defaultSlug={values.slug ? `${values.slug}-faq` : ""}
             />
             <div>
               <FieldLabel>FAQ Image Alt Text</FieldLabel>

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
 import { getAdminSession } from "@/lib/admin-auth";
 import { deleteCloudinaryAsset } from "@/lib/cloudinary";
+import { toMediaUrl } from "@/lib/media-url";
+import { slugify } from "@/lib/utils";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -43,8 +45,13 @@ export async function POST(request: Request) {
   try {
     const form = await request.formData();
     const file = form.get("file");
-    const folder = String(form.get("folder") || "packaginghype/products");
+    const folder = String(form.get("folder") || "packaginghype/products")
+      .replace(/^\/+|\/+$/g, "")
+      .replace(/\/+/g, "/");
     const kind = String(form.get("kind") || "image");
+    // Optional SEO filename → /media/{folder}/{slug}.ext
+    const rawSlug = String(form.get("slug") || form.get("publicId") || "");
+    const publicId = slugify(rawSlug.replace(/\.[a-z0-9]{2,5}$/i, ""));
 
     if (!(file instanceof File)) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
@@ -82,11 +89,24 @@ export async function POST(request: Request) {
     const result = await cloudinary.uploader.upload(dataUri, {
       folder,
       resource_type: isVideo ? "video" : "image",
-      overwrite: false,
+      ...(publicId
+        ? {
+            public_id: publicId,
+            overwrite: true,
+            invalidate: true,
+            unique_filename: false,
+            use_filename: false,
+          }
+        : { overwrite: false }),
     });
 
+    const cleanUrl = toMediaUrl(result.secure_url);
+
     return NextResponse.json({
-      url: result.secure_url,
+      url: cleanUrl,
+      cloudinaryUrl: result.secure_url,
+      publicId: result.public_id,
+      mediaPath: cleanUrl,
       width: result.width,
       height: result.height,
       bytes: result.bytes,

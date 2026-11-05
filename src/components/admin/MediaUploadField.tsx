@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FileVideo, Loader2, Trash2, Upload } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, slugify } from "@/lib/utils";
 
 type Props = {
   label: string;
@@ -13,6 +13,8 @@ type Props = {
   kind?: "image" | "video";
   folder?: string;
   className?: string;
+  defaultSlug?: string;
+  showSlugField?: boolean;
 };
 
 export function MediaUploadField({
@@ -23,10 +25,26 @@ export function MediaUploadField({
   kind = "image",
   folder = "packaginghype/products",
   className,
+  defaultSlug = "",
+  showSlugField = true,
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const [slug, setSlug] = useState(() => slugify(defaultSlug || ""));
+  const [slugTouched, setSlugTouched] = useState(false);
+
+  useEffect(() => {
+    if (!slugTouched && defaultSlug) {
+      setSlug(slugify(defaultSlug));
+    }
+  }, [defaultSlug, slugTouched]);
+
+  const cleanFolder = folder.replace(/^\/+|\/+$/g, "");
+  const previewSlug = slugify(slug.replace(/\.[a-z0-9]{2,5}$/i, ""));
+  const previewPath = previewSlug
+    ? `/media/${cleanFolder}/${previewSlug}.${kind === "video" ? "mp4" : "webp"}`
+    : `/media/${cleanFolder}/[auto-id].${kind === "video" ? "mp4" : "webp"}`;
 
   async function onFile(file: File | undefined) {
     if (!file) return;
@@ -35,8 +53,9 @@ export function MediaUploadField({
     try {
       const body = new FormData();
       body.append("file", file);
-      body.append("folder", folder);
+      body.append("folder", cleanFolder);
       body.append("kind", kind);
+      if (previewSlug) body.append("slug", previewSlug);
       const res = await fetch("/api/admin/upload", { method: "POST", body });
       const data = await res.json();
       if (!res.ok) {
@@ -62,6 +81,30 @@ export function MediaUploadField({
           {recommended}
         </p>
       </div>
+
+      {showSlugField ? (
+        <div>
+          <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-[#172455]">
+            File slug / filename
+          </p>
+          <input
+            type="text"
+            value={slug}
+            onChange={(e) => {
+              setSlugTouched(true);
+              setSlug(e.target.value);
+            }}
+            onBlur={() =>
+              setSlug(slugify(slug.replace(/\.[a-z0-9]{2,5}$/i, "")))
+            }
+            placeholder="e.g. custom-tie-boxes"
+            className="w-full rounded-[6px] border border-[#E2E4E8] bg-white px-3 py-2 text-sm font-medium text-[#172455] placeholder:text-[#9CA3AF] outline-none focus:border-[#FF5548] focus:ring-2 focus:ring-[#FF5548]/10"
+          />
+          <p className="mt-1 break-all font-mono text-[11px] text-[#21AAA5]">
+            {previewPath}
+          </p>
+        </div>
+      ) : null}
 
       <div
         className="flex min-h-[112px] cursor-pointer flex-wrap items-start gap-3 rounded-[8px] border border-dashed border-[#E2E4E8] bg-[#F8FAFC] p-3"

@@ -721,6 +721,7 @@ export function ProductForm({
           recommended={PRODUCT_IMAGE.recommended}
           hint={PRODUCT_IMAGE.hint}
           folder="packaginghype/products/gallery"
+          defaultSlug={values.slug || ""}
         />
 
         <div>
@@ -843,6 +844,7 @@ export function ProductForm({
             recommended="MP4 only, max 5MB (vertical 9:16 recommended)"
             kind="video"
             folder="packaginghype/products/video"
+            defaultSlug={values.slug ? `${values.slug}-video` : ""}
           />
           <MediaUploadField
             label="Video Thumbnail / Poster"
@@ -850,6 +852,7 @@ export function ProductForm({
             onChange={(url) => patch({ videoThumbnailUrl: url })}
             recommended="Vertical 9:16 or 1:1 · webp, png, jpg, jpeg · max 1MB"
             folder="packaginghype/products/video-thumb"
+            defaultSlug={values.slug ? `${values.slug}-video-thumb` : ""}
           />
         </div>
         <div>
@@ -873,6 +876,7 @@ export function ProductForm({
             recommended={CARD_IMAGE.recommended}
             hint={CARD_IMAGE.hint}
             folder="packaginghype/products/thumb"
+            defaultSlug={values.slug || ""}
           />
           <div>
             <FieldLabel>Image Alt</FieldLabel>
@@ -1080,6 +1084,7 @@ export function ProductForm({
               onChange={(url) => patch({ pageScrollImageUrl: url })}
               recommended="900 × 900 px · Max 2MB"
               folder="packaginghype/products/scroll"
+              defaultSlug={values.slug ? `${values.slug}-scroll` : ""}
             />
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
@@ -1144,6 +1149,7 @@ export function ProductForm({
               onChange={(url) => patch({ faqsImageUrl: url })}
               recommended="800 × 800 or 1200 × 900 px · Max 2MB"
               folder="packaginghype/products/faqs"
+              defaultSlug={values.slug ? `${values.slug}-faq` : ""}
             />
             <div>
               <FieldLabel>FAQ Image Alt Text</FieldLabel>
@@ -1240,6 +1246,7 @@ export function ProductForm({
           }}
           recommended="900 × 900 px"
           folder="packaginghype/products/merchant"
+          defaultSlug={values.slug ? `${values.slug}-merchant` : ""}
         />
         <div>
           <p className="mb-3 text-sm font-bold text-[#172455]">
