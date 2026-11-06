@@ -121,11 +121,28 @@ export function GeneralSettingsForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setStatus("error");
-        setErrorMsg(data.error?.message || "Failed to save settings");
+        const zodHint =
+          data?.error?.fieldErrors &&
+          typeof data.error.fieldErrors === "object"
+            ? Object.entries(
+                data.error.fieldErrors as Record<string, string[]>
+              )
+                .flatMap(([key, msgs]) =>
+                  (msgs || []).map((m) => `${key}: ${m}`)
+                )
+                .slice(0, 3)
+                .join(" · ")
+            : "";
+        setErrorMsg(
+          data.error?.message || zodHint || "Failed to save settings"
+        );
       } else {
+        if (data.data) {
+          setValues(data.data);
+        }
         setStatus("success");
         setTimeout(() => setStatus("idle"), 3500);
       }

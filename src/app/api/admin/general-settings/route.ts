@@ -8,6 +8,8 @@ import { getGeneralSettings } from "@/lib/general-settings";
 import {
   DEFAULT_GENERAL_SETTINGS,
   generalSettingsSchema,
+  sanitizeFooterColumns,
+  sanitizeFooterLegalLinks,
 } from "@/lib/general-settings-schema";
 
 export async function GET() {
@@ -29,8 +31,21 @@ export async function PUT(request: Request) {
   const body = await request.json().catch(() => null);
   const parsed = generalSettingsSchema.safeParse(body);
   if (!parsed.success) {
+    const flat = parsed.error.flatten();
+    const fieldHint = Object.entries(flat.fieldErrors)
+      .flatMap(([key, msgs]) => (msgs || []).map((m) => `${key}: ${m}`))
+      .slice(0, 4)
+      .join(" · ");
     return NextResponse.json(
-      { error: parsed.error.flatten() },
+      {
+        error: {
+          ...flat,
+          message:
+            fieldHint ||
+            flat.formErrors[0] ||
+            "Invalid settings. Check footer columns and required fields.",
+        },
+      },
       { status: 400 }
     );
   }
@@ -44,8 +59,10 @@ export async function PUT(request: Request) {
     headerCode: "",
     footerCode: "",
     customScripts: parsed.data.customScripts,
-    footerColumns: (parsed.data.footerColumns || []).slice(0, 5),
-    footerLegalLinks: parsed.data.footerLegalLinks || [],
+    footerColumns: sanitizeFooterColumns(parsed.data.footerColumns || []),
+    footerLegalLinks: sanitizeFooterLegalLinks(
+      parsed.data.footerLegalLinks || []
+    ),
   };
 
   const record = await prisma.sitePage.upsert({

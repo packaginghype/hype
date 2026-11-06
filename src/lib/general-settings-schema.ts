@@ -10,13 +10,14 @@ export const customScriptSchema = z.object({
 
 export const footerMenuLinkSchema = z.object({
   id: z.string().trim().min(1).max(80),
-  label: z.string().trim().min(1).max(80),
-  href: z.string().trim().min(1).max(500),
+  // Allow empty while editing in admin; empty rows are stripped on save/normalize
+  label: z.string().max(80).default(""),
+  href: z.string().max(500).default("/"),
 });
 
 export const footerMenuColumnSchema = z.object({
   id: z.string().trim().min(1).max(80),
-  title: z.string().trim().min(1).max(60),
+  title: z.string().max(60).default("Column"),
   /** Manual links, or auto-fill from published categories */
   mode: z.enum(["links", "categories"]).default("links"),
   enabled: z.boolean().default(true),
@@ -28,8 +29,8 @@ export const footerMenuColumnSchema = z.object({
 
 export const footerLegalLinkSchema = z.object({
   id: z.string().trim().min(1).max(80),
-  label: z.string().trim().min(1).max(60),
-  href: z.string().trim().min(1).max(500),
+  label: z.string().max(60).default(""),
+  href: z.string().max(500).default("/"),
 });
 
 export const generalSettingsSchema = z.object({
@@ -62,7 +63,7 @@ export function newFooterId(prefix = "fc") {
 }
 
 export function createEmptyFooterLink(): FooterMenuLink {
-  return { id: newFooterId("fl"), label: "", href: "/" };
+  return { id: newFooterId("fl"), label: "New link", href: "/" };
 }
 
 export function createEmptyFooterColumn(
@@ -142,25 +143,64 @@ export const DEFAULT_GENERAL_SETTINGS: GeneralSettings = {
   footerLegalLinks: DEFAULT_FOOTER_LEGAL_LINKS,
 };
 
+/** Sanitize columns for DB write / live footer (drop blank link rows). */
+export function sanitizeFooterColumns(
+  columns: FooterMenuColumn[]
+): FooterMenuColumn[] {
+  return columns.slice(0, 5).map((col, index) => ({
+    ...col,
+    title: col.title.trim() || `Column ${index + 1}`,
+    mode: col.mode === "categories" ? "categories" : "links",
+    enabled: col.enabled !== false,
+    includeCustomPages: Boolean(col.includeCustomPages),
+    categoriesLimit: Math.min(12, Math.max(1, col.categoriesLimit || 7)),
+    links: (col.links || [])
+      .filter((l) => l.label.trim() && l.href.trim())
+      .map((l) => ({
+        id: l.id,
+        label: l.label.trim(),
+        href: l.href.trim(),
+      })),
+  }));
+}
+
+export function sanitizeFooterLegalLinks(
+  links: FooterLegalLink[]
+): FooterLegalLink[] {
+  return links
+    .filter((l) => l.label.trim() && l.href.trim())
+    .slice(0, 12)
+    .map((l) => ({
+      id: l.id,
+      label: l.label.trim(),
+      href: l.href.trim(),
+    }));
+}
+
 export function normalizeFooterColumns(
   raw: unknown
 ): FooterMenuColumn[] {
-  const parsed = z.array(footerMenuColumnSchema).safeParse(raw);
-  if (!parsed.success || !parsed.data.length) {
+  // Only fall back to defaults when the field was never saved
+  if (raw === undefined || raw === null) {
     return DEFAULT_FOOTER_COLUMNS;
   }
-  return parsed.data.slice(0, 5).map((col) => ({
-    ...col,
-    links: (col.links || []).filter((l) => l.label.trim() && l.href.trim()),
-  }));
+  const parsed = z.array(footerMenuColumnSchema).safeParse(raw);
+  if (!parsed.success) {
+    return DEFAULT_FOOTER_COLUMNS;
+  }
+  // Allow intentional empty array (admin cleared all columns)
+  return sanitizeFooterColumns(parsed.data);
 }
 
 export function normalizeFooterLegalLinks(
   raw: unknown
 ): FooterLegalLink[] {
-  const parsed = z.array(footerLegalLinkSchema).safeParse(raw);
-  if (!parsed.success || !parsed.data.length) {
+  if (raw === undefined || raw === null) {
     return DEFAULT_FOOTER_LEGAL_LINKS;
   }
-  return parsed.data.filter((l) => l.label.trim() && l.href.trim());
+  const parsed = z.array(footerLegalLinkSchema).safeParse(raw);
+  if (!parsed.success) {
+    return DEFAULT_FOOTER_LEGAL_LINKS;
+  }
+  return sanitizeFooterLegalLinks(parsed.data);
 }
