@@ -297,20 +297,43 @@ model BlogPost {
   thumbnailImageAlt    String?
   thumbnailImageTitle  String?
   author               String   @default("Packaging Hype Team")
+  category             String?
+  readTime             String?
   publishedDate        DateTime @default(now())
+  videoUrl             String?
+  videoTitle           String?
+  faqsHeading          String?
+  faqsSubheading       String?  @db.Text
+  faqsImageUrl         String?
+  faqsImageAlt         String?
+  faqsImageTitle       String?
   seoTitle             String?
   seoKeywords          String?  @db.Text
   seoDescription       String?  @db.Text
   seoScript            String?  @db.Text
   canonicalUrl         String?
+  noIndex              Boolean  @default(false)
   isPublished          Boolean  @default(true)
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
+  faqs                 BlogPostFaq[]
 
   @@index([slug])
   @@index([isPublished])
   @@index([featuredEnabled])
   @@index([publishedDate])
+  @@index([category])
+}
+
+model BlogPostFaq {
+  id         String   @id @default(cuid())
+  blogPostId String
+  blogPost   BlogPost @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+  question   String
+  answer     String   @db.Text
+  sortOrder  Int      @default(0)
+
+  @@index([blogPostId])
 }
 
 enum QuoteStatus {

@@ -214,6 +214,9 @@ export const getBlogBySlug = cache(async (slug: string) => {
     async () => {
       const post = await prisma.blogPost.findFirst({
         where: { slug, isPublished: true },
+        include: {
+          faqs: { orderBy: { sortOrder: "asc" } },
+        },
       });
       return mapBlogWithFallbackImage(post);
     },

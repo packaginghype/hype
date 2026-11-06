@@ -11,6 +11,12 @@ import {
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
 import {
+  CATEGORY_BANNER_IMAGE,
+  CATEGORY_THUMBNAIL_IMAGE,
+  CATEGORY_CONTENT_IMAGE,
+  CATEGORY_FAQ_IMAGE,
+} from "@/lib/image-presets";
+import {
   CANONICAL_MATERIAL_IMAGES,
   CANONICAL_DESIGN_IMAGES,
 } from "@/data/category-page-content";
@@ -575,7 +581,8 @@ export function CategoryForm({
           label="Banner Image"
           value={values.bannerImageUrl || ""}
           onChange={(url) => patch({ bannerImageUrl: url })}
-          recommended="1200 × 840 px · Aspect 10:7 · Max 1.5MB"
+          recommended={CATEGORY_BANNER_IMAGE.recommended}
+          hint={CATEGORY_BANNER_IMAGE.hint}
           folder="packaginghype/categories/banner"
           defaultSlug={values.slug ? `${values.slug}-banner` : ""}
         />
@@ -605,8 +612,8 @@ export function CategoryForm({
             label="Thumbnail Image"
             value={values.imageUrl || ""}
             onChange={(url) => patch({ imageUrl: url })}
-            recommended="900 × 900 px (1:1)"
-            hint="Max 1MB · JPG, PNG, WEBP · upload at 900×900"
+            recommended={CATEGORY_THUMBNAIL_IMAGE.recommended}
+            hint={CATEGORY_THUMBNAIL_IMAGE.hint}
             folder="packaginghype/categories/thumb"
             defaultSlug={values.slug || ""}
           />
@@ -675,7 +682,8 @@ export function CategoryForm({
               label="Page Scroll Image"
               value={values.pageScrollImageUrl || ""}
               onChange={(url) => patch({ pageScrollImageUrl: url })}
-              recommended="900 × 900 px · Max 2MB"
+              recommended={CATEGORY_CONTENT_IMAGE.recommended}
+              hint={CATEGORY_CONTENT_IMAGE.hint}
               folder="packaginghype/categories/scroll"
               defaultSlug={values.slug ? `${values.slug}-scroll` : ""}
             />
@@ -746,7 +754,8 @@ export function CategoryForm({
               label="FAQ Side Image"
               value={values.faqsImageUrl || ""}
               onChange={(url) => patch({ faqsImageUrl: url })}
-              recommended="800 × 800 or 1200 × 900 px · Max 2MB"
+              recommended={CATEGORY_FAQ_IMAGE.recommended}
+              hint={CATEGORY_FAQ_IMAGE.hint}
               folder="packaginghype/categories/faqs"
               defaultSlug={values.slug ? `${values.slug}-faq` : ""}
             />

@@ -2,12 +2,14 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getAdminSession } from "@/lib/admin-auth";
-import { adminBlogSchema, blogWriteData } from "@/lib/admin-blog-schema";
+import {
+  adminBlogSchema,
+  blogWriteData,
+  normalizeBlogFaqs,
+} from "@/lib/admin-blog-schema";
 import { revalidateBlogs } from "@/lib/cache";
 import { logAdminActivity } from "@/lib/admin-activity";
-import {
-  deleteRemovedCloudinaryAssets,
-} from "@/lib/cloudinary";
+import { deleteRemovedCloudinaryAssets } from "@/lib/cloudinary";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -34,24 +36,37 @@ export async function PUT(request: Request, { params }: Params) {
     }
 
     const newData = parsed.data;
+    const faqs = normalizeBlogFaqs(newData.faqs);
 
-    // Collect old Cloudinary image URLs from blog (featuredImage = bannerImageUrl in DB)
     const oldImageUrls = [
-      existing.featuredImage,   // same as bannerImageUrl in DB
+      existing.featuredImage,
       existing.thumbnailImageUrl,
+      existing.faqsImageUrl,
     ];
-    // newData uses bannerImageUrl which maps to featuredImage in blogWriteData
     const newImageUrls = [
       newData.bannerImageUrl ?? null,
       newData.thumbnailImageUrl ?? null,
+      newData.faqsImageUrl ?? null,
     ];
 
-    const post = await prisma.blogPost.update({
-      where: { id },
-      data: blogWriteData(newData),
+    const post = await prisma.$transaction(async (tx) => {
+      await tx.blogPostFaq.deleteMany({ where: { blogPostId: id } });
+      return tx.blogPost.update({
+        where: { id },
+        data: {
+          ...blogWriteData(newData),
+          faqs: {
+            create: faqs.map((faq, index) => ({
+              question: faq.question,
+              answer: faq.answer,
+              sortOrder: index,
+            })),
+          },
+        },
+        include: { faqs: { orderBy: { sortOrder: "asc" } } },
+      });
     });
 
-    // Delete Cloudinary assets that were removed/replaced
     await deleteRemovedCloudinaryAssets(oldImageUrls, newImageUrls);
 
     await logAdminActivity(session, {
@@ -104,10 +119,12 @@ export async function DELETE(_request: Request, { params }: Params) {
 
     await prisma.blogPost.delete({ where: { id } });
 
-    // Delete all Cloudinary images associated with this blog post
-    // featuredImage and bannerImageUrl are the same value in the DB
     await deleteRemovedCloudinaryAssets(
-      [existing.featuredImage, existing.thumbnailImageUrl],
+      [
+        existing.featuredImage,
+        existing.thumbnailImageUrl,
+        existing.faqsImageUrl,
+      ],
       []
     );
 

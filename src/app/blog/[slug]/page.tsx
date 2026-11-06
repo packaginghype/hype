@@ -8,6 +8,7 @@ import { RichText } from "@/components/ui/RichText";
 import { BlogShareButtons } from "@/components/blog/BlogShareButtons";
 import { BlogReadingProgress } from "@/components/blog/BlogReadingProgress";
 import { BlogTableOfContents } from "@/components/blog/BlogTableOfContents";
+import { BlogFaqSection } from "@/components/blog/BlogFaqSection";
 import { JsonLdScript } from "@/components/seo/JsonLdScript";
 import { Calendar, Clock, ArrowLeft, ArrowRight, BookOpen } from "lucide-react";
 import {
@@ -18,6 +19,7 @@ import {
   extractHeadingsFromHtml,
   ensureHeadingIds,
 } from "@/lib/blogs";
+import { toVideoEmbedUrl } from "@/lib/blog-video";
 
 export const revalidate = 120;
 
@@ -50,6 +52,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     alternates: {
       canonical,
     },
+    robots: post.noIndex
+      ? { index: false, follow: false }
+      : { index: true, follow: true },
     openGraph: {
       title,
       description,
@@ -81,7 +86,15 @@ export default async function BlogDetailPage({ params }: Props) {
     post.bannerImageUrl ||
     post.featuredImage ||
     getBlogFallbackImage(post.slug);
-  const estRead = readingTime(post.content || "");
+  const estRead =
+    post.readTime?.trim() || readingTime(post.content || "");
+  const videoEmbed = toVideoEmbedUrl(post.videoUrl);
+  const faqItems = (post.faqs || [])
+    .map((f) => ({
+      question: f.question,
+      answer: f.answer,
+    }))
+    .filter((f) => f.question.trim());
 
   const rawHtml = post.content || "";
   const toc = extractHeadingsFromHtml(rawHtml);
@@ -109,6 +122,11 @@ export default async function BlogDetailPage({ params }: Props) {
             <div className="mt-6 grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-12">
               {/* Left column */}
               <div className="flex flex-col gap-5">
+                {post.category?.trim() ? (
+                  <span className="inline-flex w-fit rounded-full bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[#172455] shadow-sm ring-1 ring-[#E8EAEF]">
+                    {post.category}
+                  </span>
+                ) : null}
                 <h1 className="font-heading text-3xl font-extrabold tracking-tight text-[#172455] sm:text-4xl lg:text-[2.4rem] lg:leading-[1.2]">
                   {post.title}
                 </h1>
@@ -199,6 +217,27 @@ export default async function BlogDetailPage({ params }: Props) {
                 </div>
               </article>
 
+              {videoEmbed ? (
+                <section className="mt-14">
+                  {post.videoTitle?.trim() ? (
+                    <h2 className="mb-4 font-heading text-xl font-bold text-[#172455] sm:text-2xl">
+                      {post.videoTitle}
+                    </h2>
+                  ) : null}
+                  <div className="overflow-hidden rounded-2xl border border-gray-100 bg-black shadow-sm">
+                    <div className="relative aspect-video w-full">
+                      <iframe
+                        src={videoEmbed}
+                        title={post.videoTitle || post.title}
+                        className="absolute inset-0 h-full w-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </div>
+                  </div>
+                </section>
+              ) : null}
+
               {/* Author Bio & Actions */}
               <div className="mt-14 border-t border-gray-100 pt-8">
                 <div className="flex flex-col gap-6 rounded-2xl border border-gray-100 bg-[#FAFAFA] p-6 sm:flex-row sm:items-center sm:justify-between">
@@ -240,6 +279,16 @@ export default async function BlogDetailPage({ params }: Props) {
               </aside>
             ) : null}
           </div>
+
+          {faqItems.length > 0 ? (
+            <BlogFaqSection
+              heading={post.faqsHeading}
+              subheading={post.faqsSubheading}
+              items={faqItems}
+              imageUrl={post.faqsImageUrl}
+              imageAlt={post.faqsImageAlt || post.faqsImageTitle}
+            />
+          ) : null}
 
           {/* ── Related Articles ────────────────────────────────────── */}
           {relatedBlogs.length > 0 ? (

@@ -147,6 +147,7 @@ export default async function AdminBlogsPage({ searchParams }: Props) {
                                 day: "numeric",
                                 year: "numeric",
                               })}
+                              {post.category ? ` · ${post.category}` : ""}
                               {post.author ? ` · ${post.author}` : ""}
                             </p>
                           </div>

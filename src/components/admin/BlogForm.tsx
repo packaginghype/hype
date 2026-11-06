@@ -2,8 +2,14 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Plus, Trash2 } from "lucide-react";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
+
+export type BlogFaqInput = {
+  question: string;
+  answer: string;
+};
 
 export type BlogFormValues = {
   title: string;
@@ -18,12 +24,23 @@ export type BlogFormValues = {
   thumbnailImageAlt?: string | null;
   thumbnailImageTitle?: string | null;
   author?: string | null;
+  category?: string | null;
+  readTime?: string | null;
   publishedDate?: string | null;
+  videoUrl?: string | null;
+  videoTitle?: string | null;
+  faqsHeading?: string | null;
+  faqsSubheading?: string | null;
+  faqsImageUrl?: string | null;
+  faqsImageAlt?: string | null;
+  faqsImageTitle?: string | null;
+  faqs?: BlogFaqInput[];
   seoTitle?: string | null;
   seoKeywords?: string | null;
   seoDescription?: string | null;
   seoScript?: string | null;
   canonicalUrl?: string | null;
+  noIndex?: boolean;
   isPublished?: boolean;
 };
 
@@ -47,6 +64,15 @@ function toDateInput(value?: string | null) {
 
 const inputClass =
   "w-full rounded-[4px] border border-[#E2E4E8] bg-white px-3 py-2.5 text-sm font-medium text-[#172455] placeholder:text-[#9CA3AF] outline-none focus:border-[#FF5548]";
+
+const BLOG_CATEGORIES = [
+  "Packaging Guides",
+  "Materials",
+  "Printing & Finishes",
+  "Design Tips",
+  "Industry Insights",
+  "Shipping & Logistics",
+];
 
 function Section({
   title,
@@ -141,19 +167,42 @@ export function BlogForm({
     thumbnailImageAlt: initial?.thumbnailImageAlt || "",
     thumbnailImageTitle: initial?.thumbnailImageTitle || "",
     author: initial?.author || "Packaging Hype Team",
-    publishedDate: toDateInput(initial?.publishedDate) || toDateInput(new Date().toISOString()),
+    category: initial?.category || "",
+    readTime: initial?.readTime || "",
+    publishedDate:
+      toDateInput(initial?.publishedDate) ||
+      toDateInput(new Date().toISOString()),
+    videoUrl: initial?.videoUrl || "",
+    videoTitle: initial?.videoTitle || "",
+    faqsHeading: initial?.faqsHeading || "",
+    faqsSubheading: initial?.faqsSubheading || "",
+    faqsImageUrl: initial?.faqsImageUrl || "",
+    faqsImageAlt: initial?.faqsImageAlt || "",
+    faqsImageTitle: initial?.faqsImageTitle || "",
     seoTitle: initial?.seoTitle || "",
     seoKeywords: initial?.seoKeywords || "",
     seoDescription: initial?.seoDescription || "",
     seoScript: initial?.seoScript || "",
     canonicalUrl: initial?.canonicalUrl || "",
+    noIndex: initial?.noIndex ?? false,
     isPublished: initial?.isPublished ?? true,
   });
+  const [faqs, setFaqs] = useState<BlogFaqInput[]>(
+    initial?.faqs?.length
+      ? initial.faqs
+      : [{ question: "", answer: "" }]
+  );
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [slugTouched, setSlugTouched] = useState(Boolean(initial?.slug));
   const [savedPostId, setSavedPostId] = useState(postId);
+
+  const categoryOptions = Array.from(
+    new Set(
+      [...BLOG_CATEGORIES, values.category || ""].filter(Boolean) as string[]
+    )
+  );
 
   function patch(p: Partial<BlogFormValues>) {
     setValues((prev) => ({ ...prev, ...p }));
@@ -166,6 +215,10 @@ export function BlogForm({
     setSuccess("");
 
     const activeId = savedPostId || postId;
+    const payload = {
+      ...values,
+      faqs: faqs.filter((f) => f.question.trim()),
+    };
 
     try {
       const res = await fetch(
@@ -173,7 +226,7 @@ export function BlogForm({
         {
           method: activeId ? "PUT" : "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(values),
+          body: JSON.stringify(payload),
         }
       );
 
@@ -213,7 +266,9 @@ export function BlogForm({
         router.replace(`/admin/blogs/${newId}`);
       }
       setSuccess(
-        activeId ? "Blog post updated successfully." : "Blog post created successfully."
+        activeId
+          ? "Blog post updated successfully."
+          : "Blog post created successfully."
       );
       router.refresh();
       setLoading(false);
@@ -247,11 +302,28 @@ export function BlogForm({
           />
         </div>
 
-        <YesNo
-          label="Featured Enable / Disable"
-          value={values.featuredEnabled ?? false}
-          onChange={(v) => patch({ featuredEnabled: v })}
-        />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <YesNo
+            label="Featured Enable / Disable"
+            value={values.featuredEnabled ?? false}
+            onChange={(v) => patch({ featuredEnabled: v })}
+          />
+          <div>
+            <FieldLabel>Category</FieldLabel>
+            <input
+              list="blog-category-options"
+              value={values.category || ""}
+              onChange={(e) => patch({ category: e.target.value })}
+              className={inputClass}
+              placeholder="e.g. Packaging Guides"
+            />
+            <datalist id="blog-category-options">
+              {categoryOptions.map((cat) => (
+                <option key={cat} value={cat} />
+              ))}
+            </datalist>
+          </div>
+        </div>
 
         <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr_1fr]">
           <ImageUploadField
@@ -292,7 +364,7 @@ export function BlogForm({
           />
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-3">
           <div>
             <FieldLabel>Author</FieldLabel>
             <input
@@ -309,6 +381,18 @@ export function BlogForm({
               onChange={(e) => patch({ publishedDate: e.target.value })}
               className={inputClass}
             />
+          </div>
+          <div>
+            <FieldLabel>Read Time</FieldLabel>
+            <input
+              value={values.readTime || ""}
+              onChange={(e) => patch({ readTime: e.target.value })}
+              className={inputClass}
+              placeholder="e.g. 5 min read"
+            />
+            <p className="mt-1 text-[11px] text-[#6B7280]">
+              Leave empty to auto-estimate from content.
+            </p>
           </div>
         </div>
       </Section>
@@ -351,6 +435,150 @@ export function BlogForm({
               placeholder="Thumbnail title"
             />
           </div>
+        </div>
+      </Section>
+
+      <Section title="Featured Video (Optional)">
+        <p className="text-xs text-[#6B7280]">
+          YouTube or Vimeo URL. Shown below the article content when set.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <FieldLabel>Video URL</FieldLabel>
+            <input
+              value={values.videoUrl || ""}
+              onChange={(e) => patch({ videoUrl: e.target.value })}
+              className={inputClass}
+              placeholder="https://www.youtube.com/watch?v=…"
+            />
+          </div>
+          <div>
+            <FieldLabel>Video Section Title</FieldLabel>
+            <input
+              value={values.videoTitle || ""}
+              onChange={(e) => patch({ videoTitle: e.target.value })}
+              className={inputClass}
+              placeholder="Watch: Packaging walkthrough"
+            />
+          </div>
+        </div>
+      </Section>
+
+      <Section title="FAQ Section (Optional)">
+        <p className="text-xs text-[#6B7280]">
+          Appears at the bottom of the blog detail page. Leave empty to hide.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <FieldLabel>FAQ Section Title</FieldLabel>
+            <input
+              value={values.faqsHeading || ""}
+              onChange={(e) => patch({ faqsHeading: e.target.value })}
+              className={inputClass}
+              placeholder="Frequently Asked Questions"
+            />
+          </div>
+          <div>
+            <FieldLabel>FAQ Section Description</FieldLabel>
+            <input
+              value={values.faqsSubheading || ""}
+              onChange={(e) => patch({ faqsSubheading: e.target.value })}
+              className={inputClass}
+              placeholder="Quick answers related to this guide"
+            />
+          </div>
+        </div>
+
+        <div className="rounded-[8px] border border-[#E8EAEF] bg-[#F8FAFC] p-4 space-y-4">
+          <p className="text-sm font-bold text-[#172455]">
+            FAQ Side Image (Optional)
+          </p>
+          <div className="grid gap-5 lg:grid-cols-2">
+            <ImageUploadField
+              label="FAQ Image"
+              value={values.faqsImageUrl || ""}
+              onChange={(url) => patch({ faqsImageUrl: url })}
+              recommended="800 × 800 or 1200 × 900 px · Max 2MB"
+              folder="packaginghype/blogs/faqs"
+            />
+            <div className="space-y-4">
+              <div>
+                <FieldLabel>FAQ Image Alt</FieldLabel>
+                <input
+                  value={values.faqsImageAlt || ""}
+                  onChange={(e) => patch({ faqsImageAlt: e.target.value })}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <FieldLabel>FAQ Image Title</FieldLabel>
+                <input
+                  value={values.faqsImageTitle || ""}
+                  onChange={(e) => patch({ faqsImageTitle: e.target.value })}
+                  className={inputClass}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          {faqs.map((faq, index) => (
+            <div
+              key={index}
+              className="space-y-3 rounded-[6px] border border-[#E8EAEF] bg-[#F8FAFC] p-4"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <FieldLabel>Question {index + 1}</FieldLabel>
+                {faqs.length > 1 ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFaqs((prev) => prev.filter((_, i) => i !== index))
+                    }
+                    className="inline-flex cursor-pointer items-center gap-1 text-xs font-bold text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Remove
+                  </button>
+                ) : null}
+              </div>
+              <input
+                value={faq.question}
+                onChange={(e) => {
+                  const next = [...faqs];
+                  next[index] = { ...next[index], question: e.target.value };
+                  setFaqs(next);
+                }}
+                className={inputClass}
+                placeholder="Enter question"
+              />
+              <div>
+                <FieldLabel>Answer</FieldLabel>
+                <textarea
+                  rows={3}
+                  value={faq.answer}
+                  onChange={(e) => {
+                    const next = [...faqs];
+                    next[index] = { ...next[index], answer: e.target.value };
+                    setFaqs(next);
+                  }}
+                  className={inputClass}
+                  placeholder="Enter answer"
+                />
+              </div>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() =>
+              setFaqs((prev) => [...prev, { question: "", answer: "" }])
+            }
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded-[4px] border border-[#E2E4E8] bg-white px-3 py-2 text-xs font-bold text-[#172455] hover:bg-[#F6F8FA]"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Add FAQ
+          </button>
         </div>
       </Section>
 
@@ -405,14 +633,22 @@ export function BlogForm({
             placeholder={`https://packaginghype.com/blog/${values.slug || "post-slug"}`}
           />
           <p className="mt-1 text-[11px] text-[#6B7280]">
-            Leave empty to use the default URL: https://packaginghype.com/blog/{values.slug || "post-slug"}
+            Leave empty to use the default URL:
+            https://packaginghype.com/blog/{values.slug || "post-slug"}
           </p>
         </div>
-        <YesNo
-          label="Status"
-          value={values.isPublished ?? true}
-          onChange={(v) => patch({ isPublished: v })}
-        />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <YesNo
+            label="No Index (hide from search)"
+            value={values.noIndex ?? false}
+            onChange={(v) => patch({ noIndex: v })}
+          />
+          <YesNo
+            label="Status"
+            value={values.isPublished ?? true}
+            onChange={(v) => patch({ isPublished: v })}
+          />
+        </div>
       </Section>
 
       <Section title="Article Schema">

@@ -131,8 +131,8 @@ export default function ProductDetailPage({
         <section className="bg-white py-6 sm:py-12 lg:py-16">
           <Container className={contentWidth}>
             <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2 lg:gap-10 lg:h-[480px] xl:h-[520px]">
-              {/* Left Column — Designated Image Frame */}
-              <div className="relative aspect-[5/4] w-full overflow-hidden rounded-[14px] bg-white shadow-sm sm:h-[380px] sm:rounded-[20px] lg:aspect-auto lg:h-full">
+              {/* Left Column — Designated Image Frame (1200 × 900 px, 4:3) */}
+              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[14px] bg-white shadow-sm sm:h-[380px] sm:rounded-[20px] lg:aspect-auto lg:h-full">
                 {scrollImage ? (
                   <SafeImage
                     src={scrollImage}
@@ -180,7 +180,7 @@ export default function ProductDetailPage({
 
             {cms?.faqsImageUrl ? (
               <div className="mt-8 grid grid-cols-1 items-center gap-6 lg:mt-10 lg:grid-cols-2 lg:gap-10">
-                <div className="relative aspect-[4/5] overflow-hidden rounded-[22px] bg-[#EDE6DB] sm:aspect-[5/4] lg:aspect-auto lg:min-h-[460px]">
+                <div className="relative aspect-square overflow-hidden rounded-[22px] bg-[#EDE6DB] sm:aspect-[4/3] lg:aspect-auto lg:min-h-[460px]">
                   <SafeImage
                     src={cms.faqsImageUrl}
                     alt={cms.faqsImageAlt || `${product.name} FAQs`}

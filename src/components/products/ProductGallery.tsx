@@ -34,7 +34,7 @@ export default function ProductGallery({
 
   return (
     <div className="space-y-4">
-      <div className="group relative aspect-[4/3] overflow-hidden rounded-xl bg-white">
+      <div className="group relative aspect-square overflow-hidden rounded-xl bg-white">
         <SafeImage
           src={current || ""}
           alt={name}
@@ -99,7 +99,7 @@ export default function ProductGallery({
                 return (
                   <div
                     key={`empty-${slot}`}
-                    className="aspect-[4/3]"
+                    className="aspect-square"
                     aria-hidden
                   />
                 );
@@ -112,7 +112,7 @@ export default function ProductGallery({
                   aria-label={`View image ${index + 1}`}
                   aria-current={active === index}
                   className={cn(
-                    "relative aspect-[4/3] overflow-hidden rounded-lg border-2 bg-white transition-colors",
+                    "relative aspect-square overflow-hidden rounded-lg border-2 bg-white transition-colors",
                     active === index
                       ? "border-[#FF5548]"
                       : "border-[#E8EAEF] hover:border-[#FF5548]/50"

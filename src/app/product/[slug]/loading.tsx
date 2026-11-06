@@ -53,10 +53,10 @@ export default function ProductDetailLoading() {
 
             {/* Right: image gallery skeleton */}
             <div className="min-w-0 space-y-0">
-              <div className="relative aspect-[4/3] w-full animate-pulse rounded-[8px] bg-[#F3F3F3]" />
+              <div className="relative aspect-square w-full animate-pulse rounded-[8px] bg-[#F3F3F3]" />
               <div className="mt-3 grid grid-cols-4 gap-2 sm:gap-2.5">
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="aspect-[4/3] animate-pulse rounded-[6px] bg-[#EBEBEB]" />
+                  <div key={i} className="aspect-square animate-pulse rounded-[6px] bg-[#EBEBEB]" />
                 ))}
               </div>
             </div>

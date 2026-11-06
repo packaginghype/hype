@@ -6,7 +6,13 @@ import { ChevronDown, ChevronUp, Plus, Trash2, X } from "lucide-react";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
 import { MediaUploadField } from "@/components/admin/MediaUploadField";
-import { CARD_IMAGE, PRODUCT_IMAGE } from "@/lib/image-presets";
+import {
+  CARD_IMAGE,
+  PRODUCT_IMAGE,
+  PRODUCT_CONTENT_IMAGE,
+  PRODUCT_FAQ_IMAGE,
+  PRODUCT_MERCHANT_IMAGE,
+} from "@/lib/image-presets";
 import {
   CATEGORY_GROUP_META,
   type CategoryGroupKey,
@@ -1284,7 +1290,8 @@ export function ProductForm({
               label="Image"
               value={values.pageScrollImageUrl || ""}
               onChange={(url) => patch({ pageScrollImageUrl: url })}
-              recommended="900 × 900 px · Max 2MB"
+              recommended={PRODUCT_CONTENT_IMAGE.recommended}
+              hint={PRODUCT_CONTENT_IMAGE.hint}
               folder="packaginghype/products/scroll"
               defaultSlug={values.slug ? `${values.slug}-scroll` : ""}
             />
@@ -1349,7 +1356,8 @@ export function ProductForm({
               label="FAQ Side Image"
               value={values.faqsImageUrl || ""}
               onChange={(url) => patch({ faqsImageUrl: url })}
-              recommended="800 × 800 or 1200 × 900 px · Max 2MB"
+              recommended={PRODUCT_FAQ_IMAGE.recommended}
+              hint={PRODUCT_FAQ_IMAGE.hint}
               folder="packaginghype/products/faqs"
               defaultSlug={values.slug ? `${values.slug}-faq` : ""}
             />
@@ -1446,7 +1454,8 @@ export function ProductForm({
               merchantImageUrls: [...(values.merchantImageUrls || []), url],
             });
           }}
-          recommended="900 × 900 px"
+          recommended={PRODUCT_MERCHANT_IMAGE.recommended}
+          hint={PRODUCT_MERCHANT_IMAGE.hint}
           folder="packaginghype/products/merchant"
           defaultSlug={values.slug ? `${values.slug}-merchant` : ""}
         />

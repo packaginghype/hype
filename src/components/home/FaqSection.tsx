@@ -41,7 +41,7 @@ export function FaqSection({
         </div>
 
         <div className="mt-8 grid grid-cols-1 items-center gap-6 lg:mt-10 lg:grid-cols-2 lg:gap-10">
-          <div className="relative aspect-[4/5] overflow-hidden rounded-[22px] bg-[#EDE6DB] sm:aspect-[5/4] lg:aspect-auto lg:min-h-[480px]">
+          <div className="relative aspect-square overflow-hidden rounded-[22px] bg-[#EDE6DB] sm:aspect-[4/3] lg:aspect-auto lg:min-h-[480px]">
             <Image
               src={faqImageUrl || "/images/reliable-packaging-boxes.jpg"}
               alt={

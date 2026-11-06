@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getAdminSession } from "@/lib/admin-auth";
-import { adminBlogSchema, blogWriteData } from "@/lib/admin-blog-schema";
+import {
+  adminBlogSchema,
+  blogWriteData,
+  normalizeBlogFaqs,
+} from "@/lib/admin-blog-schema";
 import { revalidateBlogs } from "@/lib/cache";
 import { logAdminActivity } from "@/lib/admin-activity";
 
@@ -17,6 +21,7 @@ export async function GET() {
 
   const posts = await prisma.blogPost.findMany({
     orderBy: { publishedDate: "desc" },
+    include: { faqs: { orderBy: { sortOrder: "asc" } } },
   });
 
   return NextResponse.json({ posts });
@@ -33,9 +38,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
+  const faqs = normalizeBlogFaqs(parsed.data.faqs);
+
   try {
     const post = await prisma.blogPost.create({
-      data: blogWriteData(parsed.data),
+      data: {
+        ...blogWriteData(parsed.data),
+        faqs: {
+          create: faqs.map((faq, index) => ({
+            question: faq.question,
+            answer: faq.answer,
+            sortOrder: index,
+          })),
+        },
+      },
+      include: { faqs: { orderBy: { sortOrder: "asc" } } },
     });
     await logAdminActivity(session, {
       action: "CREATE",
