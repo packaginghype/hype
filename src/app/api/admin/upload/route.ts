@@ -103,7 +103,14 @@ export async function POST(request: Request) {
         : { overwrite: false }),
     });
 
-    const cleanUrl = toMediaUrl(result.secure_url);
+    const cleanUrl = toMediaUrl(result.secure_url, {
+      format:
+        typeof result.format === "string"
+          ? result.format
+          : isVideo
+            ? "mp4"
+            : undefined,
+    });
 
     return NextResponse.json({
       url: cleanUrl,

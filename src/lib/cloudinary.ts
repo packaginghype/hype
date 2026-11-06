@@ -83,27 +83,19 @@ async function verifiedMediaUrl(
   resourceType: "image" | "video",
   secureUrl?: string
 ): Promise<{ url: string; publicId: string }> {
+  const verified = await resourceExists(publicId, resourceType);
+  if (verified) {
+    return {
+      url: toMediaUrl(verified.secure_url, { format: verified.format }),
+      publicId: verified.public_id,
+    };
+  }
   if (secureUrl) {
-    const verified = await resourceExists(publicId, resourceType);
-    if (verified) {
-      return {
-        url: toMediaUrl(verified.secure_url),
-        publicId: verified.public_id,
-      };
-    }
     return { url: toMediaUrl(secureUrl), publicId };
   }
-
-  const verified = await resourceExists(publicId, resourceType);
-  if (!verified) {
-    throw new Error(
-      "Image name was set but the file is missing on Cloudinary. Re-upload the image, then try again."
-    );
-  }
-  return {
-    url: toMediaUrl(verified.secure_url),
-    publicId: verified.public_id,
-  };
+  throw new Error(
+    "Image name was set but the file is missing on Cloudinary. Re-upload the image, then try again."
+  );
 }
 
 /**
@@ -137,7 +129,7 @@ export async function renameCloudinaryAsset(options: {
     const target = await resourceExists(toId, resourceType);
     if (target) {
       return {
-        url: toMediaUrl(target.secure_url),
+        url: toMediaUrl(target.secure_url, { format: target.format }),
         publicId: target.public_id,
       };
     }

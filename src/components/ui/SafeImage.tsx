@@ -9,7 +9,7 @@ export interface SafeImageProps extends Omit<ImageProps, "onError"> {
   fallbackSrc?: string;
 }
 
-/** Always normalize Cloudinary /media paths to /media/folder/file (no ext). */
+/** Normalize Cloudinary paths to clean `/media/folder/file.ext`. */
 function cleanSrc(src: ImageProps["src"]): ImageProps["src"] {
   if (typeof src !== "string") return src;
   if (isCloudinaryDeliveryUrl(src) || src.startsWith("/media/")) {

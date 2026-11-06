@@ -83,19 +83,49 @@ function cleanMediaPath(src: string): string {
 }
 
 /**
+ * Ensure a `/media/...` path ends with a real file extension.
+ * Cloudinary secure_url sometimes omits it; we use `format` from the API.
+ */
+export function ensureMediaExtension(
+  mediaUrl: string,
+  format?: string | null
+): string {
+  if (!mediaUrl) return mediaUrl;
+  const pathOnly = mediaUrl.split("?")[0];
+  if (!pathOnly.startsWith("/media/")) return mediaUrl;
+  if (FORMAT_EXT_RE.test(pathOnly)) return pathOnly;
+
+  const fmt = (format || "")
+    .trim()
+    .replace(/^\./, "")
+    .toLowerCase();
+  if (!fmt || !/^[a-z0-9]{2,5}$/.test(fmt)) return pathOnly;
+
+  // jpeg → jpg for shorter, familiar URLs
+  const normalized = fmt === "jpeg" ? "jpg" : fmt;
+  return `${pathOnly}.${normalized}`;
+}
+
+/**
  * Same-origin clean URL for a Cloudinary asset.
- * `/media/{folder}/{filename}.jpg` — keeps the real format extension.
+ * `/media/{folder}/{filename}.jpg` — always prefers a visible format extension.
  */
 export function toMediaUrl(
   src: string,
-  _options?: { width?: number; quality?: number }
+  options?: { width?: number; quality?: number; format?: string | null }
 ): string {
   if (!src) return src;
-  if (src.startsWith("/media/")) return cleanMediaPath(src);
-  if (src.startsWith("/") && !src.startsWith("//")) return src;
 
-  const assetPath = extractCloudinaryPublicId(src);
-  if (!assetPath) return src;
+  let mediaPath: string;
+  if (src.startsWith("/media/")) {
+    mediaPath = cleanMediaPath(src);
+  } else if (src.startsWith("/") && !src.startsWith("//")) {
+    return src;
+  } else {
+    const assetPath = extractCloudinaryPublicId(src);
+    if (!assetPath) return src;
+    mediaPath = `/media/${assetPath}`;
+  }
 
-  return `/media/${assetPath}`;
+  return ensureMediaExtension(mediaPath, options?.format);
 }
