@@ -1,10 +1,7 @@
 /**
  * Serve Cloudinary assets as clean same-origin paths:
- * `/media/folder/filename` — no host, transforms, version, or format extension.
- *
- * Extensions are stripped on purpose: next.config rewrites /media to
- * `f_auto,q_auto/...`. Keeping a wrong `.png`/`.jpg` after rename/upload
- * makes Cloudinary 404 even when the public_id exists.
+ * `/media/folder/filename.jpg` — no host, transforms, or version.
+ * Format extension is kept so admin/media links show the real file type.
  */
 
 const CLOUDINARY_HOST = "res.cloudinary.com";
@@ -28,7 +25,7 @@ function toAssetPath(parts: string[]): string | null {
   return parts.slice(i).join("/") || null;
 }
 
-/** Drop trailing image/video format so /media + f_auto can deliver correctly. */
+/** Drop trailing image/video format (for public_id / basename compares). */
 function stripFormatExtension(path: string): string {
   return path.replace(FORMAT_EXT_RE, "");
 }
@@ -38,6 +35,14 @@ export function mediaBasename(url: string): string {
   if (!url) return "";
   const base = url.split("?")[0].split("/").pop() || "";
   return stripFormatExtension(base).toLowerCase();
+}
+
+/** File extension from a media/Cloudinary URL, e.g. "png" — empty if unknown. */
+export function mediaExtension(url: string): string {
+  if (!url) return "";
+  const base = url.split("?")[0].split("/").pop() || "";
+  const match = base.match(FORMAT_EXT_RE);
+  return match?.[1]?.toLowerCase() || "";
 }
 
 /** Cloudinary folder/file path (may include extension) from a full delivery URL. */
@@ -69,18 +74,17 @@ export function isCloudinaryDeliveryUrl(src: string): boolean {
   );
 }
 
-/** Normalize an existing `/media/...` path (drop transforms/version/format). */
+/** Normalize an existing `/media/...` path (drop transforms/version, keep ext). */
 function cleanMediaPath(src: string): string {
   const raw = src.replace(/^\/media\//, "").split("?")[0];
   const parts = raw.split("/").filter(Boolean);
   const assetPath = toAssetPath(parts);
-  if (!assetPath) return src.split("?")[0];
-  return `/media/${stripFormatExtension(assetPath)}`;
+  return assetPath ? `/media/${assetPath}` : src.split("?")[0];
 }
 
 /**
  * Same-origin clean URL for a Cloudinary asset.
- * `/media/{folder}/{filename}` — format is chosen by f_auto in the rewrite.
+ * `/media/{folder}/{filename}.jpg` — keeps the real format extension.
  */
 export function toMediaUrl(
   src: string,
@@ -93,5 +97,5 @@ export function toMediaUrl(
   const assetPath = extractCloudinaryPublicId(src);
   if (!assetPath) return src;
 
-  return `/media/${stripFormatExtension(assetPath)}`;
+  return `/media/${assetPath}`;
 }

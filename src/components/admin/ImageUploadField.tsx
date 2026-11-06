@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { ImagePlus, Loader2, Trash2, Link2, Upload } from "lucide-react";
-import { mediaBasename } from "@/lib/media-url";
+import { mediaBasename, mediaExtension } from "@/lib/media-url";
 import { cn, slugify } from "@/lib/utils";
 
 type Props = {
@@ -63,9 +63,10 @@ export function ImageUploadField({
   const cleanFolder = folder.replace(/^\/+|\/+$/g, "");
   const imageName = slugify(name.replace(/\.[a-z0-9]{2,5}$/i, ""));
   const currentBase = mediaBasename(value);
+  const currentExt = mediaExtension(value) || "webp";
   const targetPath = imageName
-    ? `/media/${cleanFolder}/${imageName}`
-    : `/media/${cleanFolder}/[image-name]`;
+    ? `/media/${cleanFolder}/${imageName}.${currentExt}`
+    : `/media/${cleanFolder}/[image-name].${currentExt}`;
   // Exact basename only — "testing" must NOT match "testing1-1"
   const alreadyNamed =
     Boolean(value) && Boolean(imageName) && currentBase === imageName;

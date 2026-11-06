@@ -11,7 +11,7 @@ import {
   CATEGORY_GROUP_META,
   type CategoryGroupKey,
 } from "@/lib/category-groups";
-import { mediaBasename } from "@/lib/media-url";
+import { mediaBasename, mediaExtension } from "@/lib/media-url";
 import { slugify } from "@/lib/utils";
 
 const GALLERY_FOLDER = "packaginghype/products/gallery";
@@ -40,6 +40,7 @@ function GalleryImageSlugField({
   }, [suggestedSlug, nameTouched]);
 
   const imageName = slugify(name.replace(/\.[a-z0-9]{2,5}$/i, ""));
+  const currentExt = mediaExtension(url) || "webp";
   // Exact basename only — "testing" must NOT match URL ".../testing1-1"
   const alreadyNamed =
     Boolean(imageName) && mediaBasename(url) === imageName;
@@ -101,7 +102,7 @@ function GalleryImageSlugField({
         placeholder="e.g. custom-boxes-1"
       />
       <p className="break-all font-mono text-[10px] text-[#21AAA5]">
-        Target: /media/{GALLERY_FOLDER}/{imageName || "[name]"}
+        Target: /media/{GALLERY_FOLDER}/{imageName || "[name]"}.{currentExt}
       </p>
       <p className="break-all font-mono text-[10px] text-[#6B7280]">
         Current: {url || "—"}

@@ -2,7 +2,7 @@ import type { ImageLoaderProps } from "next/image";
 import { isCloudinaryDeliveryUrl, toMediaUrl } from "@/lib/media-url";
 
 /**
- * Custom next/image loader — Cloudinary → `/media/folder/file` (no ext / transforms).
+ * Custom next/image loader — Cloudinary → `/media/folder/file.ext`.
  */
 export default function cloudinaryImageLoader({
   src,
