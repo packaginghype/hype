@@ -56,7 +56,7 @@ export default function ProductDetailPage({
   return (
     <div className="bg-white">
       <section className="border-b border-gray-100 bg-white">
-        <Container className={`${contentWidth} py-6 sm:py-8 lg:py-10`}>
+        <Container className={`${contentWidth} py-4 sm:py-8 lg:py-10`}>
           <ProductHero
             product={product}
             startingFrom={startingFrom}
@@ -79,9 +79,9 @@ export default function ProductDetailPage({
         </Container>
       </section>
 
-      <section className="bg-white py-8 sm:py-10">
+      <section className="bg-white py-5 sm:py-10">
         <Container className={contentWidth}>
-          <div className="grid grid-cols-1 gap-4 rounded-xl border border-[#E5E7EB] bg-white px-4 py-5 sm:grid-cols-2 sm:px-5 lg:grid-cols-5 lg:gap-2 lg:px-3 lg:py-4">
+          <div className="grid grid-cols-1 gap-3 rounded-xl border border-[#E5E7EB] bg-white px-3 py-4 sm:grid-cols-2 sm:gap-4 sm:px-5 sm:py-5 lg:grid-cols-5 lg:gap-2 lg:px-3 lg:py-4">
             {PRODUCT_TRUST_BADGES.map((badge) => {
               const Icon = trustIcons[badge.icon];
               return (
@@ -127,11 +127,11 @@ export default function ProductDetailPage({
 
       {scrollOn &&
       (scrollImage || !isEmptyHtml(cms?.pageScrollContent || "")) ? (
-        <section className="bg-white py-12 sm:py-16">
+        <section className="bg-white py-6 sm:py-12 lg:py-16">
           <Container className={contentWidth}>
-            <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-2 lg:gap-10 lg:h-[480px] xl:h-[520px]">
+            <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2 lg:gap-10 lg:h-[480px] xl:h-[520px]">
               {/* Left Column — Designated Image Frame */}
-              <div className="relative aspect-[5/4] h-[320px] w-full overflow-hidden rounded-[16px] bg-white shadow-sm sm:h-[380px] sm:rounded-[20px] lg:aspect-auto lg:h-full">
+              <div className="relative aspect-[5/4] w-full overflow-hidden rounded-[14px] bg-white shadow-sm sm:h-[380px] sm:rounded-[20px] lg:aspect-auto lg:h-full">
                 {scrollImage ? (
                   <SafeImage
                     src={scrollImage}
@@ -148,7 +148,7 @@ export default function ProductDetailPage({
               </div>
 
               {/* Right Column — Scrollable Content Section with Coral Headings and Slim Scrollbar */}
-              <div className="reliable-scroll flex flex-col h-[400px] sm:h-[440px] lg:h-full min-h-0 overflow-y-auto overflow-x-hidden pr-3 sm:pr-4">
+              <div className="reliable-scroll flex max-h-[min(70vh,420px)] min-h-0 flex-col overflow-y-auto overflow-x-hidden pr-2 sm:h-[440px] sm:max-h-none sm:pr-4 lg:h-full">
                 {!isEmptyHtml(cms?.pageScrollContent || "") ? (
                   <RichText
                     html={cms!.pageScrollContent!}
@@ -162,21 +162,21 @@ export default function ProductDetailPage({
       ) : null}
 
       {faqs.length > 0 ? (
-        <section className="bg-white py-12 sm:py-16">
+        <section className="bg-white py-6 sm:py-12 lg:py-16">
           <Container className={contentWidth}>
             <div className="max-w-2xl text-left">
               <h2 className="text-left font-heading text-2xl font-extrabold tracking-tight text-[#111] sm:text-3xl">
                 {cms?.faqsHeading || "Frequently Asked Questions"}
               </h2>
-              <p className="mt-2 text-sm text-[#888] sm:text-[15px]">
+              <p className="mt-1.5 text-sm text-[#888] sm:mt-2 sm:text-[15px]">
                 {cms?.faqsSubheading ||
                   `Here are some common questions about ${product.name.toLowerCase()}.`}
               </p>
             </div>
 
             {cms?.faqsImageUrl ? (
-              <div className="mt-8 grid grid-cols-1 items-stretch gap-5 lg:mt-10 lg:grid-cols-2 lg:gap-6 lg:h-[540px] xl:h-[580px]">
-                <div className="relative min-h-[280px] overflow-hidden rounded-[16px] bg-white sm:min-h-[340px] lg:min-h-0 lg:h-full">
+              <div className="mt-5 grid grid-cols-1 items-stretch gap-4 sm:mt-8 sm:gap-5 lg:mt-10 lg:grid-cols-2 lg:gap-6 lg:h-[540px] xl:h-[580px]">
+                <div className="relative aspect-[5/4] overflow-hidden rounded-[14px] bg-white sm:aspect-auto sm:min-h-[340px] lg:min-h-0 lg:h-full">
                   <SafeImage
                     src={cms.faqsImageUrl}
                     alt={cms.faqsImageAlt || `${product.name} FAQs`}
@@ -186,11 +186,11 @@ export default function ProductDetailPage({
                   />
                 </div>
 
-                <div className="flex min-h-0 flex-col overflow-hidden rounded-[16px] border border-[#E5E9F0] bg-white lg:h-full">
-                  <div className="faq-scroll min-h-0 flex-1 overflow-y-auto px-4 py-2 sm:px-5 sm:py-3">
+                <div className="flex min-h-0 flex-col overflow-hidden rounded-[14px] border border-[#E5E9F0] bg-white lg:h-full">
+                  <div className="faq-scroll min-h-0 max-h-[min(60vh,380px)] flex-1 overflow-y-auto px-3 py-2 sm:max-h-none sm:px-5 sm:py-3">
                     <ProductFaq items={faqs} />
                   </div>
-                  <div className="shrink-0 border-t border-[#E5E9F0] bg-[#F8FAFC] px-4 py-4 sm:px-5">
+                  <div className="shrink-0 border-t border-[#E5E9F0] bg-[#F8FAFC] px-3 py-3 sm:px-5 sm:py-4">
                     <p className="text-[13px] font-bold text-[#172455]">
                       Have a technical question?
                     </p>
@@ -208,7 +208,7 @@ export default function ProductDetailPage({
                 </div>
               </div>
             ) : (
-              <div className="mt-8 max-w-3xl">
+              <div className="mt-5 max-w-3xl sm:mt-8">
                 <ProductFaq items={faqs} />
               </div>
             )}
@@ -217,7 +217,7 @@ export default function ProductDetailPage({
       ) : null}
 
       {related.length > 0 ? (
-        <section className="bg-[#F6F8FA] py-12 sm:py-16">
+        <section className="bg-[#F6F8FA] py-6 sm:py-12 lg:py-16">
           <Container className={contentWidth}>
             <h2 className="text-left font-heading text-2xl font-extrabold tracking-tight text-[#111] sm:text-3xl">
               {cms?.relevantProductsHeading || "Related Products"}
@@ -233,7 +233,7 @@ export default function ProductDetailPage({
       ) : null}
 
       {relatedBlogs.length > 0 ? (
-        <section className="border-t border-gray-100 bg-white py-12 sm:py-16">
+        <section className="border-t border-gray-100 bg-white py-6 sm:py-12 lg:py-16">
           <Container className={contentWidth}>
             <div className="flex flex-col items-start text-left">
               <h2 className="text-left font-heading text-2xl font-extrabold tracking-tight text-[#111] sm:text-3xl">
