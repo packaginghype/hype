@@ -356,16 +356,6 @@ export function BlogForm({
           />
         </div>
         <div>
-          <FieldLabel>Script</FieldLabel>
-          <textarea
-            rows={5}
-            value={values.seoScript || ""}
-            onChange={(e) => patch({ seoScript: e.target.value })}
-            className={`${inputClass} font-mono text-[12px]`}
-            placeholder='<script type="application/ld+json">…</script>'
-          />
-        </div>
-        <div>
           <FieldLabel>Canonical URL</FieldLabel>
           <input
             value={values.canonicalUrl || ""}
@@ -382,6 +372,38 @@ export function BlogForm({
           value={values.isPublished ?? true}
           onChange={(v) => patch({ isPublished: v })}
         />
+      </Section>
+
+      <Section title="Article Schema">
+        <div>
+          <FieldLabel>Article Schema (JSON-LD)</FieldLabel>
+          <textarea
+            rows={10}
+            value={values.seoScript || ""}
+            onChange={(e) => patch({ seoScript: e.target.value })}
+            spellCheck={false}
+            className={`${inputClass} resize-y font-mono text-[12px] leading-relaxed`}
+            placeholder={`{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Post title",
+  "author": {
+    "@type": "Person",
+    "name": "Packaging Hype Team"
+  },
+  "datePublished": "2025-01-01",
+  "image": "https://packaginghype.com/images/example.jpg",
+  "mainEntityOfPage": "https://packaginghype.com/blog/${values.slug || "post-slug"}"
+}`}
+          />
+          <p className="mt-1.5 text-[11px] text-[#6B7280]">
+            Paste raw Article JSON-LD or a full{" "}
+            <code className="rounded bg-[#F3F4F6] px-1 py-0.5 text-[10px]">
+              {`<script type="application/ld+json">`}
+            </code>{" "}
+            tag. Output on the live blog post page.
+          </p>
+        </div>
       </Section>
 
       {error ? <p className="text-sm font-medium text-red-600">{error}</p> : null}

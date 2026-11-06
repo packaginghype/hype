@@ -341,9 +341,9 @@ export function ProductForm({
     relevantProductsDescription: initial?.relevantProductsDescription || "",
     relatedProductIds: initial?.relatedProductIds || [],
     relatedBlogsHeading:
-      initial?.relatedBlogsHeading || "Related Articles & Packaging Guides",
+      initial?.relatedBlogsHeading || "Explore More Packaging Guides",
     relatedBlogsDescription: initial?.relatedBlogsDescription || "",
-    relatedBlogIds: initial?.relatedBlogIds || [],
+    relatedBlogIds: (initial?.relatedBlogIds || []).slice(0, 4),
     pageScrollEnabled: initial?.pageScrollEnabled ?? true,
     pageScrollImageUrl: initial?.pageScrollImageUrl || "",
     pageScrollImageAlt: initial?.pageScrollImageAlt || "",
@@ -441,10 +441,16 @@ export function ProductForm({
 
   function toggleBlog(id: string) {
     setValues((prev) => {
-      const set = new Set(prev.relatedBlogIds || []);
-      if (set.has(id)) set.delete(id);
-      else set.add(id);
-      return { ...prev, relatedBlogIds: Array.from(set) };
+      const current = prev.relatedBlogIds || [];
+      if (current.includes(id)) {
+        return {
+          ...prev,
+          relatedBlogIds: current.filter((item) => item !== id),
+        };
+      }
+      // Related blogs section shows max 4 selected posts
+      if (current.length >= 4) return prev;
+      return { ...prev, relatedBlogIds: [...current, id] };
     });
   }
 
@@ -1177,7 +1183,7 @@ export function ProductForm({
             value={values.relatedBlogsHeading || ""}
             onChange={(e) => patch({ relatedBlogsHeading: e.target.value })}
             className={inputClass}
-            placeholder="Related Articles & Packaging Guides"
+            placeholder="Explore More Packaging Guides"
           />
         </div>
         <div>
@@ -1187,11 +1193,16 @@ export function ProductForm({
             value={values.relatedBlogsDescription || ""}
             onChange={(e) => patch({ relatedBlogsDescription: e.target.value })}
             className={inputClass}
-            placeholder="Read our latest packaging tips, materials guides, and industry insights."
+            placeholder="Continue learning with practical packaging guides and helpful resources."
           />
         </div>
         <div>
-          <FieldLabel>Select Related Blogs</FieldLabel>
+          <div className="mb-1.5 flex items-end justify-between gap-2">
+            <FieldLabel>Select Related Blogs (max 4)</FieldLabel>
+            <p className="text-[11px] font-semibold text-[#6B7280]">
+              {(values.relatedBlogIds || []).length}/4 selected
+            </p>
+          </div>
           <input
             value={blogQuery}
             onChange={(e) => setBlogQuery(e.target.value)}
@@ -1223,15 +1234,20 @@ export function ProductForm({
             <div className="mt-3 max-h-56 space-y-1 overflow-y-auto rounded-[4px] border border-[#E2E4E8] bg-white p-2">
               {blogChoices.map((b) => {
                 const on = (values.relatedBlogIds || []).includes(b.id);
+                const atLimit =
+                  !on && (values.relatedBlogIds || []).length >= 4;
                 return (
                   <button
                     key={b.id}
                     type="button"
+                    disabled={atLimit}
                     onClick={() => toggleBlog(b.id)}
-                    className={`flex w-full cursor-pointer items-center justify-between rounded-[4px] px-2.5 py-2 text-left text-xs font-semibold ${
+                    className={`flex w-full items-center justify-between rounded-[4px] px-2.5 py-2 text-left text-xs font-semibold ${
                       on
-                        ? "bg-[#EEF2FF] text-[#172455]"
-                        : "text-[#374151] hover:bg-[#F6F8FA]"
+                        ? "cursor-pointer bg-[#EEF2FF] text-[#172455]"
+                        : atLimit
+                          ? "cursor-not-allowed text-[#9CA3AF] opacity-60"
+                          : "cursor-pointer text-[#374151] hover:bg-[#F6F8FA]"
                     }`}
                   >
                     <span className="truncate pr-2">{b.title}</span>
@@ -1242,13 +1258,17 @@ export function ProductForm({
                           : "border border-gray-200 bg-white text-gray-600"
                       }`}
                     >
-                      {on ? "Selected" : "Add"}
+                      {on ? "Selected" : atLimit ? "Limit" : "Add"}
                     </span>
                   </button>
                 );
               })}
             </div>
           )}
+          <p className="mt-2 text-[11px] text-[#6B7280]">
+            Only the 4 selected blogs appear in the Related Blogs section at the
+            bottom of the product page.
+          </p>
         </div>
       </Section>
 

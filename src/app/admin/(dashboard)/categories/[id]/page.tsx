@@ -135,6 +135,7 @@ export default async function EditCategoryPage({ params }: Props) {
           seoEnabled: category.seoEnabled,
           seoKeywords: category.seoKeywords,
           seoScript: category.seoScript,
+          canonicalUrl: category.canonicalUrl,
           isPublished: category.isPublished,
         }}
       />

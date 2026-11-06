@@ -14,6 +14,9 @@ export const metadata: Metadata = {
   title: "Packaging Design & Manufacturing Blog",
   description:
     "Practical packaging insights, dieline guides, material comparisons, and brand design ideas curated by the Packaging Hype engineering team.",
+  alternates: {
+    canonical: "https://packaginghype.com/blog",
+  },
 };
 
 const PAGE_SIZE = 6;

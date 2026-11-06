@@ -61,6 +61,7 @@ export default async function EditBlogPage({ params }: Props) {
           seoKeywords: post.seoKeywords,
           seoDescription: post.seoDescription,
           seoScript: post.seoScript,
+          canonicalUrl: post.canonicalUrl,
           isPublished: post.isPublished,
         }}
       />

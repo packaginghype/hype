@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description = post.seoDescription || post.excerpt || post.title;
 
   const canonical =
-    ((post as { canonicalUrl?: string | null }).canonicalUrl || "").trim() ||
+    (post.canonicalUrl || "").trim() ||
     `https://packaginghype.com/blog/${slug}`;
 
   return {

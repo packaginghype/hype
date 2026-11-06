@@ -235,17 +235,19 @@ export default function ProductDetailPage({
       ) : null}
 
       {relatedBlogs.length > 0 ? (
-        <section className="border-t border-gray-100 bg-white py-6 sm:py-12 lg:py-16">
+        <section className="bg-[#F7F3EC] py-8 sm:py-12 lg:py-16">
           <Container className={contentWidth}>
-            <div className="flex flex-col items-start text-left">
-              <h2 className="text-left font-heading text-2xl font-extrabold tracking-tight text-[#111] sm:text-3xl">
-                {cms?.relatedBlogsHeading || "Related Articles & Packaging Guides"}
-              </h2>
-              {cms?.relatedBlogsDescription ? (
-                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#666] sm:text-[15px]">
-                  {cms.relatedBlogsDescription}
-                </p>
-              ) : null}
+            <div className="max-w-2xl text-left">
+              <FaqAccentHeading
+                text={
+                  cms?.relatedBlogsHeading?.trim() ||
+                  "Explore More Packaging Guides"
+                }
+              />
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#6B7280] sm:text-[15px]">
+                {cms?.relatedBlogsDescription?.trim() ||
+                  "Continue learning with practical packaging guides, material tips, and helpful resources for your next custom box project."}
+              </p>
             </div>
 
             <RelatedBlogsCarousel blogs={relatedBlogs} />

@@ -128,6 +128,7 @@ export default async function EditProductPage({ params }: Props) {
           seoKeywords: product.seoKeywords,
           seoDescription: product.seoDescription,
           seoScript: product.seoScript,
+          canonicalUrl: product.canonicalUrl,
           isPublished: product.isPublished,
           imageUrl: primary?.imageUrl || "",
           imageAlt: primary?.altText || "",
