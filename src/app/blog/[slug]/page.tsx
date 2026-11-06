@@ -9,8 +9,10 @@ import { BlogShareButtons } from "@/components/blog/BlogShareButtons";
 import { BlogReadingProgress } from "@/components/blog/BlogReadingProgress";
 import { BlogTableOfContents } from "@/components/blog/BlogTableOfContents";
 import { BlogFaqSection } from "@/components/blog/BlogFaqSection";
+import { RelatedBlogsCarousel } from "@/components/products/RelatedBlogsCarousel";
+import { FaqAccentHeading } from "@/components/ui/FAQAccordion";
 import { JsonLdScript } from "@/components/seo/JsonLdScript";
-import { Calendar, Clock, ArrowLeft, ArrowRight, BookOpen } from "lucide-react";
+import { Calendar, Clock, ArrowLeft, BookOpen } from "lucide-react";
 import {
   formatBlogDate,
   getBlogBySlug,
@@ -20,6 +22,7 @@ import {
   ensureHeadingIds,
 } from "@/lib/blogs";
 import { toVideoEmbedUrl } from "@/lib/blog-video";
+import type { RelatedBlogItem } from "@/types";
 
 export const revalidate = 120;
 
@@ -80,7 +83,19 @@ export default async function BlogDetailPage({ params }: Props) {
   }
 
   const allBlogs = await getPublishedBlogs();
-  const relatedBlogs = allBlogs.filter((b) => b.slug !== slug).slice(0, 3);
+  const relatedBlogs: RelatedBlogItem[] = allBlogs
+    .filter((b) => b.slug !== slug)
+    .slice(0, 4)
+    .map((b) => ({
+      id: b.id,
+      title: b.title,
+      slug: b.slug,
+      excerpt: b.excerpt,
+      featuredImage: b.featuredImage,
+      thumbnailImageUrl: b.thumbnailImageUrl || b.bannerImageUrl,
+      publishedDate: b.publishedDate,
+      author: b.author,
+    }));
 
   const banner =
     post.bannerImageUrl ||
@@ -196,10 +211,16 @@ export default async function BlogDetailPage({ params }: Props) {
         </div>
 
         {/* ── Main Article Body + Table of Contents Layout ──────────── */}
-        <Container className="max-w-6xl pt-10 sm:pt-14 pb-16">
+        <Container className="max-w-6xl pt-10 sm:pt-14 pb-12 sm:pb-16">
           <div className="grid items-start gap-10 lg:grid-cols-12 lg:gap-12">
             {/* Article Content Column */}
-            <div className={toc.length > 0 ? "order-last min-w-0 lg:order-1 lg:col-span-8" : "min-w-0 lg:col-span-12"}>
+            <div
+              className={
+                toc.length > 0
+                  ? "order-last min-w-0 lg:order-1 lg:col-span-8"
+                  : "min-w-0 lg:col-span-12"
+              }
+            >
               <article id="blog-article-content" className="w-full">
                 <div
                   className="prose prose-slate prose-lg max-w-none text-[#2D3748] leading-[1.85]
@@ -246,9 +267,12 @@ export default async function BlogDetailPage({ params }: Props) {
                       <BookOpen className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-[#172455]">{post.author}</p>
+                      <p className="text-sm font-bold text-[#172455]">
+                        {post.author}
+                      </p>
                       <p className="text-xs text-gray-500">
-                        Packaging Hype Editorial Team • Industry Packaging Insights &amp; Trends
+                        Packaging Hype Editorial Team • Industry Packaging
+                        Insights &amp; Trends
                       </p>
                     </div>
                   </div>
@@ -279,84 +303,38 @@ export default async function BlogDetailPage({ params }: Props) {
               </aside>
             ) : null}
           </div>
-
-          {faqItems.length > 0 ? (
-            <BlogFaqSection
-              heading={post.faqsHeading}
-              subheading={post.faqsSubheading}
-              items={faqItems}
-              imageUrl={post.faqsImageUrl}
-              imageAlt={post.faqsImageAlt || post.faqsImageTitle}
-            />
-          ) : null}
-
-          {/* ── Related Articles ────────────────────────────────────── */}
-          {relatedBlogs.length > 0 ? (
-            <section className="border-t border-gray-100 mt-16 pt-12">
-              <div className="flex items-center justify-between mb-8">
-                <div>
-                  <h2 className="font-heading text-2xl font-extrabold text-[#111111]">
-                    More from the Packaging Hype Blog
-                  </h2>
-                  <p className="mt-1 text-sm text-gray-500">
-                    Explore recent trends, guides, and tips for custom packaging.
-                  </p>
-                </div>
-                <Link
-                  href="/blog"
-                  className="hidden sm:inline-flex items-center gap-1 text-xs font-bold text-[#FF5548] hover:text-[#e04337]"
-                >
-                  View all <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
-
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-                {relatedBlogs.map((item) => {
-                  const img = item.thumbnailImageUrl || item.featuredImage || item.bannerImageUrl;
-                  return (
-                    <Link
-                      key={item.id}
-                      href={`/blog/${item.slug}`}
-                      className="group flex flex-col overflow-hidden rounded-xl border border-gray-100 bg-white"
-                    >
-                      <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#F6F8FA]">
-                        {img ? (
-                          <Image
-                            src={img}
-                            alt={item.title}
-                            fill
-                            sizes="(max-width: 640px) 100vw, 33vw"
-                            className="object-cover transition-transform duration-300 group-hover:scale-105"
-                          />
-                        ) : (
-                          <div className="flex h-full items-center justify-center text-gray-300">
-                            <BookOpen className="h-8 w-8" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex flex-1 flex-col p-4">
-                        <p className="text-[11px] font-semibold uppercase tracking-wider text-[#FF5548]">
-                          {formatBlogDate(item.publishedDate)}
-                        </p>
-                        <h3 className="mt-1.5 line-clamp-2 text-sm font-bold text-[#172455] group-hover:text-[#FF5548]">
-                          {item.title}
-                        </h3>
-                        {item.excerpt ? (
-                          <p className="mt-1.5 line-clamp-2 text-xs text-gray-500">
-                            {item.excerpt}
-                          </p>
-                        ) : null}
-                        <span className="mt-auto pt-3 text-xs font-bold text-[#172455] group-hover:text-[#FF5548] inline-flex items-center gap-1">
-                          Read Article <ArrowRight className="h-3 w-3" />
-                        </span>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-            </section>
-          ) : null}
         </Container>
+
+        {faqItems.length > 0 ? (
+          <BlogFaqSection
+            heading={post.faqsHeading}
+            subheading={post.faqsSubheading}
+            items={faqItems}
+            imageUrl={post.faqsImageUrl}
+            imageAlt={post.faqsImageAlt || post.faqsImageTitle}
+          />
+        ) : null}
+
+        {relatedBlogs.length > 0 ? (
+          <section
+            className={
+              faqItems.length > 0
+                ? "border-t border-[#EDE6DB] bg-white py-8 sm:py-12 lg:py-16"
+                : "bg-[#F7F3EC] py-8 sm:py-12 lg:py-16"
+            }
+          >
+            <Container className="max-w-6xl">
+              <div className="max-w-2xl text-left">
+                <FaqAccentHeading text="Explore More Packaging Guides" />
+                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#6B7280] sm:text-[15px]">
+                  Continue learning with practical packaging guides, material
+                  tips, and helpful resources for your next custom box project.
+                </p>
+              </div>
+              <RelatedBlogsCarousel blogs={relatedBlogs} />
+            </Container>
+          </section>
+        ) : null}
       </article>
     </>
   );

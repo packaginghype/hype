@@ -1,7 +1,10 @@
 "use client";
 
-import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { Container } from "@/components/ui/Container";
 import { FaqAccentHeading, FAQAccordion } from "@/components/ui/FAQAccordion";
+import { SafeImage } from "@/components/ui/SafeImage";
 import type { FAQItem } from "@/types";
 
 export function BlogFaqSection({
@@ -23,35 +26,70 @@ export function BlogFaqSection({
   const hasImage = Boolean(imageUrl?.trim());
 
   return (
-    <section className="mt-16 rounded-[18px] border border-[#EDE6DB] bg-[#F7F3EC] p-5 sm:p-8">
-      <div className="max-w-2xl">
-        <FaqAccentHeading text={title} />
-        {subheading?.trim() ? (
-          <p className="mt-3 text-sm leading-relaxed text-[#6B7280] sm:text-[15px]">
-            {subheading}
-          </p>
-        ) : null}
-      </div>
+    <section className="bg-[#F7F3EC] py-10 sm:py-12 lg:py-16">
+      <Container className="max-w-6xl">
+        <div className="max-w-2xl text-left">
+          <FaqAccentHeading text={title} />
+          {subheading?.trim() ? (
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#6B7280] sm:text-[15px]">
+              {subheading}
+            </p>
+          ) : null}
+        </div>
 
-      <div
-        className={`mt-8 grid gap-8 ${
-          hasImage ? "lg:grid-cols-2 lg:items-start" : ""
-        }`}
-      >
-        <FAQAccordion items={items} variant="pills" />
         {hasImage ? (
-          <div className="relative aspect-[4/3] overflow-hidden rounded-[18px] bg-[#EDE6DB]">
-            <Image
-              src={imageUrl!}
-              alt={imageAlt || title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              unoptimized
-            />
+          <div className="mt-8 grid grid-cols-1 items-center gap-6 lg:mt-10 lg:grid-cols-2 lg:gap-10">
+            <div className="relative aspect-square overflow-hidden rounded-[22px] bg-[#EDE6DB] sm:aspect-[4/3] lg:aspect-auto lg:min-h-[460px]">
+              <SafeImage
+                src={imageUrl!}
+                alt={imageAlt || title}
+                fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover object-center"
+                unoptimized={imageUrl!.startsWith("http")}
+              />
+            </div>
+
+            <div className="min-w-0">
+              <FAQAccordion items={items} variant="pills" />
+              <div className="mt-5 px-1">
+                <p className="font-heading text-[15px] font-bold text-[#172455]">
+                  Still have a question?
+                </p>
+                <p className="mt-0.5 text-[13px] text-[#6B7280]">
+                  Our packaging experts are available Monday–Friday.
+                </p>
+                <Link
+                  href="/contact-us"
+                  className="mt-2 inline-flex items-center gap-1.5 text-[13px] font-bold text-[#21AAA5] transition-colors hover:text-[#FF5548]"
+                >
+                  Contact support
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+            </div>
           </div>
-        ) : null}
-      </div>
+        ) : (
+          <div className="mt-8 max-w-3xl">
+            <FAQAccordion items={items} variant="pills" />
+            <div className="mt-5 px-1">
+              <p className="font-heading text-[15px] font-bold text-[#172455]">
+                Still have a question?
+              </p>
+              <p className="mt-0.5 text-[13px] text-[#6B7280]">
+                Our packaging experts are available Monday–Friday.
+              </p>
+              <Link
+                href="/contact-us"
+                className="mt-2 inline-flex items-center gap-1.5 text-[13px] font-bold text-[#21AAA5] transition-colors hover:text-[#FF5548]"
+              >
+                Contact support
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          </div>
+        )}
+      </Container>
     </section>
   );
 }
