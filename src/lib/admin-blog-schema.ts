@@ -24,11 +24,21 @@ export const adminBlogSchema = z.object({
 
 export type AdminBlogInput = z.infer<typeof adminBlogSchema>;
 
+function parsePublishedDate(value?: string | null): Date {
+  if (!value?.trim()) return new Date();
+  const raw = value.trim();
+  // date input (YYYY-MM-DD) — noon local avoids timezone day-shift
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+    const [y, m, d] = raw.split("-").map(Number);
+    return new Date(y, m - 1, d, 12, 0, 0);
+  }
+  const parsed = new Date(raw);
+  return Number.isNaN(parsed.getTime()) ? new Date() : parsed;
+}
+
 export function blogWriteData(data: AdminBlogInput) {
   const banner = (data.bannerImageUrl || "").trim() || null;
-  const publishedDate = data.publishedDate
-    ? new Date(data.publishedDate)
-    : new Date();
+  const publishedDate = parsePublishedDate(data.publishedDate);
 
   return {
     title: data.title.trim(),
@@ -44,9 +54,7 @@ export function blogWriteData(data: AdminBlogInput) {
     thumbnailImageAlt: (data.thumbnailImageAlt || "").trim() || null,
     thumbnailImageTitle: (data.thumbnailImageTitle || "").trim() || null,
     author: (data.author || "").trim() || "Packaging Hype Team",
-    publishedDate: Number.isNaN(publishedDate.getTime())
-      ? new Date()
-      : publishedDate,
+    publishedDate,
     seoTitle: (data.seoTitle || "").trim() || null,
     seoKeywords: (data.seoKeywords || "").trim() || null,
     seoDescription: (data.seoDescription || "").trim() || null,

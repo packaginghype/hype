@@ -66,42 +66,60 @@ export async function PUT(request: Request, { params }: Params) {
 
   const oldUrls = categoryImageUrls(existing);
 
-  const category = await prisma.$transaction(async (tx) => {
-    await tx.categoryFaq.deleteMany({ where: { categoryId: id } });
-    return tx.category.update({
-      where: { id },
-      data: {
-        ...categoryWriteData(data),
-        faqs: {
-          create: faqs.map((faq, index) => ({
-            question: faq.question.trim(),
-            answer: faq.answer || "",
-            sortOrder: index,
-          })),
+  try {
+    const category = await prisma.$transaction(async (tx) => {
+      await tx.categoryFaq.deleteMany({ where: { categoryId: id } });
+      return tx.category.update({
+        where: { id },
+        data: {
+          ...categoryWriteData(data),
+          faqs: {
+            create: faqs.map((faq, index) => ({
+              question: faq.question.trim(),
+              answer: faq.answer || "",
+              sortOrder: index,
+            })),
+          },
         },
-      },
+      });
     });
-  });
 
-  // Delete replaced/removed images from Cloudinary
-  const newUrls = categoryImageUrls({
-    imageUrl: data.imageUrl ?? null,
-    bannerImageUrl: data.bannerImageUrl ?? null,
-    pageScrollImageUrl: data.pageScrollImageUrl ?? null,
-    faqsImageUrl: data.faqsImageUrl ?? null,
-  });
-  await deleteRemovedCloudinaryAssets(oldUrls, newUrls);
+    // Delete replaced/removed images from Cloudinary
+    const newUrls = categoryImageUrls({
+      imageUrl: data.imageUrl ?? null,
+      bannerImageUrl: data.bannerImageUrl ?? null,
+      pageScrollImageUrl: data.pageScrollImageUrl ?? null,
+      faqsImageUrl: data.faqsImageUrl ?? null,
+    });
+    await deleteRemovedCloudinaryAssets(oldUrls, newUrls);
 
-  await logAdminActivity(session, {
-    action: "UPDATE",
-    entityType: "category",
-    entityId: category.id,
-    entityLabel: category.name,
-    summary: `${session.name} updated category "${category.name}"`,
-  });
+    await logAdminActivity(session, {
+      action: "UPDATE",
+      entityType: "category",
+      entityId: category.id,
+      entityLabel: category.name,
+      summary: `${session.name} updated category "${category.name}"`,
+    });
 
-  revalidateCatalog(category.slug);
-  return NextResponse.json({ category });
+    revalidateCatalog(category.slug);
+    return NextResponse.json({ category });
+  } catch (error) {
+    const code =
+      error && typeof error === "object" && "code" in error
+        ? String((error as { code?: string }).code)
+        : "";
+    if (code === "P2002") {
+      return NextResponse.json(
+        { error: "Category slug already exists. Choose a different slug." },
+        { status: 409 }
+      );
+    }
+    console.error(error);
+    return NextResponse.json(
+      { error: "Could not update category." },
+      { status: 500 }
+    );
+  }
 }
 
 export async function DELETE(_request: Request, { params }: Params) {

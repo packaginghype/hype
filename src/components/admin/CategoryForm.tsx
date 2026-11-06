@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
 import {
+  adminEditCategoryHref,
   CATEGORY_GROUP_META,
   type CategoryGroupKey,
 } from "@/lib/category-groups";
@@ -349,8 +350,10 @@ export function CategoryForm({
   });
 
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [slugTouched, setSlugTouched] = useState(Boolean(initial?.slug));
+  const [savedCategoryId, setSavedCategoryId] = useState(categoryId);
 
   function patch(p: Partial<CategoryFormValues>) {
     setValues((prev) => ({ ...prev, ...p }));
@@ -360,10 +363,10 @@ export function CategoryForm({
     e.preventDefault();
     setLoading(true);
     setError("");
+    setSuccess("");
 
     const currentGroup = (values.group || group) as CategoryGroupKey;
-    const targetHref =
-      CATEGORY_GROUP_META[currentGroup]?.adminHref || listHref;
+    const activeId = savedCategoryId || categoryId;
 
     const payload = {
       ...values,
@@ -380,26 +383,65 @@ export function CategoryForm({
           : Number(values.discountedPrice),
     };
 
-    const res = await fetch(
-      categoryId ? `/api/admin/categories/${categoryId}` : "/api/admin/categories",
-      {
-        method: categoryId ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+    try {
+      const res = await fetch(
+        activeId
+          ? `/api/admin/categories/${activeId}`
+          : "/api/admin/categories",
+        {
+          method: activeId ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        const zodFieldErrors =
+          data?.error?.fieldErrors &&
+          typeof data.error.fieldErrors === "object"
+            ? Object.entries(data.error.fieldErrors as Record<string, string[]>)
+                .flatMap(([key, msgs]) =>
+                  (msgs || []).map((m) => `${key}: ${m}`)
+                )
+                .slice(0, 4)
+                .join(" · ")
+            : "";
+        const message =
+          (typeof data?.error === "string" && data.error) ||
+          zodFieldErrors ||
+          "Could not save category. Check slug uniqueness and required fields.";
+        const isSlugTaken =
+          res.status === 409 || /slug already exists/i.test(message);
+        setError(
+          isSlugTaken
+            ? `Slug "${values.slug}" is already used. Choose a different URL / slug.`
+            : message
+        );
+        console.error(data);
+        setLoading(false);
+        return;
       }
-    );
 
-    const data = await res.json();
-    setLoading(false);
-
-    if (!res.ok) {
-      setError("Could not save category. Check slug uniqueness and required fields.");
-      console.error(data);
-      return;
+      const newId =
+        typeof data?.category?.id === "string" ? data.category.id : activeId;
+      if (newId && newId !== savedCategoryId) {
+        setSavedCategoryId(newId);
+        router.replace(adminEditCategoryHref(newId, currentGroup));
+      }
+      setSuccess(
+        activeId
+          ? `${CATEGORY_GROUP_META[currentGroup]?.singularLabel || "Category"} updated successfully.`
+          : `${CATEGORY_GROUP_META[currentGroup]?.singularLabel || "Category"} created successfully.`
+      );
+      router.refresh();
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+      setError("Network error — could not save. Try again.");
+      setLoading(false);
     }
-
-    router.push(targetHref);
-    router.refresh();
   }
 
   const currentGroup = (values.group || group) as CategoryGroupKey;
@@ -864,26 +906,45 @@ export function CategoryForm({
       </Section>
 
       {error ? <p className="text-sm font-medium text-red-600">{error}</p> : null}
+      {success ? (
+        <p className="text-sm font-medium text-emerald-700">{success}</p>
+      ) : null}
 
       <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-[#E8EAEF] bg-white/95 px-4 py-3 backdrop-blur sm:px-6 lg:left-64">
-        <div className="mx-auto flex w-full max-w-none items-center justify-between gap-3">
-          <p className="hidden text-[12px] text-[#6B7280] sm:block">
-            Changes apply to the live category page after save.
-          </p>
+        <div className="mx-auto flex w-full max-w-none flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0 flex-1">
+            {error ? (
+              <p className="truncate text-xs font-semibold text-red-600">
+                {error}
+              </p>
+            ) : success ? (
+              <p className="truncate text-xs font-semibold text-emerald-700">
+                {success}
+              </p>
+            ) : (
+              <p className="hidden text-[12px] text-[#6B7280] sm:block">
+                Save keeps you on this editor — no redirect to the list.
+              </p>
+            )}
+          </div>
           <div className="flex flex-1 justify-end gap-3 sm:flex-none">
             <button
               type="button"
               onClick={() => router.push(listHref)}
               className="rounded-[4px] px-5 py-2.5 text-sm font-semibold text-[#172455] hover:bg-[#F6F8FA]"
             >
-              Cancel
+              Back to list
             </button>
             <button
               type="submit"
               disabled={loading}
               className="rounded-[4px] bg-[#FF5548] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#e04337] disabled:opacity-60"
             >
-              {loading ? "Saving..." : categoryId ? "Update" : "Create"}
+              {loading
+                ? "Saving..."
+                : savedCategoryId || categoryId
+                  ? "Update"
+                  : "Create"}
             </button>
           </div>
         </div>

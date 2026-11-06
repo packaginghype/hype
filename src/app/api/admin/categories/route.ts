@@ -41,27 +41,45 @@ export async function POST(request: Request) {
   const data = parsed.data;
   const faqs = (data.faqs || []).filter((f) => f.question.trim());
 
-  const category = await prisma.category.create({
-    data: {
-      ...categoryWriteData(data),
-      faqs: {
-        create: faqs.map((faq, index) => ({
-          question: faq.question.trim(),
-          answer: faq.answer || "",
-          sortOrder: index,
-        })),
+  try {
+    const category = await prisma.category.create({
+      data: {
+        ...categoryWriteData(data),
+        faqs: {
+          create: faqs.map((faq, index) => ({
+            question: faq.question.trim(),
+            answer: faq.answer || "",
+            sortOrder: index,
+          })),
+        },
       },
-    },
-  });
+    });
 
-  await logAdminActivity(session, {
-    action: "CREATE",
-    entityType: "category",
-    entityId: category.id,
-    entityLabel: category.name,
-    summary: `${session.name} created category "${category.name}"`,
-  });
+    await logAdminActivity(session, {
+      action: "CREATE",
+      entityType: "category",
+      entityId: category.id,
+      entityLabel: category.name,
+      summary: `${session.name} created category "${category.name}"`,
+    });
 
-  revalidateCatalog(category.slug);
-  return NextResponse.json({ category }, { status: 201 });
+    revalidateCatalog(category.slug);
+    return NextResponse.json({ category }, { status: 201 });
+  } catch (error) {
+    const code =
+      error && typeof error === "object" && "code" in error
+        ? String((error as { code?: string }).code)
+        : "";
+    if (code === "P2002") {
+      return NextResponse.json(
+        { error: "Category slug already exists. Choose a different slug." },
+        { status: 409 }
+      );
+    }
+    console.error(error);
+    return NextResponse.json(
+      { error: "Could not create category." },
+      { status: 500 }
+    );
+  }
 }

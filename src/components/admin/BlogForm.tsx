@@ -39,7 +39,10 @@ function toDateInput(value?: string | null) {
   if (!value) return "";
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return "";
-  return d.toISOString().slice(0, 10);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
 const inputClass =
@@ -147,8 +150,10 @@ export function BlogForm({
     isPublished: initial?.isPublished ?? true,
   });
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [slugTouched, setSlugTouched] = useState(Boolean(initial?.slug));
+  const [savedPostId, setSavedPostId] = useState(postId);
 
   function patch(p: Partial<BlogFormValues>) {
     setValues((prev) => ({ ...prev, ...p }));
@@ -158,29 +163,65 @@ export function BlogForm({
     e.preventDefault();
     setLoading(true);
     setError("");
+    setSuccess("");
 
-    const res = await fetch(
-      postId ? `/api/admin/blogs/${postId}` : "/api/admin/blogs",
-      {
-        method: postId ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      }
-    );
+    const activeId = savedPostId || postId;
 
-    const data = await res.json();
-    setLoading(false);
-
-    if (!res.ok) {
-      setError(
-        "Could not save blog post. Check slug uniqueness and required fields."
+    try {
+      const res = await fetch(
+        activeId ? `/api/admin/blogs/${activeId}` : "/api/admin/blogs",
+        {
+          method: activeId ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(values),
+        }
       );
-      console.error(data);
-      return;
-    }
 
-    router.push("/admin/blogs");
-    router.refresh();
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        const zodFieldErrors =
+          data?.error?.fieldErrors &&
+          typeof data.error.fieldErrors === "object"
+            ? Object.entries(data.error.fieldErrors as Record<string, string[]>)
+                .flatMap(([key, msgs]) =>
+                  (msgs || []).map((m) => `${key}: ${m}`)
+                )
+                .slice(0, 4)
+                .join(" · ")
+            : "";
+        const message =
+          (typeof data?.error === "string" && data.error) ||
+          zodFieldErrors ||
+          "Could not save blog post. Check slug uniqueness and required fields.";
+        const isSlugTaken =
+          res.status === 409 || /slug already exists/i.test(message);
+        setError(
+          isSlugTaken
+            ? `Slug "${values.slug}" is already used by another post. Choose a different URL.`
+            : message
+        );
+        console.error(data);
+        setLoading(false);
+        return;
+      }
+
+      const newId =
+        typeof data?.post?.id === "string" ? data.post.id : activeId;
+      if (newId && newId !== savedPostId) {
+        setSavedPostId(newId);
+        router.replace(`/admin/blogs/${newId}`);
+      }
+      setSuccess(
+        activeId ? "Blog post updated successfully." : "Blog post created successfully."
+      );
+      router.refresh();
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+      setError("Network error — could not save blog post. Try again.");
+      setLoading(false);
+    }
   }
 
   return (
@@ -407,23 +448,47 @@ export function BlogForm({
       </Section>
 
       {error ? <p className="text-sm font-medium text-red-600">{error}</p> : null}
+      {success ? (
+        <p className="text-sm font-medium text-emerald-700">{success}</p>
+      ) : null}
 
       <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-[#E8EAEF] bg-white/95 px-4 py-3 backdrop-blur sm:px-6 lg:left-64">
-        <div className="flex w-full items-center justify-end gap-3">
-          <button
-            type="button"
-            onClick={() => router.push("/admin/blogs")}
-            className="cursor-pointer rounded-[4px] px-5 py-2.5 text-sm font-semibold text-[#172455] hover:bg-[#F6F8FA]"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="cursor-pointer rounded-[4px] bg-[#FF5548] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#e04337] disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {loading ? "Saving…" : postId ? "Update" : "Create"}
-          </button>
+        <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0 flex-1">
+            {error ? (
+              <p className="truncate text-xs font-semibold text-red-600">
+                {error}
+              </p>
+            ) : success ? (
+              <p className="truncate text-xs font-semibold text-emerald-700">
+                {success}
+              </p>
+            ) : (
+              <p className="hidden text-[12px] text-[#6B7280] sm:block">
+                Save keeps you on this editor — no redirect to the list.
+              </p>
+            )}
+          </div>
+          <div className="flex flex-1 justify-end gap-3 sm:flex-none">
+            <button
+              type="button"
+              onClick={() => router.push("/admin/blogs")}
+              className="cursor-pointer rounded-[4px] px-5 py-2.5 text-sm font-semibold text-[#172455] hover:bg-[#F6F8FA]"
+            >
+              Back to list
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="cursor-pointer rounded-[4px] bg-[#FF5548] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#e04337] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {loading
+                ? "Saving…"
+                : savedPostId || postId
+                  ? "Update"
+                  : "Create"}
+            </button>
+          </div>
         </div>
       </div>
     </form>

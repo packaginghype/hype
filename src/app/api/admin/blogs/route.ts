@@ -48,6 +48,16 @@ export async function POST(request: Request) {
     revalidatePath(`/blog/${post.slug}`);
     return NextResponse.json({ post }, { status: 201 });
   } catch (error) {
+    const code =
+      error && typeof error === "object" && "code" in error
+        ? String((error as { code?: string }).code)
+        : "";
+    if (code === "P2002") {
+      return NextResponse.json(
+        { error: "Blog slug already exists. Choose a different slug." },
+        { status: 409 }
+      );
+    }
     console.error(error);
     return NextResponse.json(
       { error: "Could not create blog post" },
