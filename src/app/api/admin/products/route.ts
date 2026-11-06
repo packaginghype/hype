@@ -48,39 +48,58 @@ export async function POST(request: Request) {
   const faqs = (data.faqs || []).filter((f) => f.question.trim());
   const relatedProductIds = data.relatedProductIds || [];
 
-  const product = await prisma.product.create({
-    data: {
-      ...productWriteData(data),
-      categories: {
-        create: categoryIds.map((categoryId) => ({ categoryId })),
+  let product;
+  try {
+    product = await prisma.product.create({
+      data: {
+        ...productWriteData(data),
+        categories: {
+          create: categoryIds.map((categoryId) => ({ categoryId })),
+        },
+        images:
+          images.length > 0
+            ? {
+                create: images.map((img) => ({
+                  imageUrl: img.imageUrl,
+                  altText: img.altText,
+                  title: img.title,
+                  isPrimary: img.isPrimary,
+                  sortOrder: img.sortOrder,
+                })),
+              }
+            : undefined,
+        faqs: {
+          create: faqs.map((faq, index) => ({
+            question: faq.question.trim(),
+            answer: faq.answer || "",
+            sortOrder: index,
+          })),
+        },
+        relatedFrom: {
+          create: relatedProductIds.map((relatedProductId, index) => ({
+            relatedProductId,
+            sortOrder: index,
+          })),
+        },
       },
-      images:
-        images.length > 0
-          ? {
-              create: images.map((img) => ({
-                imageUrl: img.imageUrl,
-                altText: img.altText,
-                title: img.title,
-                isPrimary: img.isPrimary,
-                sortOrder: img.sortOrder,
-              })),
-            }
-          : undefined,
-      faqs: {
-        create: faqs.map((faq, index) => ({
-          question: faq.question.trim(),
-          answer: faq.answer || "",
-          sortOrder: index,
-        })),
-      },
-      relatedFrom: {
-        create: relatedProductIds.map((relatedProductId, index) => ({
-          relatedProductId,
-          sortOrder: index,
-        })),
-      },
-    },
-  });
+    });
+  } catch (err) {
+    const code =
+      err && typeof err === "object" && "code" in err
+        ? String((err as { code?: string }).code)
+        : "";
+    if (code === "P2002") {
+      return NextResponse.json(
+        { error: "Product slug already exists. Choose a different slug." },
+        { status: 409 }
+      );
+    }
+    console.error("Product create failed", err);
+    return NextResponse.json(
+      { error: "Could not create product." },
+      { status: 500 }
+    );
+  }
 
   await logAdminActivity(session, {
     action: "CREATE",

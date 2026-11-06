@@ -14,11 +14,16 @@ type Props = {
   folder?: string;
   accept?: string;
   className?: string;
-  /** Prefill image filename slug (e.g. product/category slug) */
+  /** Prefill image filename (e.g. product/category slug) */
   defaultSlug?: string;
-  /** Show the image slug field (default true) */
+  /** Show the image name field (default true) */
   showSlugField?: boolean;
 };
+
+function filenameFromUrl(url: string): string {
+  const base = url.split("?")[0].split("/").pop() || "";
+  return slugify(base.replace(/\.[a-z0-9]{2,5}$/i, ""));
+}
 
 export function ImageUploadField({
   label,
@@ -38,41 +43,57 @@ export function ImageUploadField({
   const [showUrl, setShowUrl] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [imgError, setImgError] = useState(false);
-  const [slug, setSlug] = useState(() => slugify(defaultSlug || ""));
-  const [slugTouched, setSlugTouched] = useState(false);
-  const [slugApplied, setSlugApplied] = useState(false);
+  const [name, setName] = useState(() =>
+    slugify(defaultSlug || filenameFromUrl(value) || "")
+  );
+  const [nameTouched, setNameTouched] = useState(false);
+  const [status, setStatus] = useState("");
 
   useEffect(() => {
     setImgError(false);
   }, [value]);
 
   useEffect(() => {
-    if (!slugTouched && defaultSlug) {
-      setSlug(slugify(defaultSlug));
-    }
-  }, [defaultSlug, slugTouched]);
+    if (nameTouched) return;
+    const next = slugify(defaultSlug || filenameFromUrl(value) || "");
+    if (next) setName(next);
+  }, [defaultSlug, value, nameTouched]);
 
   const cleanFolder = folder.replace(/^\/+|\/+$/g, "");
-  const previewSlug = slugify(slug.replace(/\.[a-z0-9]{2,5}$/i, ""));
+  const imageName = slugify(name.replace(/\.[a-z0-9]{2,5}$/i, ""));
   const currentExt =
     value.match(/\.([a-z0-9]{2,5})(?:\?|$)/i)?.[1]?.toLowerCase() || "webp";
-  const previewPath = previewSlug
-    ? `/media/${cleanFolder}/${previewSlug}.${currentExt}`
-    : `/media/${cleanFolder}/[auto-id].webp`;
-  const alreadyOnSlug =
+  const targetPath = imageName
+    ? `/media/${cleanFolder}/${imageName}.${currentExt}`
+    : `/media/${cleanFolder}/[image-name].webp`;
+  const alreadyNamed =
     Boolean(value) &&
-    Boolean(previewSlug) &&
-    (value.includes(`/${previewSlug}.`) ||
-      value.endsWith(`/${previewSlug}`) ||
-      value.includes(`/${cleanFolder}/${previewSlug}.`));
+    Boolean(imageName) &&
+    (value.includes(`/${imageName}.`) ||
+      value.endsWith(`/${imageName}`) ||
+      value.includes(`/${cleanFolder}/${imageName}.`));
 
-  async function applySlugToCurrent() {
-    if (!value || !previewSlug) {
-      setError("Set a slug first, then apply.");
-      return;
+  async function applyImageName(nextName = imageName) {
+    const cleanName = slugify(nextName.replace(/\.[a-z0-9]{2,5}$/i, ""));
+    if (!value || !cleanName) {
+      setError("Set an image name first.");
+      return false;
     }
+    if (
+      value.includes(`/${cleanName}.`) ||
+      value.endsWith(`/${cleanName}`) ||
+      value.includes(`/${cleanFolder}/${cleanName}.`)
+    ) {
+      // Already named — still normalize full Cloudinary URLs to /media
+      if (!value.startsWith("/media/")) {
+        onChange(`/media/${cleanFolder}/${cleanName}.${currentExt}`);
+      }
+      setStatus("Image name ready — click Update to save.");
+      return true;
+    }
+
     setError("");
-    setSlugApplied(false);
+    setStatus("");
     setUploading(true);
     try {
       const res = await fetch("/api/admin/upload", {
@@ -80,20 +101,21 @@ export function ImageUploadField({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           url: value,
-          slug: previewSlug,
+          slug: cleanName,
           folder: cleanFolder,
         }),
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Apply slug failed");
-        return;
+        setError(data.error || "Could not set image name");
+        return false;
       }
       onChange(data.url);
-      setShowUrl(true);
-      setSlugApplied(true);
+      setStatus("Image name set on Cloudinary — click Update to save in database.");
+      return true;
     } catch {
-      setError("Apply slug failed. Try again.");
+      setError("Could not set image name. Try again.");
+      return false;
     } finally {
       setUploading(false);
     }
@@ -102,14 +124,15 @@ export function ImageUploadField({
   async function onFile(file: File | undefined) {
     if (!file) return;
     setError("");
+    setStatus("");
     setUploading(true);
 
     try {
       const body = new FormData();
       body.append("file", file);
       body.append("folder", cleanFolder);
-      if (previewSlug) {
-        body.append("slug", previewSlug);
+      if (imageName) {
+        body.append("slug", imageName);
       }
 
       const res = await fetch("/api/admin/upload", {
@@ -123,6 +146,11 @@ export function ImageUploadField({
       }
       onChange(data.url);
       setShowUrl(false);
+      setStatus(
+        imageName
+          ? `Uploaded as ${imageName} — click Update to save.`
+          : "Uploaded — set an image name, then click Update."
+      );
     } catch {
       setError("Upload failed. Try again.");
     } finally {
@@ -157,23 +185,28 @@ export function ImageUploadField({
       {showSlugField ? (
         <div>
           <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-[#172455]">
-            Image slug / filename
+            Image name
           </p>
           <input
             type="text"
-            value={slug}
+            value={name}
             onChange={(e) => {
-              setSlugTouched(true);
-              setSlug(e.target.value);
+              setNameTouched(true);
+              setName(e.target.value);
+              setStatus("");
             }}
-            onBlur={() =>
-              setSlug(slugify(slug.replace(/\.[a-z0-9]{2,5}$/i, "")))
-            }
-            placeholder="e.g. custom-tie-boxes"
+            onBlur={() => {
+              const cleaned = slugify(name.replace(/\.[a-z0-9]{2,5}$/i, ""));
+              setName(cleaned);
+              if (value && cleaned && !alreadyNamed) {
+                void applyImageName(cleaned);
+              }
+            }}
+            placeholder="e.g. tie-boxes-scroll"
             className="w-full rounded-[6px] border border-[#E2E4E8] bg-white px-3 py-2 text-sm font-medium text-[#172455] placeholder:text-[#9CA3AF] outline-none focus:border-[#FF5548] focus:ring-2 focus:ring-[#FF5548]/10"
           />
           <p className="mt-1 break-all font-mono text-[11px] text-[#21AAA5]">
-            Target: {previewPath}
+            Saves as: {targetPath}
           </p>
           {value ? (
             <p className="mt-0.5 break-all font-mono text-[11px] text-[#6B7280]">
@@ -183,30 +216,26 @@ export function ImageUploadField({
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <button
               type="button"
-              disabled={
-                uploading || !value || !previewSlug || alreadyOnSlug
-              }
-              onClick={() => void applySlugToCurrent()}
+              disabled={uploading || !value || !imageName || alreadyNamed}
+              onClick={() => void applyImageName()}
               className="inline-flex h-8 cursor-pointer items-center rounded-[5px] border border-[#21AAA5] bg-white px-3 text-[11px] font-bold text-[#21AAA5] hover:bg-[#EAF7F6] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {uploading ? "Working…" : "Apply slug to current image"}
+              {uploading
+                ? "Working…"
+                : alreadyNamed
+                  ? "Name applied"
+                  : "Apply image name"}
             </button>
-            {slugApplied ? (
-              <span className="text-[11px] font-semibold text-emerald-700">
-                Copied to slug URL — save this form to publish (old file stays
-                until save).
-              </span>
-            ) : alreadyOnSlug ? (
-              <span className="text-[11px] font-semibold text-emerald-700">
-                Already on this slug URL
-              </span>
-            ) : (
-              <span className="text-[11px] text-[#6B7280]">
-                Copies to the slug URL without breaking the live image. Save the
-                form after. Or choose file to upload fresh with this slug.
-              </span>
-            )}
+            <span className="text-[11px] text-[#6B7280]">
+              Type the file name only. Upload uses this name; then click Update
+              to save in the database.
+            </span>
           </div>
+          {status ? (
+            <p className="mt-1 text-[11px] font-semibold text-emerald-700">
+              {status}
+            </p>
+          ) : null}
         </div>
       ) : null}
 
@@ -296,7 +325,7 @@ export function ImageUploadField({
               onClick={() => onChange("")}
               disabled={!value}
               className={cn(
-                "inline-flex h-10 items-center gap-1.5 rounded-[5px] border px-3 text-xs font-bold transition-colors",
+                "inline-flex h-10 items-center gap-1.5 rounded-[4px] border px-3 text-xs font-bold transition-colors",
                 value
                   ? "cursor-pointer border-[#E2E4E8] bg-white text-[#FF5548] hover:bg-[#FFF5F4]"
                   : "invisible pointer-events-none border-transparent"

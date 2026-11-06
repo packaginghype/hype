@@ -29,30 +29,41 @@ function GalleryImageSlugField({
   suggestedSlug: string;
   onApplied: (nextUrl: string) => void;
 }) {
-  const [slug, setSlug] = useState(() => slugify(suggestedSlug));
-  const [slugTouched, setSlugTouched] = useState(false);
+  const [name, setName] = useState(() => slugify(suggestedSlug));
+  const [nameTouched, setNameTouched] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [applied, setApplied] = useState(false);
+  const [status, setStatus] = useState("");
 
   useEffect(() => {
-    if (!slugTouched) setSlug(slugify(suggestedSlug));
-  }, [suggestedSlug, slugTouched]);
+    if (!nameTouched) setName(slugify(suggestedSlug));
+  }, [suggestedSlug, nameTouched]);
 
-  const previewSlug = slugify(slug.replace(/\.[a-z0-9]{2,5}$/i, ""));
+  const imageName = slugify(name.replace(/\.[a-z0-9]{2,5}$/i, ""));
   const ext =
     url.match(/\.([a-z0-9]{2,5})(?:\?|$)/i)?.[1]?.toLowerCase() || "webp";
-  const alreadyOn =
-    Boolean(previewSlug) &&
-    (url.includes(`/${previewSlug}.`) || url.endsWith(`/${previewSlug}`));
+  const alreadyNamed =
+    Boolean(imageName) &&
+    (url.includes(`/${imageName}.`) || url.endsWith(`/${imageName}`));
 
-  async function applySlug() {
-    if (!previewSlug) {
-      setError("Set a slug first");
+  async function applyName(nextName = imageName) {
+    const cleanName = slugify(nextName.replace(/\.[a-z0-9]{2,5}$/i, ""));
+    if (!cleanName) {
+      setError("Set an image name");
+      return;
+    }
+    if (
+      url.includes(`/${cleanName}.`) ||
+      url.endsWith(`/${cleanName}`)
+    ) {
+      if (!url.startsWith("/media/")) {
+        onApplied(`/media/${GALLERY_FOLDER}/${cleanName}.${ext}`);
+      }
+      setStatus("Name ready — click Update");
       return;
     }
     setError("");
-    setApplied(false);
+    setStatus("");
     setBusy(true);
     try {
       const res = await fetch("/api/admin/upload", {
@@ -60,19 +71,19 @@ function GalleryImageSlugField({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           url,
-          slug: previewSlug,
+          slug: cleanName,
           folder: GALLERY_FOLDER,
         }),
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Apply slug failed");
+        setError(data.error || "Could not set image name");
         return;
       }
       onApplied(data.url);
-      setApplied(true);
+      setStatus("Named on Cloudinary — click Update");
     } catch {
-      setError("Apply slug failed");
+      setError("Could not set image name");
     } finally {
       setBusy(false);
     }
@@ -81,37 +92,37 @@ function GalleryImageSlugField({
   return (
     <div className="space-y-1.5">
       <p className="text-[10px] font-bold uppercase tracking-wider text-[#172455]">
-        Image slug
+        Image name
       </p>
       <input
         type="text"
-        value={slug}
+        value={name}
         onChange={(e) => {
-          setSlugTouched(true);
-          setSlug(e.target.value);
-          setApplied(false);
+          setNameTouched(true);
+          setName(e.target.value);
+          setStatus("");
         }}
-        onBlur={() =>
-          setSlug(slugify(slug.replace(/\.[a-z0-9]{2,5}$/i, "")))
-        }
+        onBlur={() => {
+          const cleaned = slugify(name.replace(/\.[a-z0-9]{2,5}$/i, ""));
+          setName(cleaned);
+          if (cleaned && !alreadyNamed) void applyName(cleaned);
+        }}
         className="w-full rounded-[4px] border border-[#E2E4E8] bg-white px-2.5 py-1.5 text-xs font-medium text-[#172455] outline-none focus:border-[#FF5548]"
         placeholder="e.g. custom-boxes-1"
       />
       <p className="break-all font-mono text-[10px] text-[#21AAA5]">
-        /media/{GALLERY_FOLDER}/{previewSlug || "[slug]"}.{ext}
+        /media/{GALLERY_FOLDER}/{imageName || "[name]"}.{ext}
       </p>
       <button
         type="button"
-        disabled={busy || !previewSlug || alreadyOn}
-        onClick={() => void applySlug()}
+        disabled={busy || !imageName || alreadyNamed}
+        onClick={() => void applyName()}
         className="inline-flex h-8 w-full cursor-pointer items-center justify-center rounded-[4px] border border-[#21AAA5] bg-white text-[11px] font-bold text-[#21AAA5] hover:bg-[#EAF7F6] disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {busy ? "Working…" : alreadyOn ? "On slug URL" : "Apply slug"}
+        {busy ? "Working…" : alreadyNamed ? "Name applied" : "Apply image name"}
       </button>
-      {applied ? (
-        <p className="text-[10px] font-semibold text-emerald-700">
-          Copied — save product to publish
-        </p>
+      {status ? (
+        <p className="text-[10px] font-semibold text-emerald-700">{status}</p>
       ) : null}
       {error ? (
         <p className="text-[10px] font-medium text-red-600">{error}</p>
@@ -514,26 +525,46 @@ export function ProductForm({
       finishesAvailable: values.finishesAvailable || [],
     };
 
-    const res = await fetch(
-      productId ? `/api/admin/products/${productId}` : "/api/admin/products",
-      {
-        method: productId ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+    try {
+      const res = await fetch(
+        productId ? `/api/admin/products/${productId}` : "/api/admin/products",
+        {
+          method: productId ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        const zodFieldErrors =
+          data?.error?.fieldErrors &&
+          typeof data.error.fieldErrors === "object"
+            ? Object.entries(data.error.fieldErrors as Record<string, string[]>)
+                .flatMap(([key, msgs]) =>
+                  (msgs || []).map((m) => `${key}: ${m}`)
+                )
+                .slice(0, 4)
+                .join(" · ")
+            : "";
+        setError(
+          (typeof data?.error === "string" && data.error) ||
+            zodFieldErrors ||
+            "Could not save product. Check slug uniqueness and required fields."
+        );
+        console.error(data);
+        setLoading(false);
+        return;
       }
-    );
 
-    const data = await res.json();
-    setLoading(false);
-
-    if (!res.ok) {
-      setError("Could not save product. Check slug uniqueness and required fields.");
-      console.error(data);
-      return;
+      router.push("/admin/products");
+      router.refresh();
+    } catch (err) {
+      console.error(err);
+      setError("Network error — could not save product. Try again.");
+      setLoading(false);
     }
-
-    router.push("/admin/products");
-    router.refresh();
   }
 
   return (

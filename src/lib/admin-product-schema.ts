@@ -1,4 +1,11 @@
 import { z } from "zod";
+import { toMediaUrl } from "@/lib/media-url";
+
+function cleanMedia(url: string | null | undefined): string | null {
+  const trimmed = url?.trim();
+  if (!trimmed) return null;
+  return toMediaUrl(trimmed);
+}
 
 const imageSchema = z.object({
   imageUrl: z.string().min(1),
@@ -95,7 +102,7 @@ export function resolveProductCategoryIds(data: AdminProductInput) {
 export function normalizeProductImages(data: AdminProductInput) {
   const fromGallery = data.images
     .map((img, index) => ({
-      imageUrl: img.imageUrl.trim(),
+      imageUrl: cleanMedia(img.imageUrl) || "",
       altText: (img.altText || data.name || "").trim(),
       title: (img.title || data.name || "").trim(),
       isPrimary: Boolean(img.isPrimary),
@@ -114,7 +121,8 @@ export function normalizeProductImages(data: AdminProductInput) {
     }));
   }
 
-  const thumb = data.thumbnailUrl?.trim() || data.imageUrl?.trim();
+  const thumb =
+    cleanMedia(data.thumbnailUrl) || cleanMedia(data.imageUrl) || "";
   if (thumb) {
     return [
       {
@@ -169,12 +177,12 @@ export function productWriteData(data: AdminProductInput) {
             : [];
       return ids[0]?.trim() || null;
     })(),
-    thumbnailUrl: data.thumbnailUrl?.trim() || null,
+    thumbnailUrl: cleanMedia(data.thumbnailUrl),
     thumbnailAlt: data.thumbnailAlt || null,
     thumbnailTitle: data.thumbnailTitle || null,
     thumbnailSubDescription: data.thumbnailSubDescription || null,
     videoUrl: data.videoUrl?.trim() || null,
-    videoThumbnailUrl: data.videoThumbnailUrl?.trim() || null,
+    videoThumbnailUrl: cleanMedia(data.videoThumbnailUrl),
     videoDescription: data.videoDescription || null,
     widgetsContent: data.widgetsContent || null,
     relevantProductsHeading: data.relevantProductsHeading || null,
@@ -183,15 +191,17 @@ export function productWriteData(data: AdminProductInput) {
     relatedBlogsDescription: data.relatedBlogsDescription || null,
     relatedBlogIds: (data.relatedBlogIds || []).filter(Boolean),
     pageScrollEnabled: data.pageScrollEnabled,
-    pageScrollImageUrl: data.pageScrollImageUrl?.trim() || null,
+    pageScrollImageUrl: cleanMedia(data.pageScrollImageUrl),
     pageScrollImageAlt: data.pageScrollImageAlt || null,
     pageScrollImageTitle: data.pageScrollImageTitle || null,
     pageScrollContent: data.pageScrollContent || null,
     faqsHeading: data.faqsHeading || null,
     faqsSubheading: data.faqsSubheading || null,
-    faqsImageUrl: data.faqsImageUrl?.trim() || null,
+    faqsImageUrl: cleanMedia(data.faqsImageUrl),
     faqsImageAlt: data.faqsImageAlt || null,
-    merchantImageUrls: (data.merchantImageUrls || []).filter((u) => u.trim()),
+    merchantImageUrls: (data.merchantImageUrls || [])
+      .map((u) => cleanMedia(u))
+      .filter((u): u is string => Boolean(u)),
     navbarEnabled: data.navbarEnabled,
     featureEnabled: data.featureEnabled,
     seoEnabled: data.seoEnabled,

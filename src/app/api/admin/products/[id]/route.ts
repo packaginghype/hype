@@ -77,70 +77,85 @@ export async function PUT(request: Request, { params }: Params) {
 
   const oldTopLevelUrls = productTopLevelImageUrls(existing);
   const oldGalleryUrls = (existing?.images || []).map((img) => img.imageUrl);
+  const writeData = productWriteData(data);
 
-  await prisma.$transaction([
-    prisma.productCategory.deleteMany({ where: { productId: id } }),
-    prisma.productImage.deleteMany({ where: { productId: id } }),
-    prisma.productSpec.deleteMany({ where: { productId: id } }),
-    prisma.productFaq.deleteMany({ where: { productId: id } }),
-    prisma.productRelated.deleteMany({ where: { productId: id } }),
-  ]);
+  let product;
+  try {
+    product = await prisma.$transaction(async (tx) => {
+      await tx.productCategory.deleteMany({ where: { productId: id } });
+      await tx.productImage.deleteMany({ where: { productId: id } });
+      await tx.productSpec.deleteMany({ where: { productId: id } });
+      await tx.productFaq.deleteMany({ where: { productId: id } });
+      await tx.productRelated.deleteMany({ where: { productId: id } });
 
-  const product = await prisma.product.update({
-    where: { id },
-    data: {
-      ...productWriteData(data),
-      categories: {
-        create: categoryIds.map((categoryId) => ({ categoryId })),
-      },
-      images:
-        images.length > 0
-          ? {
-              create: images.map((img) => ({
-                imageUrl: img.imageUrl,
-                altText: img.altText,
-                title: img.title,
-                isPrimary: img.isPrimary,
-                sortOrder: img.sortOrder,
-              })),
-            }
-          : undefined,
-      faqs: {
-        create: faqs.map((faq, index) => ({
-          question: faq.question.trim(),
-          answer: faq.answer || "",
-          sortOrder: index,
-        })),
-      },
-      relatedFrom: {
-        create: relatedProductIds.map((relatedProductId, index) => ({
-          relatedProductId,
-          sortOrder: index,
-        })),
-      },
-    },
-  });
+      return tx.product.update({
+        where: { id },
+        data: {
+          ...writeData,
+          categories: {
+            create: categoryIds.map((categoryId) => ({ categoryId })),
+          },
+          images:
+            images.length > 0
+              ? {
+                  create: images.map((img) => ({
+                    imageUrl: img.imageUrl,
+                    altText: img.altText,
+                    title: img.title,
+                    isPrimary: img.isPrimary,
+                    sortOrder: img.sortOrder,
+                  })),
+                }
+              : undefined,
+          faqs: {
+            create: faqs.map((faq, index) => ({
+              question: faq.question.trim(),
+              answer: faq.answer || "",
+              sortOrder: index,
+            })),
+          },
+          relatedFrom: {
+            create: relatedProductIds.map((relatedProductId, index) => ({
+              relatedProductId,
+              sortOrder: index,
+            })),
+          },
+        },
+      });
+    });
+  } catch (err) {
+    const code =
+      err && typeof err === "object" && "code" in err
+        ? String((err as { code?: string }).code)
+        : "";
+    if (code === "P2002") {
+      return NextResponse.json(
+        { error: "Product slug already exists. Choose a different slug." },
+        { status: 409 }
+      );
+    }
+    console.error("Product update failed", err);
+    return NextResponse.json(
+      { error: "Could not save product." },
+      { status: 500 }
+    );
+  }
 
-  // Build new image URL sets for comparison
   const newTopLevelUrls = productTopLevelImageUrls({
-    thumbnailUrl: data.thumbnailUrl ?? null,
-    videoThumbnailUrl: data.videoThumbnailUrl ?? null,
-    pageScrollImageUrl: data.pageScrollImageUrl ?? null,
-    faqsImageUrl: data.faqsImageUrl ?? null,
-    merchantImageUrls: data.merchantImageUrls ?? [],
+    thumbnailUrl: writeData.thumbnailUrl,
+    videoThumbnailUrl: writeData.videoThumbnailUrl,
+    pageScrollImageUrl: writeData.pageScrollImageUrl,
+    faqsImageUrl: writeData.faqsImageUrl,
+    merchantImageUrls: writeData.merchantImageUrls,
   });
   const newGalleryUrls = images.map((img) => img.imageUrl);
 
-  // Delete removed Cloudinary assets (top-level + gallery)
-  await deleteRemovedCloudinaryAssets(oldTopLevelUrls, newTopLevelUrls);
-  await deleteRemovedCloudinaryAssets(oldGalleryUrls, newGalleryUrls);
-
-  // Video thumbnails are images; also handle video deletion if URL changed
-  if (
-    existing?.videoThumbnailUrl &&
-    existing.videoThumbnailUrl !== (data.videoThumbnailUrl ?? null)
-  ) {
-    // Already handled above in top-level; separate video url itself:
+  // Never fail the save because Cloudinary cleanup failed
+  try {
+    await deleteRemovedCloudinaryAssets(oldTopLevelUrls, newTopLevelUrls);
+    await deleteRemovedCloudinaryAssets(oldGalleryUrls, newGalleryUrls);
+  } catch (err) {
+    console.error("Cloudinary cleanup after product save failed", err);
   }
 
   await logAdminActivity(session, {
