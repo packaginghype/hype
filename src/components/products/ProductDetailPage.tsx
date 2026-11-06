@@ -15,6 +15,7 @@ import { RelatedBlogsCarousel } from "@/components/products/RelatedBlogsCarousel
 import ProductHero from "@/components/products/ProductHero";
 import { ProductFloatingVideo } from "@/components/products/ProductFloatingVideo";
 import { ProductFaq } from "@/components/products/ProductFaq";
+import { FaqAccentHeading } from "@/components/ui/FAQAccordion";
 import { RichText } from "@/components/ui/RichText";
 import { SafeImage } from "@/components/ui/SafeImage";
 import {
@@ -162,39 +163,40 @@ export default function ProductDetailPage({
       ) : null}
 
       {faqs.length > 0 ? (
-        <section className="bg-white py-6 sm:py-12 lg:py-16">
+        <section className="bg-[#F7F3EC] py-8 sm:py-12 lg:py-16">
           <Container className={contentWidth}>
             <div className="max-w-2xl text-left">
-              <h2 className="text-left font-heading text-2xl font-extrabold tracking-tight text-[#111] sm:text-3xl">
-                {cms?.faqsHeading || "Frequently Asked Questions"}
-              </h2>
-              <p className="mt-1.5 text-sm text-[#888] sm:mt-2 sm:text-[15px]">
+              <FaqAccentHeading
+                text={
+                  cms?.faqsHeading?.trim() ||
+                  `Frequently Asked Questions About ${product.name}`
+                }
+              />
+              <p className="mt-3 text-sm leading-relaxed text-[#6B7280] sm:text-[15px]">
                 {cms?.faqsSubheading ||
                   `Here are some common questions about ${product.name.toLowerCase()}.`}
               </p>
             </div>
 
             {cms?.faqsImageUrl ? (
-              <div className="mt-5 grid grid-cols-1 items-stretch gap-4 sm:mt-8 sm:gap-5 lg:mt-10 lg:grid-cols-2 lg:gap-6 lg:h-[540px] xl:h-[580px]">
-                <div className="relative aspect-[5/4] overflow-hidden rounded-[14px] bg-white sm:aspect-auto sm:min-h-[340px] lg:min-h-0 lg:h-full">
+              <div className="mt-8 grid grid-cols-1 items-center gap-6 lg:mt-10 lg:grid-cols-2 lg:gap-10">
+                <div className="relative aspect-[4/5] overflow-hidden rounded-[22px] bg-[#EDE6DB] sm:aspect-[5/4] lg:aspect-auto lg:min-h-[460px]">
                   <SafeImage
                     src={cms.faqsImageUrl}
                     alt={cms.faqsImageAlt || `${product.name} FAQs`}
                     fill
                     sizes="(max-width: 1024px) 100vw, 50vw"
-                    className="object-contain object-center p-2 sm:p-3"
+                    className="object-contain object-center p-3 sm:p-4"
                   />
                 </div>
 
-                <div className="flex min-h-0 flex-col overflow-hidden rounded-[14px] border border-[#E5E9F0] bg-white lg:h-full">
-                  <div className="faq-scroll min-h-0 max-h-[min(60vh,380px)] flex-1 overflow-y-auto px-3 py-2 sm:max-h-none sm:px-5 sm:py-3">
-                    <ProductFaq items={faqs} />
-                  </div>
-                  <div className="shrink-0 border-t border-[#E5E9F0] bg-[#F8FAFC] px-3 py-3 sm:px-5 sm:py-4">
-                    <p className="text-[13px] font-bold text-[#172455]">
+                <div className="min-w-0">
+                  <ProductFaq items={faqs} />
+                  <div className="mt-5 px-1">
+                    <p className="font-heading text-[15px] font-bold text-[#172455]">
                       Have a technical question?
                     </p>
-                    <p className="mt-0.5 text-[12.5px] text-[#6B7280]">
+                    <p className="mt-0.5 text-[13px] text-[#6B7280]">
                       Our packaging experts are available Monday–Friday.
                     </p>
                     <Link
@@ -208,7 +210,7 @@ export default function ProductDetailPage({
                 </div>
               </div>
             ) : (
-              <div className="mt-5 max-w-3xl sm:mt-8">
+              <div className="mt-8 max-w-2xl">
                 <ProductFaq items={faqs} />
               </div>
             )}

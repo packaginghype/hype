@@ -17,7 +17,7 @@ import { CategoryProductGrid } from "@/components/categories/CategoryProductGrid
 import { CATALOG_TILE } from "@/components/ui/CatalogTile";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { CATEGORY_GROUP_META, type CategoryGroupKey } from "@/lib/category-groups";
-import { FAQAccordion } from "@/components/ui/FAQAccordion";
+import { FAQAccordion, FaqAccentHeading } from "@/components/ui/FAQAccordion";
 import { RichText } from "@/components/ui/RichText";
 import {
   getCategoryAboutContent,
@@ -273,39 +273,50 @@ export function CategoryDetailPage({
 
 
       {hasFaqs ? (
-        <section className="border-t border-[#E8EAEF] bg-[#F8FAFC] py-14 sm:py-16">
+        <section className="bg-[#F7F3EC] py-10 sm:py-14 lg:py-16">
           <Container className={contentWidth}>
-            <div className={cms?.faqsImageUrl ? "max-w-2xl text-left" : "mx-auto max-w-3xl text-center"}>
-              <h2 className="font-heading text-2xl font-extrabold tracking-tight text-[#172455] sm:text-3xl">
-                {cms?.faqsHeading || `FAQs about ${heroTitle}`}
-              </h2>
+            <div
+              className={
+                cms?.faqsImageUrl
+                  ? "max-w-2xl text-left"
+                  : "mx-auto max-w-2xl text-center"
+              }
+            >
+              <FaqAccentHeading
+                text={
+                  cms?.faqsHeading?.trim() ||
+                  `Frequently Asked Questions About ${heroTitle}`
+                }
+                className={cms?.faqsImageUrl ? undefined : "text-center"}
+              />
               {cms?.faqsSubheading ? (
-                <p className="mt-2 text-sm text-[#666]">{cms.faqsSubheading}</p>
+                <p className="mt-3 text-sm leading-relaxed text-[#6B7280] sm:text-[15px]">
+                  {cms.faqsSubheading}
+                </p>
               ) : null}
             </div>
 
             {cms?.faqsImageUrl ? (
-              <div className="mt-8 grid grid-cols-1 items-stretch gap-5 lg:mt-10 lg:grid-cols-2 lg:gap-6 lg:h-[540px] xl:h-[580px]">
-                <div className="relative min-h-[280px] overflow-hidden rounded-[16px] bg-white sm:min-h-[340px] lg:min-h-0 lg:h-full">
+              <div className="mt-8 grid grid-cols-1 items-center gap-6 lg:mt-10 lg:grid-cols-2 lg:gap-10">
+                <div className="relative aspect-[4/5] overflow-hidden rounded-[22px] bg-[#EDE6DB] sm:aspect-[5/4] lg:aspect-auto lg:min-h-[460px]">
                   <SafeImage
                     src={cms.faqsImageUrl}
                     alt={cms.faqsImageAlt || `FAQs about ${heroTitle}`}
                     fill
                     sizes="(max-width: 1024px) 100vw, 50vw"
-                    className="object-contain object-center p-2 sm:p-3"
+                    className="object-contain object-center p-3 sm:p-4"
                   />
                 </div>
 
-                <div className="flex min-h-0 flex-col overflow-hidden rounded-[16px] border border-[#E5E9F0] bg-white lg:h-full">
-                  <div className="faq-scroll min-h-0 flex-1 overflow-y-auto px-4 py-2 sm:px-5 sm:py-3">
-                    <FAQAccordion items={cms!.faqs} variant="panel" />
-                  </div>
-                  <div className="shrink-0 border-t border-[#E5E9F0] bg-[#F8FAFC] px-4 py-4 sm:px-5">
-                    <p className="text-[13px] font-bold text-[#172455]">
+                <div className="min-w-0">
+                  <FAQAccordion items={cms!.faqs} variant="pills" />
+                  <div className="mt-5 px-1">
+                    <p className="font-heading text-[15px] font-bold text-[#172455]">
                       Still have a question?
                     </p>
-                    <p className="mt-0.5 text-[12.5px] text-[#6B7280]">
-                      Our team is here to assist with sizing, materials, and design.
+                    <p className="mt-0.5 text-[13px] text-[#6B7280]">
+                      Our team is here to assist with sizing, materials, and
+                      design.
                     </p>
                     <Link
                       href="/contact-us"
@@ -318,8 +329,8 @@ export function CategoryDetailPage({
                 </div>
               </div>
             ) : (
-              <div className="mx-auto mt-8 max-w-3xl rounded-[12px] border border-[#E5E9F0] bg-white px-4 sm:px-6">
-                <FAQAccordion items={cms!.faqs} variant="panel" />
+              <div className="mx-auto mt-8 max-w-2xl">
+                <FAQAccordion items={cms!.faqs} variant="pills" />
               </div>
             )}
           </Container>
