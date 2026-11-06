@@ -388,7 +388,10 @@ export function ProductForm({
       : [{ question: "", answer: "" }]
   );
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [slugConflict, setSlugConflict] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [savedProductId, setSavedProductId] = useState(productId);
   const [slugTouched, setSlugTouched] = useState(Boolean(initial?.slug));
   const [relatedQuery, setRelatedQuery] = useState("");
 
@@ -513,8 +516,11 @@ export function ProductForm({
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
+    setSuccess("");
+    setSlugConflict(false);
     setLoading(true);
 
+    const activeId = savedProductId || productId;
     const payload = {
       ...values,
       startingPrice: values.originalPrice,
@@ -527,9 +533,9 @@ export function ProductForm({
 
     try {
       const res = await fetch(
-        productId ? `/api/admin/products/${productId}` : "/api/admin/products",
+        activeId ? `/api/admin/products/${activeId}` : "/api/admin/products",
         {
-          method: productId ? "PUT" : "POST",
+          method: activeId ? "PUT" : "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         }
@@ -548,18 +554,35 @@ export function ProductForm({
                 .slice(0, 4)
                 .join(" · ")
             : "";
-        setError(
+        const message =
           (typeof data?.error === "string" && data.error) ||
-            zodFieldErrors ||
-            "Could not save product. Check slug uniqueness and required fields."
+          zodFieldErrors ||
+          "Could not save product. Check slug uniqueness and required fields.";
+        const isSlugTaken =
+          res.status === 409 || /slug already exists/i.test(message);
+        setSlugConflict(isSlugTaken);
+        setError(
+          isSlugTaken
+            ? `Slug "${values.slug}" is already used by another product. Choose a different URL / slug.`
+            : message
         );
         console.error(data);
         setLoading(false);
         return;
       }
 
-      router.push("/admin/products");
+      const newId =
+        typeof data?.product?.id === "string" ? data.product.id : activeId;
+      if (newId && newId !== savedProductId) {
+        setSavedProductId(newId);
+        // Stay on editor — only sync URL for new products so refresh keeps working
+        router.replace(`/admin/products/${newId}`);
+      }
+      setSuccess(
+        activeId ? "Product updated successfully." : "Product created successfully."
+      );
       router.refresh();
+      setLoading(false);
     } catch (err) {
       console.error(err);
       setError("Network error — could not save product. Try again.");
@@ -595,10 +618,22 @@ export function ProductForm({
               value={values.slug}
               onChange={(e) => {
                 setSlugTouched(true);
+                setSlugConflict(false);
+                if (error) setError("");
                 patch({ slug: slugify(e.target.value) });
               }}
-              className={inputClass}
+              className={`${inputClass} ${
+                slugConflict
+                  ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+                  : ""
+              }`}
+              aria-invalid={slugConflict}
             />
+            {slugConflict ? (
+              <p className="mt-1.5 text-[12px] font-semibold text-red-600">
+                This slug is already taken. Pick another name for the URL.
+              </p>
+            ) : null}
           </div>
           <div>
             <FieldLabel>SKU</FieldLabel>
@@ -1546,24 +1581,39 @@ export function ProductForm({
         />
       </Section>
 
-      {error ? <p className="text-sm font-medium text-red-600">{error}</p> : null}
-
       <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-[#E8EAEF] bg-white/95 px-4 py-3 backdrop-blur sm:px-6 lg:left-64">
-        <div className="flex w-full items-center justify-end gap-3">
-          <button
-            type="button"
-            onClick={() => router.push("/admin/products")}
-            className="cursor-pointer rounded-[4px] px-5 py-2.5 text-sm font-semibold text-[#172455] hover:bg-[#F6F8FA]"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="cursor-pointer rounded-[4px] bg-[#FF5548] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#e04337] disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {loading ? "Saving…" : productId ? "Update" : "Create"}
-          </button>
+        <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0 flex-1">
+            {error ? (
+              <p className="text-sm font-semibold text-red-600">{error}</p>
+            ) : success ? (
+              <p className="text-sm font-semibold text-emerald-700">{success}</p>
+            ) : (
+              <p className="text-xs text-[#6B7280]">
+                Stay on this page after save — fix the slug if it is already taken.
+              </p>
+            )}
+          </div>
+          <div className="flex shrink-0 items-center justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => router.push("/admin/products")}
+              className="cursor-pointer rounded-[4px] px-5 py-2.5 text-sm font-semibold text-[#172455] hover:bg-[#F6F8FA]"
+            >
+              Back to list
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="cursor-pointer rounded-[4px] bg-[#FF5548] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#e04337] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {loading
+                ? "Saving…"
+                : savedProductId || productId
+                  ? "Update"
+                  : "Create"}
+            </button>
+          </div>
         </div>
       </div>
     </form>
