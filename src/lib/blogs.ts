@@ -221,3 +221,46 @@ export const getBlogBySlug = cache(async (slug: string) => {
     { tags: [CACHE_TAGS.blogs], revalidate: CATALOG_REVALIDATE }
   )();
 });
+
+export function getHeadingId(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-");
+}
+
+export function stripHtml(value: string): string {
+  return value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+export function extractHeadingsFromHtml(html: string): { id: string; text: string; level: 2 | 3 }[] {
+  if (!html) return [];
+  const matches = [...html.matchAll(/<h([23])([^>]*)>([\s\S]*?)<\/h\1>/gi)];
+  return matches
+    .map((match) => {
+      const level = Number(match[1]) as 2 | 3;
+      const attrs = match[2] || "";
+      const text = stripHtml(match[3] || "");
+      const idMatch = attrs.match(/\sid=["']([^"']+)["']/i);
+      return {
+        id: idMatch?.[1] || getHeadingId(text),
+        text,
+        level,
+      };
+    })
+    .filter((item) => Boolean(item.text));
+}
+
+export function ensureHeadingIds(html: string): string {
+  if (!html) return "";
+  return html.replace(
+    /<h([23])([^>]*)>([\s\S]*?)<\/h\1>/gi,
+    (match, level, attrs, inner) => {
+      if (/\sid\s*=/i.test(attrs)) return match;
+      const id = getHeadingId(stripHtml(inner));
+      if (!id) return match;
+      return `<h${level}${attrs} id="${id}">${inner}</h${level}>`;
+    }
+  );
+}
