@@ -212,15 +212,31 @@ export async function deleteCloudinaryAssets(
 }
 
 /**
- * Computes URLs that were present in oldUrls but are absent from newUrls,
+ * Computes assets that were present in oldUrls but are absent from newUrls,
  * then deletes those removed Cloudinary assets.
+ *
+ * Compares by public_id (not raw URL string) so normalizing
+ * `/media/…/file.png` → `/media/…/file` on save does NOT delete the live asset.
  */
 export async function deleteRemovedCloudinaryAssets(
   oldUrls: (string | null | undefined)[],
   newUrls: (string | null | undefined)[],
   resourceType: "image" | "video" | "raw" = "image"
 ): Promise<void> {
-  const newSet = new Set(newUrls.filter(Boolean));
-  const removed = oldUrls.filter((u) => u && !newSet.has(u));
-  await deleteCloudinaryAssets(removed, resourceType);
+  const newPublicIds = new Set(
+    newUrls
+      .filter((u): u is string => Boolean(u))
+      .map((u) => extractPublicId(toMediaUrl(u)) || extractPublicId(u))
+      .filter((id): id is string => Boolean(id))
+  );
+
+  const removedUrls = oldUrls.filter((u) => {
+    if (!u) return false;
+    const id = extractPublicId(toMediaUrl(u)) || extractPublicId(u);
+    // Keep if we can't resolve an id (don't delete unknowns), or still referenced
+    if (!id) return false;
+    return !newPublicIds.has(id);
+  });
+
+  await deleteCloudinaryAssets(removedUrls, resourceType);
 }
