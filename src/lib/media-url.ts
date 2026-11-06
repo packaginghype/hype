@@ -1,9 +1,14 @@
 /**
  * Serve Cloudinary assets as clean same-origin paths:
- * `/media/folder/filename.jpg` — no host, transforms, or version.
+ * `/media/folder/filename` — no host, transforms, version, or format extension.
+ *
+ * Extensions are stripped on purpose: next.config rewrites /media to
+ * `f_auto,q_auto/...`. Keeping a wrong `.png`/`.jpg` after rename/upload
+ * makes Cloudinary 404 even when the public_id exists.
  */
 
 const CLOUDINARY_HOST = "res.cloudinary.com";
+const FORMAT_EXT_RE = /\.(avif|webp|png|jpe?g|gif|svg|bmp|ico|tiff?|heic|mp4|webm|mov)$/i;
 
 function isTransformSegment(segment: string): boolean {
   if (!segment || /^v\d+$/.test(segment)) return false;
@@ -14,7 +19,7 @@ function isTransformSegment(segment: string): boolean {
   return /^[a-z]{1,4}_.+/i.test(segment);
 }
 
-/** Strip delivery transforms + version → folder/filename.ext */
+/** Strip delivery transforms + version → folder/filename(.ext?) */
 function toAssetPath(parts: string[]): string | null {
   let i = 0;
   while (i < parts.length && isTransformSegment(parts[i])) i += 1;
@@ -23,7 +28,12 @@ function toAssetPath(parts: string[]): string | null {
   return parts.slice(i).join("/") || null;
 }
 
-/** Cloudinary folder/file path (keeps extension) from a full delivery URL. */
+/** Drop trailing image/video format so /media + f_auto can deliver correctly. */
+function stripFormatExtension(path: string): string {
+  return path.replace(FORMAT_EXT_RE, "");
+}
+
+/** Cloudinary folder/file path (may include extension) from a full delivery URL. */
 export function extractCloudinaryPublicId(src: string): string | null {
   try {
     const url = new URL(src);
@@ -52,17 +62,18 @@ export function isCloudinaryDeliveryUrl(src: string): boolean {
   );
 }
 
-/** Normalize an existing `/media/...` path (drop transforms/version, keep ext). */
+/** Normalize an existing `/media/...` path (drop transforms/version/format). */
 function cleanMediaPath(src: string): string {
   const raw = src.replace(/^\/media\//, "").split("?")[0];
   const parts = raw.split("/").filter(Boolean);
   const assetPath = toAssetPath(parts);
-  return assetPath ? `/media/${assetPath}` : src.split("?")[0];
+  if (!assetPath) return src.split("?")[0];
+  return `/media/${stripFormatExtension(assetPath)}`;
 }
 
 /**
  * Same-origin clean URL for a Cloudinary asset.
- * `/media/{folder}/{filename}.jpg` — quality/size live in the rewrite only.
+ * `/media/{folder}/{filename}` — format is chosen by f_auto in the rewrite.
  */
 export function toMediaUrl(
   src: string,
@@ -75,5 +86,5 @@ export function toMediaUrl(
   const assetPath = extractCloudinaryPublicId(src);
   if (!assetPath) return src;
 
-  return `/media/${assetPath}`;
+  return `/media/${stripFormatExtension(assetPath)}`;
 }

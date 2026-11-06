@@ -78,15 +78,32 @@ async function resourceExists(
   return null;
 }
 
-function mediaUrlFor(
+async function verifiedMediaUrl(
   publicId: string,
-  ext: string,
+  resourceType: "image" | "video",
   secureUrl?: string
-): { url: string; publicId: string } {
+): Promise<{ url: string; publicId: string }> {
   if (secureUrl) {
+    const verified = await resourceExists(publicId, resourceType);
+    if (verified) {
+      return {
+        url: toMediaUrl(verified.secure_url),
+        publicId: verified.public_id,
+      };
+    }
     return { url: toMediaUrl(secureUrl), publicId };
   }
-  return { url: `/media/${publicId}.${ext}`, publicId };
+
+  const verified = await resourceExists(publicId, resourceType);
+  if (!verified) {
+    throw new Error(
+      "Image name was set but the file is missing on Cloudinary. Re-upload the image, then try again."
+    );
+  }
+  return {
+    url: toMediaUrl(verified.secure_url),
+    publicId: verified.public_id,
+  };
 }
 
 /**
@@ -110,24 +127,19 @@ export async function renameCloudinaryAsset(options: {
 
   const resourceType = options.resourceType || "image";
   const toId = `${folder}/${name}`;
-  const extMatch = options.url.match(/\.([a-z0-9]{2,5})(?:\?|$)/i);
-  const ext =
-    extMatch?.[1]?.toLowerCase() ||
-    (resourceType === "video" ? "mp4" : "webp");
 
   if (fromId === toId) {
-    return mediaUrlFor(toId, ext, undefined);
+    return verifiedMediaUrl(toId, resourceType);
   }
 
   const source = await resourceExists(fromId, resourceType);
   if (!source) {
     const target = await resourceExists(toId, resourceType);
     if (target) {
-      return mediaUrlFor(
-        target.public_id,
-        target.format || ext,
-        target.secure_url
-      );
+      return {
+        url: toMediaUrl(target.secure_url),
+        publicId: target.public_id,
+      };
     }
     throw new Error(
       "Image file is missing on Cloudinary. Upload the image again, set the image name, then save."
@@ -141,13 +153,13 @@ export async function renameCloudinaryAsset(options: {
       overwrite: true,
       invalidate: true,
     });
-    return mediaUrlFor(
+    return verifiedMediaUrl(
       typeof result?.public_id === "string" ? result.public_id : toId,
-      ext,
+      resourceType,
       typeof result?.secure_url === "string" ? result.secure_url : undefined
     );
   } catch (renameErr) {
-    // 2) Copy via Admin API secure URL
+    // 2) Copy via Admin API secure URL (keeps original until save cleanup)
     try {
       const result = await cloudinary.uploader.upload(source.secure_url, {
         folder,
@@ -158,9 +170,9 @@ export async function renameCloudinaryAsset(options: {
         unique_filename: false,
         use_filename: false,
       });
-      return mediaUrlFor(
+      return verifiedMediaUrl(
         typeof result?.public_id === "string" ? result.public_id : toId,
-        ext,
+        resourceType,
         typeof result?.secure_url === "string" ? result.secure_url : undefined
       );
     } catch {

@@ -40,26 +40,16 @@ function GalleryImageSlugField({
   }, [suggestedSlug, nameTouched]);
 
   const imageName = slugify(name.replace(/\.[a-z0-9]{2,5}$/i, ""));
-  const ext =
-    url.match(/\.([a-z0-9]{2,5})(?:\?|$)/i)?.[1]?.toLowerCase() || "webp";
   const alreadyNamed =
     Boolean(imageName) &&
-    (url.includes(`/${imageName}.`) || url.endsWith(`/${imageName}`));
+    (url === `/media/${GALLERY_FOLDER}/${imageName}` ||
+      url.endsWith(`/${imageName}`) ||
+      url.includes(`/${GALLERY_FOLDER}/${imageName}`));
 
   async function applyName(nextName = imageName) {
     const cleanName = slugify(nextName.replace(/\.[a-z0-9]{2,5}$/i, ""));
     if (!cleanName) {
       setError("Set an image name");
-      return;
-    }
-    if (
-      url.includes(`/${cleanName}.`) ||
-      url.endsWith(`/${cleanName}`)
-    ) {
-      if (!url.startsWith("/media/")) {
-        onApplied(`/media/${GALLERY_FOLDER}/${cleanName}.${ext}`);
-      }
-      setStatus("Name ready — click Update");
       return;
     }
     setError("");
@@ -111,7 +101,7 @@ function GalleryImageSlugField({
         placeholder="e.g. custom-boxes-1"
       />
       <p className="break-all font-mono text-[10px] text-[#21AAA5]">
-        /media/{GALLERY_FOLDER}/{imageName || "[name]"}.{ext}
+        /media/{GALLERY_FOLDER}/{imageName || "[name]"}
       </p>
       <button
         type="button"

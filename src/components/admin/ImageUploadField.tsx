@@ -61,17 +61,16 @@ export function ImageUploadField({
 
   const cleanFolder = folder.replace(/^\/+|\/+$/g, "");
   const imageName = slugify(name.replace(/\.[a-z0-9]{2,5}$/i, ""));
-  const currentExt =
-    value.match(/\.([a-z0-9]{2,5})(?:\?|$)/i)?.[1]?.toLowerCase() || "webp";
   const targetPath = imageName
-    ? `/media/${cleanFolder}/${imageName}.${currentExt}`
-    : `/media/${cleanFolder}/[image-name].webp`;
+    ? `/media/${cleanFolder}/${imageName}`
+    : `/media/${cleanFolder}/[image-name]`;
   const alreadyNamed =
     Boolean(value) &&
     Boolean(imageName) &&
-    (value.includes(`/${imageName}.`) ||
+    (value === `/media/${cleanFolder}/${imageName}` ||
       value.endsWith(`/${imageName}`) ||
-      value.includes(`/${cleanFolder}/${imageName}.`));
+      value.includes(`/${cleanFolder}/${imageName}.`) ||
+      value.includes(`/${cleanFolder}/${imageName}`));
 
   async function applyImageName(nextName = imageName) {
     const cleanName = slugify(nextName.replace(/\.[a-z0-9]{2,5}$/i, ""));
@@ -79,23 +78,12 @@ export function ImageUploadField({
       setError("Set an image name first.");
       return false;
     }
-    if (
-      value.includes(`/${cleanName}.`) ||
-      value.endsWith(`/${cleanName}`) ||
-      value.includes(`/${cleanFolder}/${cleanName}.`)
-    ) {
-      // Already named — still normalize full Cloudinary URLs to /media
-      if (!value.startsWith("/media/")) {
-        onChange(`/media/${cleanFolder}/${cleanName}.${currentExt}`);
-      }
-      setStatus("Image name ready — click Update to save.");
-      return true;
-    }
 
     setError("");
     setStatus("");
     setUploading(true);
     try {
+      // Always go through the API so the returned /media URL is verified
       const res = await fetch("/api/admin/upload", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -337,15 +325,18 @@ export function ImageUploadField({
           </div>
 
           <div className="min-h-[42px]">
+            {/* type=text: /media/... is not a valid HTML url input and was blocking form submit */}
             <input
-              type="url"
+              type="text"
+              inputMode="url"
               value={value}
               onChange={(e) => onChange(e.target.value)}
               placeholder="/media/… or https://res.cloudinary.com/…"
               tabIndex={showUrl ? 0 : -1}
+              disabled={!showUrl}
               className={cn(
                 "w-full rounded-[4px] border border-[#E2E4E8] bg-white px-3 py-2 text-sm font-medium text-[#172455] placeholder:text-[#9CA3AF] outline-none focus:border-[#FF5548]",
-                showUrl ? "visible" : "invisible pointer-events-none"
+                showUrl ? "visible" : "hidden"
               )}
             />
             {error ? (
