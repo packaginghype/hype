@@ -96,7 +96,7 @@ export function Footer({
       <Container className="relative py-12 sm:py-14 lg:py-16">
         <div
           className={cn(
-            "grid grid-cols-1 gap-10 sm:grid-cols-2 lg:gap-x-8 lg:gap-y-0",
+            "grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-8 lg:gap-x-8 lg:gap-y-0",
             gridClass(columns.length)
           )}
         >
@@ -157,7 +157,7 @@ export function Footer({
             return (
               <div key={col.id}>
                 <FooterHeading>{col.title}</FooterHeading>
-                <ul className="mt-4 space-y-2.5">
+                <ul className="mt-2.5 space-y-2 sm:mt-4 sm:space-y-2.5">
                   {col.mode === "categories" ? (
                     popular.length > 0 ? (
                       <>
