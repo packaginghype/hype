@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { ImagePlus, Loader2, Trash2, Link2, Upload } from "lucide-react";
+import { mediaBasename } from "@/lib/media-url";
 import { cn, slugify } from "@/lib/utils";
 
 type Props = {
@@ -61,16 +62,13 @@ export function ImageUploadField({
 
   const cleanFolder = folder.replace(/^\/+|\/+$/g, "");
   const imageName = slugify(name.replace(/\.[a-z0-9]{2,5}$/i, ""));
+  const currentBase = mediaBasename(value);
   const targetPath = imageName
     ? `/media/${cleanFolder}/${imageName}`
     : `/media/${cleanFolder}/[image-name]`;
+  // Exact basename only — "testing" must NOT match "testing1-1"
   const alreadyNamed =
-    Boolean(value) &&
-    Boolean(imageName) &&
-    (value === `/media/${cleanFolder}/${imageName}` ||
-      value.endsWith(`/${imageName}`) ||
-      value.includes(`/${cleanFolder}/${imageName}.`) ||
-      value.includes(`/${cleanFolder}/${imageName}`));
+    Boolean(value) && Boolean(imageName) && currentBase === imageName;
 
   async function applyImageName(nextName = imageName) {
     const cleanName = slugify(nextName.replace(/\.[a-z0-9]{2,5}$/i, ""));
@@ -204,19 +202,19 @@ export function ImageUploadField({
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <button
               type="button"
-              disabled={uploading || !value || !imageName || alreadyNamed}
+              disabled={uploading || !value || !imageName}
               onClick={() => void applyImageName()}
               className="inline-flex h-8 cursor-pointer items-center rounded-[5px] border border-[#21AAA5] bg-white px-3 text-[11px] font-bold text-[#21AAA5] hover:bg-[#EAF7F6] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {uploading
                 ? "Working…"
                 : alreadyNamed
-                  ? "Name applied"
+                  ? "Re-apply name"
                   : "Apply image name"}
             </button>
             <span className="text-[11px] text-[#6B7280]">
-              Type the file name only. Upload uses this name; then click Update
-              to save in the database.
+              Type the file name only (hyphen optional). Then Update to save in
+              the database.
             </span>
           </div>
           {status ? (

@@ -11,13 +11,13 @@ import {
   CATEGORY_GROUP_META,
   type CategoryGroupKey,
 } from "@/lib/category-groups";
+import { mediaBasename } from "@/lib/media-url";
 import { slugify } from "@/lib/utils";
 
 const GALLERY_FOLDER = "packaginghype/products/gallery";
 
 function mediaFilenameSlug(url: string): string {
-  const base = url.split("?")[0].split("/").pop() || "";
-  return slugify(base.replace(/\.[a-z0-9]{2,5}$/i, ""));
+  return slugify(mediaBasename(url));
 }
 
 function GalleryImageSlugField({
@@ -40,11 +40,9 @@ function GalleryImageSlugField({
   }, [suggestedSlug, nameTouched]);
 
   const imageName = slugify(name.replace(/\.[a-z0-9]{2,5}$/i, ""));
+  // Exact basename only — "testing" must NOT match URL ".../testing1-1"
   const alreadyNamed =
-    Boolean(imageName) &&
-    (url === `/media/${GALLERY_FOLDER}/${imageName}` ||
-      url.endsWith(`/${imageName}`) ||
-      url.includes(`/${GALLERY_FOLDER}/${imageName}`));
+    Boolean(imageName) && mediaBasename(url) === imageName;
 
   async function applyName(nextName = imageName) {
     const cleanName = slugify(nextName.replace(/\.[a-z0-9]{2,5}$/i, ""));
@@ -95,21 +93,30 @@ function GalleryImageSlugField({
         onBlur={() => {
           const cleaned = slugify(name.replace(/\.[a-z0-9]{2,5}$/i, ""));
           setName(cleaned);
-          if (cleaned && !alreadyNamed) void applyName(cleaned);
+          if (cleaned && mediaBasename(url) !== cleaned) {
+            void applyName(cleaned);
+          }
         }}
         className="w-full rounded-[4px] border border-[#E2E4E8] bg-white px-2.5 py-1.5 text-xs font-medium text-[#172455] outline-none focus:border-[#FF5548]"
         placeholder="e.g. custom-boxes-1"
       />
       <p className="break-all font-mono text-[10px] text-[#21AAA5]">
-        /media/{GALLERY_FOLDER}/{imageName || "[name]"}
+        Target: /media/{GALLERY_FOLDER}/{imageName || "[name]"}
+      </p>
+      <p className="break-all font-mono text-[10px] text-[#6B7280]">
+        Current: {url || "—"}
       </p>
       <button
         type="button"
-        disabled={busy || !imageName || alreadyNamed}
+        disabled={busy || !imageName}
         onClick={() => void applyName()}
         className="inline-flex h-8 w-full cursor-pointer items-center justify-center rounded-[4px] border border-[#21AAA5] bg-white text-[11px] font-bold text-[#21AAA5] hover:bg-[#EAF7F6] disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {busy ? "Working…" : alreadyNamed ? "Name applied" : "Apply image name"}
+        {busy
+          ? "Working…"
+          : alreadyNamed
+            ? "Re-apply name"
+            : "Apply image name"}
       </button>
       {status ? (
         <p className="text-[10px] font-semibold text-emerald-700">{status}</p>

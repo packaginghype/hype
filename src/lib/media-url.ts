@@ -33,6 +33,13 @@ function stripFormatExtension(path: string): string {
   return path.replace(FORMAT_EXT_RE, "");
 }
 
+/** Filename stem from a /media or Cloudinary URL (no folder, no extension). */
+export function mediaBasename(url: string): string {
+  if (!url) return "";
+  const base = url.split("?")[0].split("/").pop() || "";
+  return stripFormatExtension(base).toLowerCase();
+}
+
 /** Cloudinary folder/file path (may include extension) from a full delivery URL. */
 export function extractCloudinaryPublicId(src: string): string | null {
   try {

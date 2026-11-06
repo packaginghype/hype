@@ -146,29 +146,29 @@ export async function renameCloudinaryAsset(options: {
     );
   }
 
-  // 1) Native rename — most reliable for same-account assets
+  // Prefer copy so the old public_id keeps working until the form is saved.
+  // Rename would 404 the previous /media URL immediately.
   try {
-    const result = await cloudinary.uploader.rename(fromId, toId, {
+    const result = await cloudinary.uploader.upload(source.secure_url, {
+      folder,
+      public_id: name,
       resource_type: resourceType,
       overwrite: true,
       invalidate: true,
+      unique_filename: false,
+      use_filename: false,
     });
     return verifiedMediaUrl(
       typeof result?.public_id === "string" ? result.public_id : toId,
       resourceType,
       typeof result?.secure_url === "string" ? result.secure_url : undefined
     );
-  } catch (renameErr) {
-    // 2) Copy via Admin API secure URL (keeps original until save cleanup)
+  } catch (copyErr) {
     try {
-      const result = await cloudinary.uploader.upload(source.secure_url, {
-        folder,
-        public_id: name,
+      const result = await cloudinary.uploader.rename(fromId, toId, {
         resource_type: resourceType,
         overwrite: true,
         invalidate: true,
-        unique_filename: false,
-        use_filename: false,
       });
       return verifiedMediaUrl(
         typeof result?.public_id === "string" ? result.public_id : toId,
@@ -176,7 +176,7 @@ export async function renameCloudinaryAsset(options: {
         typeof result?.secure_url === "string" ? result.secure_url : undefined
       );
     } catch {
-      throw new Error(cloudinaryErrorMessage(renameErr));
+      throw new Error(cloudinaryErrorMessage(copyErr));
     }
   }
 }
