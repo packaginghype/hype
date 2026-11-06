@@ -51,8 +51,8 @@ export function BlogTableOfContents({ items }: { items: TocItem[] }) {
                 className={cn(
                   "group flex items-center gap-2.5 rounded-full px-3 py-2 text-[13px] leading-snug transition-all duration-200",
                   isActive
-                    ? "bg-[#063b2f] text-white font-semibold shadow-sm"
-                    : "text-[#4A5568] hover:bg-gray-100/70 hover:text-[#172455]"
+                    ? "bg-[#172455] text-white font-semibold shadow-sm"
+                    : "text-[#4A5568] hover:bg-[#F6F8FA] hover:text-[#172455]"
                 )}
               >
                 <span
@@ -60,7 +60,7 @@ export function BlogTableOfContents({ items }: { items: TocItem[] }) {
                     "flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold transition-colors",
                     isActive
                       ? "bg-white/20 text-white"
-                      : "bg-gray-100 text-gray-500 group-hover:bg-gray-200 group-hover:text-gray-800"
+                      : "bg-gray-100 text-gray-500 group-hover:bg-[#FF5548]/15 group-hover:text-[#FF5548]"
                   )}
                 >
                   {index + 1}
@@ -77,7 +77,7 @@ export function BlogTableOfContents({ items }: { items: TocItem[] }) {
   return (
     <>
       {/* Mobile Drawer Accordion */}
-      <div className="mb-8 rounded-2xl border border-gray-200/80 bg-white p-4 shadow-sm lg:hidden">
+      <div className="mb-8 rounded-2xl border border-gray-200/90 bg-white p-4 shadow-sm lg:hidden">
         <button
           type="button"
           className="flex w-full items-center justify-between text-left text-xs font-bold uppercase tracking-wider text-[#172455]"
@@ -85,17 +85,17 @@ export function BlogTableOfContents({ items }: { items: TocItem[] }) {
           aria-expanded={open}
         >
           <span className="inline-flex items-center gap-2">
-            <ListFilter className="h-4 w-4 text-[#063b2f]" />
+            <ListFilter className="h-4 w-4 text-[#FF5548]" />
             <span>Table of Contents</span>
           </span>
           <span className="inline-flex items-center gap-2">
-            <span className="rounded-full bg-[#fbf4eb] px-2 py-0.5 text-[10px] font-bold text-[#c59a53]">
+            <span className="rounded-full bg-[#FFF1F0] px-2 py-0.5 text-[10px] font-bold text-[#FF5548]">
               {items.length} SECTIONS
             </span>
             <ChevronDown
               className={cn(
                 "h-4 w-4 text-gray-400 transition-transform duration-200",
-                open && "rotate-180 text-[#063b2f]"
+                open && "rotate-180 text-[#FF5548]"
               )}
             />
           </span>
@@ -107,13 +107,13 @@ export function BlogTableOfContents({ items }: { items: TocItem[] }) {
 
       {/* Desktop Sticky Rail */}
       <div className="sticky top-24 hidden space-y-5 lg:block">
-        <div className="rounded-[24px] border border-gray-200/90 bg-white p-5 shadow-[0_8px_28px_-16px_rgba(0,0,0,0.08)]">
-          <div className="flex items-center justify-between border-b border-gray-100 pb-3 text-xs font-bold uppercase tracking-wider text-[#063b2f]">
+        <div className="rounded-[24px] border border-gray-200/90 bg-white p-5 shadow-[0_8px_28px_-16px_rgba(23,36,85,0.08)]">
+          <div className="flex items-center justify-between border-b border-gray-100 pb-3 text-xs font-bold uppercase tracking-wider text-[#172455]">
             <span className="flex items-center gap-1.5">
-              <BookOpen className="h-3.5 w-3.5 text-[#063b2f]" />
+              <BookOpen className="h-3.5 w-3.5 text-[#FF5548]" />
               <span>Table of Contents</span>
             </span>
-            <span className="rounded-full bg-[#fbf4eb] px-2.5 py-0.5 text-[10px] font-bold text-[#c59a53]">
+            <span className="rounded-full bg-[#FFF1F0] px-2.5 py-0.5 text-[10px] font-bold text-[#FF5548]">
               {items.length} SECTIONS
             </span>
           </div>

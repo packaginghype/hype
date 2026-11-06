@@ -319,8 +319,8 @@ export default async function BlogDetailPage({ params }: Props) {
           <section
             className={
               faqItems.length > 0
-                ? "border-t border-[#EDE6DB] bg-white py-8 sm:py-12 lg:py-16"
-                : "bg-[#F7F3EC] py-8 sm:py-12 lg:py-16"
+                ? "border-t border-gray-100 bg-white py-8 sm:py-12 lg:py-16"
+                : "bg-[#F6F8FA] py-8 sm:py-12 lg:py-16"
             }
           >
             <Container className="max-w-6xl">

@@ -42,11 +42,11 @@ export function RelatedBlogsCarousel({ blogs }: { blogs: RelatedBlogItem[] }) {
         return (
           <article
             key={blog.id}
-            className="group flex h-full flex-col overflow-hidden rounded-[18px] border border-[#EDE6DB] bg-white shadow-[0_8px_28px_-18px_rgba(23,36,85,0.35)]"
+            className="group flex h-full flex-col overflow-hidden rounded-[18px] border border-[#E5E9F0] bg-white shadow-[0_8px_28px_-18px_rgba(23,36,85,0.18)]"
           >
             <Link
               href={`/blog/${blog.slug}`}
-              className="relative aspect-[16/11] w-full overflow-hidden bg-[#EDE6DB]"
+              className="relative aspect-[16/11] w-full overflow-hidden bg-[#F6F8FA]"
             >
               <SafeImage
                 src={img}
