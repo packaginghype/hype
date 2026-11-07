@@ -52,15 +52,6 @@ export function FaqSection({
               sizes="(max-width: 1024px) 100vw, 50vw"
               className="object-cover object-center"
             />
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0F1839]/45 via-transparent to-transparent"
-            />
-            <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
-              <p className="max-w-xs text-[13px] font-semibold leading-snug text-white sm:text-sm">
-                Custom sizes, materials, and finishes — built for your brand.
-              </p>
-            </div>
           </div>
 
           {/* FAQ panel */}

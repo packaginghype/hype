@@ -38,14 +38,9 @@ export function ReliablePackagingSection({
 
           {/* ── Left: Content ── */}
           <div className="flex flex-col">
-            {/* Section label */}
-            <span className="inline-flex w-fit items-center rounded-full bg-[#172455]/8 px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-[#172455]">
-              Why Packaging Hype
-            </span>
-
             {/* Heading */}
             {reliableHeading ? (
-              <h2 className="mt-3 font-heading text-[1.85rem] font-extrabold leading-tight tracking-tight text-[#172455] sm:text-3xl lg:text-[2.2rem]">
+              <h2 className="font-heading text-[1.85rem] font-extrabold leading-tight tracking-tight text-[#172455] sm:text-3xl lg:text-[2.2rem]">
                 {reliableHeading}
               </h2>
             ) : null}

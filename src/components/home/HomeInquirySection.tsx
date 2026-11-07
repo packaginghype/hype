@@ -485,12 +485,7 @@ export function HomeInquirySection({
 
           {/* ── Right: Heading panel ── */}
           <div className="flex flex-col justify-center lg:pl-2">
-            {/* Section label */}
-            <span className="inline-flex w-fit items-center rounded-full bg-[#172455]/8 px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-[#172455]">
-              Get a Quote
-            </span>
-
-            <h2 className="mt-3 font-heading text-[1.75rem] font-extrabold leading-tight tracking-tight text-[#172455] sm:text-[2rem] lg:text-[2.15rem]">
+            <h2 className="font-heading text-[1.75rem] font-extrabold leading-tight tracking-tight text-[#172455] sm:text-[2rem] lg:text-[2.15rem]">
               {inquiryHeading}
             </h2>
 

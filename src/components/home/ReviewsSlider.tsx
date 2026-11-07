@@ -91,12 +91,7 @@ export function ReviewsSlider({
       <Container>
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-3xl lg:max-w-4xl">
-            {reviewsEyebrow ? (
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#21AAA5]">
-                {reviewsEyebrow}
-              </p>
-            ) : null}
-            <h2 className="mt-2 font-heading text-2xl font-extrabold tracking-tight text-[#172455] sm:text-3xl">
+            <h2 className="font-heading text-2xl font-extrabold tracking-tight text-[#172455] sm:text-3xl">
               {reviewsHeading || "What Our Customers Say"}
             </h2>
             {reviewsSubtext ? (
