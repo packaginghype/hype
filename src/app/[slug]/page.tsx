@@ -3,11 +3,20 @@ import { notFound } from "next/navigation";
 import { CategoryDetailPage } from "@/components/categories/CategoryDetailPage";
 import { CustomPageView } from "@/components/pages/CustomPageView";
 import { JsonLdScript } from "@/components/seo/JsonLdScript";
-import { getAllProducts, getCategoryBySlug } from "@/lib/catalog";
+import { getAllProducts, getCategoryBySlug, getNavCategories } from "@/lib/catalog";
 import { getCustomPageBySlug } from "@/lib/custom-pages";
 import { stripHtml } from "@/lib/html";
 
-export const revalidate = 120;
+export const revalidate = 3600;
+
+export async function generateStaticParams() {
+  try {
+    const nav = await getNavCategories();
+    return (nav?.all || []).map((c) => ({ slug: c.slug }));
+  } catch {
+    return [];
+  }
+}
 
 export async function generateMetadata({
   params,

@@ -8,7 +8,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import { Calendar, User, ArrowRight, BookOpen } from "lucide-react";
 import { formatBlogDate, getBlogsPaged, getBlogFallbackImage } from "@/lib/blogs";
 
-export const revalidate = 120;
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Packaging Design & Manufacturing Blog",

@@ -24,7 +24,7 @@ import {
 import { toVideoEmbedUrl } from "@/lib/blog-video";
 import type { RelatedBlogItem } from "@/types";
 
-export const revalidate = 120;
+export const revalidate = 3600;
 
 type Props = { params: Promise<{ slug: string }> };
 

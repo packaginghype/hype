@@ -16,7 +16,7 @@ import { JsonLdScript } from "@/components/seo/JsonLdScript";
 import { HOME_PAGE_CANONICAL_DEFAULT } from "@/lib/home-page-schema";
 import type { Metadata } from "next";
 
-export const revalidate = 120;
+export const revalidate = 3600;
 
 export async function generateMetadata(): Promise<Metadata> {
   const data = await getHomePageData();

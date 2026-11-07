@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ProductDetailPage from "@/components/products/ProductDetailPage";
 import {
+  getAllProducts,
   getProductBySlug,
   getProductRelatedBlogs,
   getRelatedProducts,
@@ -9,7 +10,16 @@ import {
 import { stripHtml } from "@/lib/html";
 import { JsonLdScript } from "@/components/seo/JsonLdScript";
 
-export const revalidate = 120;
+export const revalidate = 3600;
+
+export async function generateStaticParams() {
+  try {
+    const products = await getAllProducts({ limit: 50 });
+    return products.map((p) => ({ slug: p.slug }));
+  } catch {
+    return [];
+  }
+}
 
 export async function generateMetadata({
   params,

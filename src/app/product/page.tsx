@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     "Find the perfect packaging solution tailored to your business needs. Browse our wholesale catalog of custom boxes organized by industry — retail, e-commerce, food, cosmetics, and more.",
 };
 
-export const revalidate = 120;
+export const revalidate = 3600;
 
 export default async function ProductsPage({
   searchParams,

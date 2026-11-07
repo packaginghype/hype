@@ -3,7 +3,7 @@ import { CategoryCollectionPage } from "@/components/categories/CategoryCollecti
 import { CATEGORY_GROUPS } from "@/data/category-groups";
 import { getCategoriesByGroup } from "@/lib/catalog";
 
-export const revalidate = 120;
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: `${CATEGORY_GROUPS.materials.title} | Custom Packaging`,

@@ -8,7 +8,7 @@ import { SearchHeroForm } from "@/components/search/SearchHeroForm";
 import { getProductsPaged } from "@/lib/catalog";
 import { VERIFIED_BUSINESS_INFO } from "@/data/verified-data";
 
-export const revalidate = 120;
+export const revalidate = 3600;
 
 const PAGE_SIZE = 24;
 

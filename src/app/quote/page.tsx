@@ -11,7 +11,7 @@ import {
 import { getStaticPageData } from "@/lib/get-static-page";
 import { getStaticPageDef } from "@/lib/static-pages";
 
-export const revalidate = 120;
+export const revalidate = 3600;
 
 const KEY = "quote";
 

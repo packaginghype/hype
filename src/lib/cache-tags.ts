@@ -11,5 +11,5 @@ export const CACHE_TAGS = {
   settings: "settings",
 } as const;
 
-/** Seconds — public catalog ISR / data cache window */
-export const CATALOG_REVALIDATE = 120;
+/** Seconds — public catalog ISR / data cache window (1 hour; purged immediately on admin updates) */
+export const CATALOG_REVALIDATE = 3600;
