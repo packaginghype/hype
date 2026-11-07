@@ -33,6 +33,71 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     return [
+      // Legacy backwards-compatibility fallbacks so old paths never 404
+      {
+        source: "/media/packaginghype/products/gallery/:file*",
+        destination: `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto/ProductImages/:file*`,
+      },
+      {
+        source: "/media/packaginghype/products/thumb/:file*",
+        destination: `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto/ProductImages/:file*`,
+      },
+      {
+        source: "/media/packaginghype/products/scroll/:file*",
+        destination: `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto/ProductImages/:file*`,
+      },
+      {
+        source: "/media/packaginghype/products/faqs/:file*",
+        destination: `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto/ProductImages/:file*`,
+      },
+      {
+        source: "/media/packaginghype/products/merchant/:file*",
+        destination: `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto/ProductImages/:file*`,
+      },
+      {
+        source: "/media/packaginghype/products/:file*",
+        destination: `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto/ProductImages/:file*`,
+      },
+      {
+        source: "/media/packaginghype/catalog/:file*",
+        destination: `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto/ProductImages/:file*`,
+      },
+      {
+        source: "/media/packaginghype/categories/banner/:file*",
+        destination: `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto/CatagoryImages/:file*`,
+      },
+      {
+        source: "/media/packaginghype/categories/thumb/:file*",
+        destination: `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto/CatagoryImages/:file*`,
+      },
+      {
+        source: "/media/packaginghype/categories/scroll/:file*",
+        destination: `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto/CatagoryImages/:file*`,
+      },
+      {
+        source: "/media/packaginghype/categories/faqs/:file*",
+        destination: `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto/CatagoryImages/:file*`,
+      },
+      {
+        source: "/media/packaginghype/categories/:file*",
+        destination: `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto/CatagoryImages/:file*`,
+      },
+      {
+        source: "/media/packaginghype/blogs/banner/:file*",
+        destination: `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto/BlogImages/:file*`,
+      },
+      {
+        source: "/media/packaginghype/blogs/thumb/:file*",
+        destination: `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto/BlogImages/:file*`,
+      },
+      {
+        source: "/media/packaginghype/blogs/faqs/:file*",
+        destination: `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto/BlogImages/:file*`,
+      },
+      {
+        source: "/media/packaginghype/blogs/:file*",
+        destination: `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto/BlogImages/:file*`,
+      },
       {
         // Browser sees /media/folder/file — transforms stay server-side only
         source: "/media/:path*",
