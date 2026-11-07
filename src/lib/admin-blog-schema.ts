@@ -36,6 +36,9 @@ export const adminBlogSchema = z.object({
   canonicalUrl: z.string().optional().nullable(),
   noIndex: z.boolean().optional(),
   isPublished: z.boolean().optional(),
+  relatedBlogsHeading: z.string().optional().nullable(),
+  relatedBlogsDescription: z.string().optional().nullable(),
+  relatedBlogIds: z.array(z.string()).optional().default([]),
 });
 
 export type AdminBlogInput = z.infer<typeof adminBlogSchema>;
@@ -102,5 +105,8 @@ export function blogWriteData(data: AdminBlogInput) {
     canonicalUrl: (data.canonicalUrl || "").trim() || null,
     noIndex: data.noIndex ?? false,
     isPublished: data.isPublished ?? true,
+    relatedBlogsHeading: (data.relatedBlogsHeading || "").trim() || "Explore More Packaging Guides",
+    relatedBlogsDescription: (data.relatedBlogsDescription || "").trim() || null,
+    relatedBlogIds: Array.isArray(data.relatedBlogIds) ? data.relatedBlogIds : [],
   };
 }

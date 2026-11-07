@@ -42,9 +42,11 @@ function BlogThumb({ src, alt }: { src: string; alt: string }) {
 export function HomeBlogPicker({
   selectedIds,
   onChange,
+  helperText,
 }: {
   selectedIds: string[];
   onChange: (ids: string[]) => void;
+  helperText?: string;
 }) {
   const [all, setAll] = useState<BlogOption[]>([]);
   const [query, setQuery] = useState("");
@@ -97,8 +99,8 @@ export function HomeBlogPicker({
   return (
     <div className="space-y-3">
       <p className="text-[12px] font-medium text-[#4B5563]">
-        Selected posts appear in the Latest News section in this order. If none
-        are selected, the latest featured posts are shown.
+        {helperText ||
+          "Selected posts appear in the Latest News section in this order. If none are selected, the latest featured posts are shown."}
       </p>
 
       {selected.length === 0 ? (

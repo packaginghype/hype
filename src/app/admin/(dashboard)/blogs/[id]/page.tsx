@@ -88,6 +88,9 @@ export default async function EditBlogPage({ params }: Props) {
           canonicalUrl: post.canonicalUrl,
           noIndex: post.noIndex,
           isPublished: post.isPublished,
+          relatedBlogsHeading: post.relatedBlogsHeading,
+          relatedBlogsDescription: post.relatedBlogsDescription,
+          relatedBlogIds: post.relatedBlogIds,
         }}
       />
     </div>

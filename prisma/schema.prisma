@@ -314,6 +314,9 @@ model BlogPost {
   canonicalUrl         String?
   noIndex              Boolean  @default(false)
   isPublished          Boolean  @default(true)
+  relatedBlogsHeading  String?  @default("Explore More Packaging Guides")
+  relatedBlogsDescription String?  @db.Text
+  relatedBlogIds       String[] @default([])
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
   faqs                 BlogPostFaq[]

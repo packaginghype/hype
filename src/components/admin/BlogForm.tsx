@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { ImageUploadField } from "@/components/admin/ImageUploadField";
+import { HomeBlogPicker } from "@/components/admin/HomeBlogPicker";
 
 export type BlogFaqInput = {
   question: string;
@@ -42,6 +43,9 @@ export type BlogFormValues = {
   canonicalUrl?: string | null;
   noIndex?: boolean;
   isPublished?: boolean;
+  relatedBlogsHeading?: string | null;
+  relatedBlogsDescription?: string | null;
+  relatedBlogIds?: string[];
 };
 
 function slugify(value: string) {
@@ -177,6 +181,12 @@ export function BlogForm({
     canonicalUrl: initial?.canonicalUrl || "",
     noIndex: initial?.noIndex ?? false,
     isPublished: initial?.isPublished ?? true,
+    relatedBlogsHeading:
+      initial?.relatedBlogsHeading ?? "Explore More Packaging Guides",
+    relatedBlogsDescription:
+      initial?.relatedBlogsDescription ??
+      "Continue learning with practical packaging guides, material tips, and helpful resources for your next custom box project.",
+    relatedBlogIds: initial?.relatedBlogIds || [],
   });
   const [faqs, setFaqs] = useState<BlogFaqInput[]>(
     initial?.faqs?.length
@@ -517,6 +527,38 @@ export function BlogForm({
             <Plus className="h-3.5 w-3.5" />
             Add FAQ
           </button>
+        </div>
+      </Section>
+
+      <Section title="Related Blogs">
+        <div>
+          <FieldLabel>Related Blogs Heading</FieldLabel>
+          <input
+            value={values.relatedBlogsHeading || ""}
+            onChange={(e) => patch({ relatedBlogsHeading: e.target.value })}
+            className={inputClass}
+            placeholder="e.g. Explore More Packaging Guides"
+          />
+        </div>
+
+        <div>
+          <FieldLabel>Related Blogs Description</FieldLabel>
+          <textarea
+            rows={2}
+            value={values.relatedBlogsDescription || ""}
+            onChange={(e) => patch({ relatedBlogsDescription: e.target.value })}
+            className={inputClass}
+            placeholder="e.g. Continue learning with practical packaging guides, material tips, and helpful resources for your next custom box project."
+          />
+        </div>
+
+        <div>
+          <FieldLabel>Select Related Blogs (Optional)</FieldLabel>
+          <HomeBlogPicker
+            selectedIds={values.relatedBlogIds || []}
+            onChange={(ids) => patch({ relatedBlogIds: ids })}
+            helperText="Selected posts appear in the Related Blogs carousel in this order. If none are selected, recent published guides are automatically shown."
+          />
         </div>
       </Section>
 

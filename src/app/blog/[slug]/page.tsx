@@ -14,6 +14,7 @@ import { SafeImage } from "@/components/ui/SafeImage";
 import {
   getBlogBySlug,
   getPublishedBlogs,
+  getBlogsByIds,
   getBlogFallbackImage,
   extractHeadingsFromHtml,
   ensureHeadingIds,
@@ -72,20 +73,47 @@ export default async function BlogDetailPage({ params }: Props) {
     notFound();
   }
 
-  const allBlogs = await getPublishedBlogs();
-  const relatedBlogs: RelatedBlogItem[] = allBlogs
-    .filter((b) => b.slug !== slug)
-    .slice(0, 4)
-    .map((b) => ({
-      id: b.id,
-      title: b.title,
-      slug: b.slug,
-      excerpt: b.excerpt,
-      featuredImage: b.featuredImage,
-      thumbnailImageUrl: b.thumbnailImageUrl || b.bannerImageUrl,
-      publishedDate: b.publishedDate,
-      author: b.author,
-    }));
+  let relatedBlogs: RelatedBlogItem[] = [];
+  if (post.relatedBlogIds && post.relatedBlogIds.length > 0) {
+    const manual = await getBlogsByIds(post.relatedBlogIds);
+    relatedBlogs = manual
+      .filter((b) => b.slug !== slug)
+      .map((b) => ({
+        id: b.id,
+        title: b.title,
+        slug: b.slug,
+        excerpt: b.excerpt,
+        featuredImage: b.featuredImage,
+        thumbnailImageUrl: b.thumbnailImageUrl || b.bannerImageUrl,
+        publishedDate: b.publishedDate,
+        author: b.author,
+      }));
+  }
+
+  if (relatedBlogs.length === 0) {
+    const allBlogs = await getPublishedBlogs();
+    relatedBlogs = allBlogs
+      .filter((b) => b.slug !== slug)
+      .slice(0, 4)
+      .map((b) => ({
+        id: b.id,
+        title: b.title,
+        slug: b.slug,
+        excerpt: b.excerpt,
+        featuredImage: b.featuredImage,
+        thumbnailImageUrl: b.thumbnailImageUrl || b.bannerImageUrl,
+        publishedDate: b.publishedDate,
+        author: b.author,
+      }));
+  }
+
+  const relatedHeading =
+    post.relatedBlogsHeading?.trim() || "Explore More Packaging Guides";
+  const relatedDesc =
+    post.relatedBlogsDescription !== undefined &&
+    post.relatedBlogsDescription !== null
+      ? post.relatedBlogsDescription.trim()
+      : "Continue learning with practical packaging guides, material tips, and helpful resources for your next custom box project.";
 
   const banner =
     post.bannerImageUrl ||
@@ -233,11 +261,12 @@ export default async function BlogDetailPage({ params }: Props) {
           >
             <Container className="max-w-6xl">
               <div className="max-w-2xl text-left">
-                <FaqAccentHeading text="Explore More Packaging Guides" />
-                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#6B7280] sm:text-[15px]">
-                  Continue learning with practical packaging guides, material
-                  tips, and helpful resources for your next custom box project.
-                </p>
+                <FaqAccentHeading text={relatedHeading} />
+                {relatedDesc ? (
+                  <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#6B7280] sm:text-[15px]">
+                    {relatedDesc}
+                  </p>
+                ) : null}
               </div>
               <RelatedBlogsCarousel blogs={relatedBlogs} />
             </Container>
