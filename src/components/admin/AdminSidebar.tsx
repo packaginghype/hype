@@ -17,6 +17,7 @@ import {
   Inbox,
   History,
   Users,
+  ScanSearch,
 } from "lucide-react";
 import { AdminNavLink } from "@/components/admin/AdminNavLink";
 
@@ -57,6 +58,12 @@ const LINKS: LinkItem[] = [
     href: "/admin/activity-logs",
     label: "Activity Logs",
     icon: History,
+    superAdminOnly: true,
+  },
+  {
+    href: "/admin/image-audit",
+    label: "Image Audit",
+    icon: ScanSearch,
     superAdminOnly: true,
   },
 ];
