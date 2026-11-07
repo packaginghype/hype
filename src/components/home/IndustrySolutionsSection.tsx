@@ -82,29 +82,29 @@ export function IndustrySolutionsSection({
   const transform = canSlide ? `translateX(-${(currentIndex * 100) / items.length}%)` : "none";
 
   return (
-    <section className="relative bg-[#EEF6FF] py-10 sm:py-12 lg:py-14">
+    <section className="relative bg-[#EEF6FF] py-10 sm:py-12 lg:py-16">
       <Container>
-        <div className="mb-10 flex flex-col gap-6 sm:mb-12 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-2xl">
-            <h2 className="font-heading text-2xl font-extrabold leading-tight tracking-tight text-[#172455] sm:text-3xl lg:text-[2.35rem]">
+        {/* Section header — heading left, button right, subtext full-width below on mobile */}
+        <div className="mb-8 sm:mb-10">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+            <h2 className="font-heading text-2xl font-extrabold leading-tight tracking-tight text-[#172455] sm:text-3xl">
               {heading}
             </h2>
-            {subtext ? (
-              <p className="mt-3 max-w-xl text-sm leading-relaxed text-gray-500 sm:text-base">
-                {subtext}
-              </p>
-            ) : null}
+            <div className="shrink-0 sm:pt-1">
+              <Link
+                href="/industries"
+                className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-[4px] bg-[#FF5548] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#e04337] focus:outline-none"
+              >
+                View All Industries
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
           </div>
-
-          <div className="flex flex-wrap items-center gap-3 self-start lg:self-center">
-            <Link
-              href="/industries"
-              className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-[4px] bg-[#FF5548] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#e04337] focus:outline-none"
-            >
-              View All Industries
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
+          {subtext ? (
+            <p className="mt-2.5 text-sm leading-relaxed text-gray-500 sm:mt-3 sm:text-[15px]">
+              {subtext}
+            </p>
+          ) : null}
         </div>
 
         <div className="relative">
