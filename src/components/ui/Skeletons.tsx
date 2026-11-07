@@ -256,31 +256,34 @@ export function CategoryDetailSkeleton() {
  */
 export function BlogDetailSkeleton() {
   return (
-    <div className="min-h-screen bg-white py-8">
-      <Container className="max-w-4xl">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 mb-4">
-          <SkeletonBlock className="h-3.5 w-14" />
-          <span className="text-[#D1D5DB]">/</span>
-          <SkeletonBlock className="h-3.5 w-16" />
-          <span className="text-[#D1D5DB]">/</span>
-          <SkeletonBlock className="h-3.5 w-40" />
-        </div>
+    <div className="min-h-screen bg-white">
+      {/* Hero section */}
+      <section className="bg-white border-b border-gray-100 pt-6 pb-8 sm:pt-8 sm:pb-10 lg:pt-10 lg:pb-12">
+        <Container className="max-w-6xl">
+          <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-12">
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <SkeletonBlock className="h-3.5 w-14" />
+                <span className="text-[#D1D5DB]">/</span>
+                <SkeletonBlock className="h-3.5 w-16" />
+                <span className="text-[#D1D5DB]">/</span>
+                <SkeletonBlock className="h-3.5 w-40" />
+              </div>
+              <SkeletonBlock className="h-9 w-4/5 sm:h-11" />
+              <div className="mt-4 space-y-2">
+                <SkeletonBlock className="h-4 w-full" />
+                <SkeletonBlock className="h-4 w-5/6" />
+                <SkeletonBlock className="h-4 w-3/4" />
+              </div>
+            </div>
+            <div className="aspect-[4/3] w-full rounded-2xl bg-[#F6F8FA] animate-pulse" />
+          </div>
+        </Container>
+      </section>
 
-        {/* Title */}
-        <SkeletonBlock className="h-10 w-5/6 sm:h-12" />
-
-        {/* Meta (Date + Read time) */}
-        <div className="mt-4 flex items-center gap-4">
-          <SkeletonBlock className="h-4 w-28" />
-          <SkeletonBlock className="h-4 w-20" />
-        </div>
-
-        {/* Featured Image */}
-        <div className="mt-6 aspect-[16/9] w-full overflow-hidden rounded-xl bg-[#F3F4F6]" />
-
-        {/* Content paragraphs */}
-        <div className="mt-8 space-y-3">
+      {/* Main content */}
+      <Container className="max-w-6xl pt-8 pb-12">
+        <div className="space-y-4">
           <SkeletonBlock className="h-4 w-full" />
           <SkeletonBlock className="h-4 w-full" />
           <SkeletonBlock className="h-4 w-11/12" />

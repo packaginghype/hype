@@ -13,6 +13,7 @@ import { RelatedBlogsCarousel } from "@/components/products/RelatedBlogsCarousel
 import { FaqAccentHeading } from "@/components/ui/FAQAccordion";
 import { JsonLdScript } from "@/components/seo/JsonLdScript";
 import { PageFadeIn } from "@/components/ui/PageFadeIn";
+import { SafeImage } from "@/components/ui/SafeImage";
 import { Calendar, Clock, ArrowLeft, BookOpen } from "lucide-react";
 import {
   formatBlogDate,
@@ -125,95 +126,74 @@ export default async function BlogDetailPage({ params }: Props) {
       <article className="min-h-screen bg-white text-[#172455]">
         {post.seoScript ? <JsonLdScript source={post.seoScript} /> : null}
 
-        {/* ── Hero Banner: two-column (title + desc + CTA | image) ─── */}
-        <div className="border-b border-gray-100 bg-[#FAFAFA]">
-          <Container className="max-w-6xl py-10 sm:py-14">
-            {/* Breadcrumbs */}
-            <Breadcrumbs
-              items={[
-                { label: "Blog", href: "/blog" },
-                { label: post.title },
-              ]}
-            />
+        {/* ── Hero Banner: two-column matching Erixum layout (breadcrumbs + title + desc | image) ─── */}
+        <section className="bg-white border-b border-gray-100 pt-6 pb-8 sm:pt-8 sm:pb-10 lg:pt-10 lg:pb-12">
+          <Container className="max-w-6xl">
+            <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-12">
+              {/* Left column: Breadcrumbs + Title + Excerpt */}
+              <div className="flex flex-col">
+                <Breadcrumbs
+                  className="py-0 mb-3 sm:mb-4"
+                  items={[
+                    { label: "Blog", href: "/blog" },
+                    { label: post.title },
+                  ]}
+                />
 
-            <div className="mt-6 grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-12">
-              {/* Left column */}
-              <div className="flex flex-col gap-5">
-                {post.category?.trim() ? (
-                  <span className="inline-flex w-fit rounded-full bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[#172455] shadow-sm ring-1 ring-[#E8EAEF]">
-                    {post.category}
-                  </span>
-                ) : null}
-                <h1 className="font-heading text-3xl font-extrabold tracking-tight text-[#172455] sm:text-4xl lg:text-[2.4rem] lg:leading-[1.2]">
+                <h1 className="font-heading text-2xl font-extrabold tracking-tight text-[#172455] sm:text-3xl lg:text-[2.35rem] lg:leading-[1.2]">
                   {post.title}
                 </h1>
 
                 {post.excerpt ? (
-                  <p className="text-base leading-relaxed text-[#4A5568] sm:text-lg">
+                  <p className="mt-3 text-sm leading-relaxed text-[#4A5568] sm:mt-4 sm:text-[15px] lg:text-base">
                     {post.excerpt}
                   </p>
                 ) : null}
-
-                <Link
-                  href="/quote"
-                  className="inline-flex w-fit items-center justify-center rounded-lg bg-[#FF5548] px-6 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#e04337]"
-                >
-                  Get a Quote
-                </Link>
               </div>
 
               {/* Right column – banner image */}
               {banner ? (
-                <div className="overflow-hidden rounded-2xl border border-gray-200 shadow-sm">
-                  <div className="relative aspect-[4/3] w-full bg-[#F6F8FA]">
-                    <Image
-                      src={banner}
-                      alt={post.bannerImageAlt || post.title}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 1024px) 100vw, 50vw"
-                      priority
-                      unoptimized
-                    />
-                  </div>
-                  {post.bannerImageTitle ? (
-                    <p className="border-t border-gray-100 bg-[#FAFAFA] px-4 py-2 text-center text-xs text-gray-500">
-                      {post.bannerImageTitle}
-                    </p>
-                  ) : null}
+                <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-[#F6F8FA] shadow-sm">
+                  <SafeImage
+                    src={banner}
+                    alt={post.bannerImageAlt || post.title}
+                    fill
+                    className="object-cover object-center"
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    priority
+                  />
                 </div>
               ) : null}
             </div>
-
-            {/* Meta row below hero */}
-            <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-gray-200 pt-5">
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-[#4A5568]">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#172455] text-xs font-bold text-white shadow-sm">
-                    PH
-                  </div>
-                  <span className="font-semibold text-[#172455]">{post.author}</span>
-                </div>
-                <span className="text-gray-300">•</span>
-                <div className="flex items-center gap-1.5 text-xs text-[#6B7280]">
-                  <Calendar className="h-3.5 w-3.5 text-gray-400" />
-                  <time dateTime={new Date(post.publishedDate).toISOString()}>
-                    {formatBlogDate(post.publishedDate)}
-                  </time>
-                </div>
-                <span className="text-gray-300">•</span>
-                <div className="flex items-center gap-1.5 text-xs text-[#6B7280]">
-                  <Clock className="h-3.5 w-3.5 text-gray-400" />
-                  <span>{estRead}</span>
-                </div>
-              </div>
-              <BlogShareButtons title={post.title} />
-            </div>
           </Container>
-        </div>
+        </section>
 
         {/* ── Main Article Body + Table of Contents Layout ──────────── */}
-        <Container className="max-w-6xl pt-10 sm:pt-14 pb-12 sm:pb-16">
+        <Container className="max-w-6xl pt-8 sm:pt-10 pb-12 sm:pb-16">
+          {/* Article Meta Bar (Author, Date, Reading time, Share) */}
+          <div className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 pb-5">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-[#4A5568]">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#172455] text-xs font-bold text-white shadow-sm">
+                  PH
+                </div>
+                <span className="font-semibold text-[#172455]">{post.author}</span>
+              </div>
+              <span className="text-gray-300">•</span>
+              <div className="flex items-center gap-1.5 text-xs text-[#6B7280]">
+                <Calendar className="h-3.5 w-3.5 text-gray-400" />
+                <time dateTime={new Date(post.publishedDate).toISOString()}>
+                  {formatBlogDate(post.publishedDate)}
+                </time>
+              </div>
+              <span className="text-gray-300">•</span>
+              <div className="flex items-center gap-1.5 text-xs text-[#6B7280]">
+                <Clock className="h-3.5 w-3.5 text-gray-400" />
+                <span>{estRead}</span>
+              </div>
+            </div>
+            <BlogShareButtons title={post.title} />
+          </div>
           <div className="grid items-start gap-10 lg:grid-cols-12 lg:gap-12">
             {/* Article Content Column */}
             <div

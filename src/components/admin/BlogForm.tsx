@@ -65,15 +65,6 @@ function toDateInput(value?: string | null) {
 const inputClass =
   "w-full rounded-[4px] border border-[#E2E4E8] bg-white px-3 py-2.5 text-sm font-medium text-[#172455] placeholder:text-[#9CA3AF] outline-none focus:border-[#FF5548]";
 
-const BLOG_CATEGORIES = [
-  "Packaging Guides",
-  "Materials",
-  "Printing & Finishes",
-  "Design Tips",
-  "Industry Insights",
-  "Shipping & Logistics",
-];
-
 function Section({
   title,
   children,
@@ -198,12 +189,6 @@ export function BlogForm({
   const [slugTouched, setSlugTouched] = useState(Boolean(initial?.slug));
   const [savedPostId, setSavedPostId] = useState(postId);
 
-  const categoryOptions = Array.from(
-    new Set(
-      [...BLOG_CATEGORIES, values.category || ""].filter(Boolean) as string[]
-    )
-  );
-
   function patch(p: Partial<BlogFormValues>) {
     setValues((prev) => ({ ...prev, ...p }));
   }
@@ -302,27 +287,12 @@ export function BlogForm({
           />
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div>
           <YesNo
             label="Featured Enable / Disable"
             value={values.featuredEnabled ?? false}
             onChange={(v) => patch({ featuredEnabled: v })}
           />
-          <div>
-            <FieldLabel>Category</FieldLabel>
-            <input
-              list="blog-category-options"
-              value={values.category || ""}
-              onChange={(e) => patch({ category: e.target.value })}
-              className={inputClass}
-              placeholder="e.g. Packaging Guides"
-            />
-            <datalist id="blog-category-options">
-              {categoryOptions.map((cat) => (
-                <option key={cat} value={cat} />
-              ))}
-            </datalist>
-          </div>
         </div>
 
         <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr_1fr]">
