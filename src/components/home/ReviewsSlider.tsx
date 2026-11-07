@@ -90,7 +90,7 @@ export function ReviewsSlider({
     <section className="bg-white py-10 sm:py-12 lg:py-14">
       <Container>
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-          <div className="max-w-2xl">
+          <div className="max-w-3xl lg:max-w-4xl">
             {reviewsEyebrow ? (
               <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#21AAA5]">
                 {reviewsEyebrow}

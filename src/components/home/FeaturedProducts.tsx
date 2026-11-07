@@ -21,26 +21,26 @@ export async function FeaturedProducts({
   return (
     <section className="bg-white py-10 sm:py-12 lg:py-16">
       <Container>
-        <div className="mb-8 sm:mb-10">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
-            <h2 className="font-heading text-2xl font-extrabold tracking-tight text-[#172455] sm:text-3xl">
+        <div className="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
+          <div className="max-w-3xl lg:max-w-4xl">
+            <h2 className="font-heading text-2xl font-extrabold tracking-tight text-[#172455] sm:text-3xl lg:text-[2.1rem]">
               {trendingHeading || "Trending & Popular Products"}
             </h2>
-            <div className="shrink-0 sm:pt-1">
-              <Link
-                href="/products"
-                className="inline-flex h-11 items-center gap-2 rounded-[5px] bg-[#FF5548] px-5 text-[13.5px] font-bold text-white transition-colors hover:bg-[#e04337]"
-              >
-                View All Products
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
+            {trendingSubtext ? (
+              <p className="mt-2 text-sm leading-relaxed text-gray-500 sm:text-[15px] lg:text-base">
+                {trendingSubtext}
+              </p>
+            ) : null}
           </div>
-          {trendingSubtext ? (
-            <p className="mt-2.5 text-sm leading-relaxed text-gray-500 sm:mt-3 sm:text-[15px]">
-              {trendingSubtext}
-            </p>
-          ) : null}
+          <div className="shrink-0">
+            <Link
+              href="/products"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-[5px] bg-[#FF5548] px-5 text-[13.5px] font-bold text-white transition-colors hover:bg-[#e04337]"
+            >
+              View All Products
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
 
         {products.length > 0 ? (
