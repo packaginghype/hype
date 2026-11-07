@@ -115,7 +115,7 @@ export const HOME_PAGE_DEFAULTS: HomePageData = {
   aboutHeading: "About Packaging Hype",
   aboutBody:
     "<p>Packaging Hype is a US-based custom packaging manufacturer helping brands ship smarter and look sharper. From kraft and corrugated to rigid and specialty structures, we build boxes around your product — not the other way around.</p><p>Low minimums, free design support, and clear quotes keep the process simple. Whether you need retail-ready cartons or e-commerce mailers, our team delivers packaging that protects, presents, and performs.</p>",
-  aboutBtnLabel: "Learn More About Us",
+  aboutBtnLabel: "About Us",
   aboutBtnHref: "/about-us",
   aboutImageUrl: "/images/reliable-packaging-boxes.jpg",
   aboutImageAlt: "Packaging Hype custom packaging team and production",

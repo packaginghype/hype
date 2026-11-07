@@ -87,14 +87,9 @@ export function AboutWhoWeAre({
 
           {/* ── Right: Content ── */}
           <div className="flex flex-col">
-            {/* Section label */}
-            <span className="inline-flex w-fit items-center rounded-full bg-[#172455]/8 px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-[#172455]">
-              About Us
-            </span>
-
             {/* Heading */}
             {aboutHeading ? (
-              <h2 className="mt-3 font-heading text-[1.85rem] font-extrabold leading-tight tracking-tight text-[#172455] sm:text-3xl lg:text-[2.2rem]">
+              <h2 className="font-heading text-[1.85rem] font-extrabold leading-tight tracking-tight text-[#172455] sm:text-3xl lg:text-[2.2rem]">
                 {aboutHeading}
               </h2>
             ) : null}
@@ -133,7 +128,9 @@ export function AboutWhoWeAre({
                 href={aboutBtnHref || "/about-us"}
                 className="inline-flex h-12 cursor-pointer items-center gap-2 rounded-[6px] bg-[#FF5548] px-7 text-sm font-bold text-white shadow-md shadow-[#FF5548]/25 transition-colors hover:bg-[#e04337]"
               >
-                {aboutBtnLabel || "Learn More About Us"}
+                {aboutBtnLabel && aboutBtnLabel !== "Learn More About Us"
+                  ? aboutBtnLabel
+                  : "About Us"}
                 <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
             </div>
