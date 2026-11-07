@@ -6,6 +6,7 @@ import { JsonLdScript } from "@/components/seo/JsonLdScript";
 import { getAllProducts, getCategoryBySlug, getNavCategories } from "@/lib/catalog";
 import { getCustomPageBySlug } from "@/lib/custom-pages";
 import { stripHtml } from "@/lib/html";
+import { PageFadeIn } from "@/components/ui/PageFadeIn";
 
 export const revalidate = 3600;
 
@@ -89,15 +90,17 @@ export default async function SlugPage({
   const customPage = await getCustomPageBySlug(slug);
   if (customPage) {
     return (
-      <CustomPageView
-        title={customPage.title}
-        eyebrow={customPage.eyebrow}
-        heading={customPage.heading}
-        intro={customPage.intro}
-        content={customPage.content}
-        sections={customPage.sections}
-        layout={customPage.layout}
-      />
+      <PageFadeIn>
+        <CustomPageView
+          title={customPage.title}
+          eyebrow={customPage.eyebrow}
+          heading={customPage.heading}
+          intro={customPage.intro}
+          content={customPage.content}
+          sections={customPage.sections}
+          layout={customPage.layout}
+        />
+      </PageFadeIn>
     );
   }
 
@@ -111,11 +114,11 @@ export default async function SlugPage({
   const products = await getAllProducts({ categorySlug: category.slug });
 
   return (
-    <>
+    <PageFadeIn>
       {category.cms?.seoEnabled !== false && category.cms?.seoScript ? (
         <JsonLdScript source={category.cms.seoScript} />
       ) : null}
       <CategoryDetailPage category={category} products={products} />
-    </>
+    </PageFadeIn>
   );
 }

@@ -12,6 +12,7 @@ import { BlogFaqSection } from "@/components/blog/BlogFaqSection";
 import { RelatedBlogsCarousel } from "@/components/products/RelatedBlogsCarousel";
 import { FaqAccentHeading } from "@/components/ui/FAQAccordion";
 import { JsonLdScript } from "@/components/seo/JsonLdScript";
+import { PageFadeIn } from "@/components/ui/PageFadeIn";
 import { Calendar, Clock, ArrowLeft, BookOpen } from "lucide-react";
 import {
   formatBlogDate,
@@ -116,8 +117,9 @@ export default async function BlogDetailPage({ params }: Props) {
   const enrichedContent = ensureHeadingIds(rawHtml);
 
   return (
-    <>
-      {/* ── Reading Progress Bar ──────────────────────────────────── */}
+    <PageFadeIn>
+      <>
+        {/* ── Reading Progress Bar ──────────────────────────────────── */}
       <BlogReadingProgress />
 
       <article className="min-h-screen bg-white text-[#172455]">
@@ -336,6 +338,7 @@ export default async function BlogDetailPage({ params }: Props) {
           </section>
         ) : null}
       </article>
-    </>
+      </>
+    </PageFadeIn>
   );
 }

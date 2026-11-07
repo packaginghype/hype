@@ -9,6 +9,7 @@ import {
 } from "@/lib/catalog";
 import { stripHtml } from "@/lib/html";
 import { JsonLdScript } from "@/components/seo/JsonLdScript";
+import { PageFadeIn } from "@/components/ui/PageFadeIn";
 
 export const revalidate = 3600;
 
@@ -80,7 +81,7 @@ export default async function ProductDetailRoute({
   ]);
 
   return (
-    <>
+    <PageFadeIn>
       {product.cms?.seoEnabled !== false && product.cms?.seoScript ? (
         <JsonLdScript source={product.cms.seoScript} />
       ) : null}
@@ -89,6 +90,6 @@ export default async function ProductDetailRoute({
         related={related}
         relatedBlogs={relatedBlogs}
       />
-    </>
+    </PageFadeIn>
   );
 }

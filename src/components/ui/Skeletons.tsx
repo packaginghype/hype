@@ -154,7 +154,7 @@ export function ProductDetailSkeleton() {
  */
 export function CategoryDetailSkeleton() {
   return (
-    <div className="bg-white">
+    <div className="min-h-screen bg-white">
       {/* Top Hero with soft mint bg */}
       <section className="relative">
         <div

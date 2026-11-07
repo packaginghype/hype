@@ -15,6 +15,7 @@ import { getPublishedCustomerReviews } from "@/lib/customer-reviews";
 import { JsonLdScript } from "@/components/seo/JsonLdScript";
 import { HOME_PAGE_CANONICAL_DEFAULT } from "@/lib/home-page-schema";
 import type { Metadata } from "next";
+import { PageFadeIn } from "@/components/ui/PageFadeIn";
 
 export const revalidate = 3600;
 
@@ -39,8 +40,9 @@ export default async function HomePage() {
   ]);
 
   return (
-    <>
-      <JsonLdScript source={data.seoScript} />
+    <PageFadeIn>
+      <>
+        <JsonLdScript source={data.seoScript} />
       <HeroSection
         heroHeading={data.heroHeading}
         heroHighlight={data.heroHighlight}
@@ -106,6 +108,7 @@ export default async function HomePage() {
         blogIds={data.blogIds}
       />
       {/* Small quote band sits above footer via AppShell FooterQuoteCta */}
-    </>
+      </>
+    </PageFadeIn>
   );
 }
