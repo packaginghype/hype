@@ -132,6 +132,20 @@ a:not([class*="text-"]):not([class*="bg-"]):not([class*="btn"]):not([role="butto
   background: #94a3b8;
 }
 
+/* Smooth page transition */
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.page-fade-in {
+  animation: pageFadeIn 220ms ease-out forwards;
+}
+
 /* Card hover — stable UI (no lift, no shadow change) */
 .card-hover-effect {
   transition: none;

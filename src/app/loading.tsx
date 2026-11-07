@@ -1,6 +1,6 @@
-import { GeneralPageSkeleton } from "@/components/ui/Skeletons";
+import { HomePageSkeleton } from "@/components/ui/Skeletons";
 
 export default function RootLoading() {
-  return <GeneralPageSkeleton />;
+  return <HomePageSkeleton />;
 }
 

@@ -292,6 +292,156 @@ export function BlogDetailSkeleton() {
 }
 
 /**
+ * Realistic Full Homepage Skeleton
+ * Pixel-accurate replica of the entire homepage layout:
+ * Hero (mint bg with rounded corner), Trust bar, Industry carousel,
+ * Trending products 4x2 grid, Category showcase 4x2 grid, and About section.
+ */
+export function HomePageSkeleton() {
+  return (
+    <div className="min-h-screen bg-white">
+      {/* 1. Hero Section Skeleton */}
+      <section className="relative overflow-hidden">
+        <div className="relative isolate overflow-hidden bg-[#D8EDE3] rounded-br-[3rem] sm:rounded-br-[4.5rem] lg:rounded-br-[6rem]">
+          <Container className="relative py-6 sm:py-8 lg:py-10">
+            <div className="grid grid-cols-1 items-center gap-6 lg:grid-cols-12 lg:gap-8">
+              {/* Left text */}
+              <div className="flex flex-col items-start lg:col-span-6 xl:col-span-5">
+                <SkeletonBlock className="h-10 w-4/5 sm:h-12 lg:h-14 bg-white/60" />
+                <SkeletonBlock className="mt-3 h-10 w-3/5 sm:h-12 lg:h-14 bg-white/60" />
+                <div className="mt-4 w-full space-y-2.5">
+                  <SkeletonBlock className="h-4 w-full bg-white/50" />
+                  <SkeletonBlock className="h-4 w-5/6 bg-white/50" />
+                  <SkeletonBlock className="h-4 w-2/3 bg-white/50" />
+                </div>
+                <SkeletonBlock className="mt-6 h-12 w-44 rounded-[5px] bg-[#FF5548]/40" />
+              </div>
+
+              {/* Right hero image block */}
+              <div className="lg:col-span-6 xl:col-span-7">
+                <div className="relative aspect-[5/4] w-full max-w-xl lg:aspect-[16/11] lg:max-w-none overflow-hidden rounded-2xl bg-white/60 animate-pulse" />
+              </div>
+            </div>
+          </Container>
+        </div>
+      </section>
+
+      {/* 2. Trust Benefits Bar Skeleton */}
+      <section className="border-b border-[#E8EAEF] bg-white">
+        <Container className="py-4 sm:py-5">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-2.5">
+                <div className="h-8 w-8 shrink-0 rounded-full bg-[#E8F5F2]" />
+                <SkeletonBlock className="h-3.5 w-24" />
+              </div>
+            ))}
+          </div>
+        </Container>
+      </section>
+
+      {/* 3. Industry Solutions Section Skeleton */}
+      <section className="bg-[#EEF6FF] py-10 sm:py-12 lg:py-16">
+        <Container>
+          <div className="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
+            <div className="max-w-3xl">
+              <SkeletonBlock className="h-8 w-72 sm:h-9" />
+              <SkeletonBlock className="mt-2 h-4 w-full max-w-xl" />
+            </div>
+            <SkeletonBlock className="h-11 w-40 rounded-[5px] bg-[#FF5548]/40 shrink-0" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5 lg:gap-6">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-sm"
+              >
+                <div className="aspect-square w-full bg-[#F3F4F6] animate-pulse" />
+                <div className="p-3.5 text-center">
+                  <SkeletonBlock className="mx-auto h-4 w-3/4" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </Container>
+      </section>
+
+      {/* 4. Trending & Popular Products Section Skeleton */}
+      <section className="bg-white py-10 sm:py-12 lg:py-16">
+        <Container>
+          <div className="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
+            <div className="max-w-3xl">
+              <SkeletonBlock className="h-8 w-64 sm:h-9" />
+              <SkeletonBlock className="mt-2 h-4 w-full max-w-lg" />
+            </div>
+            <SkeletonBlock className="h-11 w-40 rounded-[5px] bg-[#FF5548]/40 shrink-0" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:gap-x-5 sm:gap-y-8 lg:grid-cols-4 lg:gap-x-6 lg:gap-y-10">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={i}
+                className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-sm"
+              >
+                <div className="aspect-square w-full bg-[#F3F4F6] animate-pulse" />
+                <div className="p-3.5 text-center">
+                  <SkeletonBlock className="mx-auto h-4 w-3/4" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </Container>
+      </section>
+
+      {/* 5. Trending & Popular Categories Section Skeleton */}
+      <section className="bg-[#EEF6FF] py-10 sm:py-12 lg:py-16">
+        <Container>
+          <div className="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
+            <div className="max-w-3xl">
+              <SkeletonBlock className="h-8 w-80 sm:h-9" />
+              <SkeletonBlock className="mt-2 h-4 w-full max-w-md" />
+            </div>
+            <SkeletonBlock className="h-11 w-40 rounded-[5px] bg-[#172455]/40 shrink-0" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:gap-x-5 sm:gap-y-8 lg:grid-cols-4 lg:gap-x-6 lg:gap-y-10">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={i}
+                className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-sm"
+              >
+                <div className="aspect-square w-full bg-[#F3F4F6] animate-pulse" />
+                <div className="p-3.5 text-center">
+                  <SkeletonBlock className="mx-auto h-4 w-3/4" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </Container>
+      </section>
+
+      {/* 6. About Who We Are Skeleton */}
+      <section className="bg-white py-12 sm:py-16">
+        <Container>
+          <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-12">
+            <div className="aspect-[4/3] w-full rounded-2xl bg-[#E8EAEF] animate-pulse" />
+            <div className="space-y-4">
+              <SkeletonBlock className="h-8 w-3/4 sm:h-9" />
+              <SkeletonBlock className="h-4 w-full" />
+              <SkeletonBlock className="h-4 w-11/12" />
+              <SkeletonBlock className="h-4 w-4/5" />
+              <SkeletonBlock className="h-4 w-2/3" />
+              <SkeletonBlock className="mt-6 h-11 w-44 rounded-[5px] bg-[#172455]/40" />
+            </div>
+          </div>
+        </Container>
+      </section>
+    </div>
+  );
+}
+
+/**
  * Root General Page Skeleton (for instant navigation on any route)
  */
 export function GeneralPageSkeleton() {

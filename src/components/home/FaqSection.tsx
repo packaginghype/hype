@@ -1,9 +1,9 @@
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { FAQAccordion } from "@/components/ui/FAQAccordion";
+import { SafeImage } from "@/components/ui/SafeImage";
 import { VERIFIED_FAQS } from "@/data/verified-data";
 import type { HomePageData } from "@/lib/home-page-schema";
 import { HOME_PAGE_DEFAULTS } from "@/lib/home-page-schema";
@@ -45,7 +45,7 @@ export function FaqSection({
         <div className="mt-8 grid grid-cols-1 items-stretch gap-5 lg:mt-10 lg:grid-cols-2 lg:gap-6 lg:h-[540px] xl:h-[580px]">
           {/* Image panel */}
           <div className="relative min-h-[280px] overflow-hidden rounded-[16px] bg-[#EAF2ED] sm:min-h-[340px] lg:min-h-0 lg:h-full">
-            <Image
+            <SafeImage
               src={faqImageUrl || "/images/reliable-packaging-boxes.jpg"}
               alt={faqImageAlt || "Custom kraft packaging boxes from Packaging Hype"}
               fill

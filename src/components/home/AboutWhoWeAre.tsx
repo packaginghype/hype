@@ -1,9 +1,9 @@
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { RichText } from "@/components/ui/RichText";
+import { SafeImage } from "@/components/ui/SafeImage";
 import type { HomePageData } from "@/lib/home-page-schema";
 import { HOME_PAGE_DEFAULTS } from "@/lib/home-page-schema";
 
@@ -58,7 +58,7 @@ export function AboutWhoWeAre({
 
             {/* Image card */}
             <div className="relative aspect-[5/4] overflow-hidden rounded-[20px] bg-[#F3F1EE] shadow-[0_28px_60px_-24px_rgba(23,36,85,0.40)] ring-1 ring-[#172455]/6 lg:aspect-[4/3]">
-              <Image
+              <SafeImage
                 src={aboutImageUrl || "/images/reliable-packaging-boxes.jpg"}
                 alt={
                   aboutImageAlt ||

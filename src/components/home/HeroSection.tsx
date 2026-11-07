@@ -1,8 +1,8 @@
 import React from "react";
-import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
+import { SafeImage } from "@/components/ui/SafeImage";
 import type { HomePageData } from "@/lib/home-page-schema";
 import { HOME_PAGE_DEFAULTS } from "@/lib/home-page-schema";
 
@@ -64,7 +64,7 @@ export function HeroSection({
                   aria-hidden
                   className="absolute inset-x-[10%] bottom-[4%] h-[16%] rounded-[50%] bg-[#0B1220]/10 blur-2xl"
                 />
-                <Image
+                <SafeImage
                   src={heroImageUrl || "/images/hero-brands-collage.webp"}
                   alt={heroImageAlt || "Custom branded packaging boxes"}
                   fill
