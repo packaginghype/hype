@@ -3,12 +3,12 @@
  * for Product and Category pages.
  */
 
-/** No 1: Product detail gallery images — 900 × 900 px (1:1) */
+/** No 1: Product detail gallery images — 1200 × 900 px (4:3) */
 export const PRODUCT_IMAGE = {
-  recommended: "900 × 900 px (1:1)",
-  hint: "Max 1.5MB · JPG, PNG, WEBP · upload at 900×900",
-  aspectClass: "aspect-square",
-  width: 900,
+  recommended: "1200 × 900 px (4:3)",
+  hint: "Max 1.5MB · JPG, PNG, WEBP · upload at 1200×900",
+  aspectClass: "aspect-[4/3]",
+  width: 1200,
   height: 900,
 } as const;
 

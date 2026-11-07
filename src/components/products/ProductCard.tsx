@@ -27,7 +27,7 @@ export function ProductCard({ product }: ProductCardProps) {
       >
         <SafeImage
           src={product.imageUrl || ""}
-          alt={product.name}
+          alt={product.cms?.thumbnailAlt || product.name}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           className={CATALOG_TILE.productMediaImage}

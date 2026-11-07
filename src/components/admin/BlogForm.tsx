@@ -331,7 +331,7 @@ export function BlogForm({
             value={values.bannerImageUrl || ""}
             onChange={(url) => patch({ bannerImageUrl: url })}
             recommended="928 × 523 px · Max 1MB"
-            folder="packaginghype/blogs/banner"
+            folder="BlogImages"
           />
           <div>
             <FieldLabel>Image Alt</FieldLabel>
@@ -415,7 +415,7 @@ export function BlogForm({
             value={values.thumbnailImageUrl || ""}
             onChange={(url) => patch({ thumbnailImageUrl: url })}
             recommended="424 × 300 px · Max 1MB"
-            folder="packaginghype/blogs/thumb"
+            folder="BlogImages"
           />
           <div>
             <FieldLabel>Image Alt</FieldLabel>
@@ -499,7 +499,7 @@ export function BlogForm({
               value={values.faqsImageUrl || ""}
               onChange={(url) => patch({ faqsImageUrl: url })}
               recommended="800 × 800 or 1200 × 900 px · Max 2MB"
-              folder="packaginghype/blogs/faqs"
+              folder="BlogImages"
             />
             <div className="space-y-4">
               <div>

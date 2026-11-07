@@ -13,6 +13,10 @@ function toProductItem(
     id: string;
     name: string;
     slug: string;
+    thumbnailUrl?: string | null;
+    thumbnailAlt?: string | null;
+    thumbnailTitle?: string | null;
+    thumbnailSubDescription?: string | null;
     shortDescription: string | null;
     fullDescription: string | null;
     startingPrice: { toNumber(): number } | number | null;
@@ -39,6 +43,8 @@ function toProductItem(
         : product.startingPrice.toNumber();
 
   const imageUrls = product.images.map((img) => img.imageUrl).filter(Boolean);
+  const thumb = (product.thumbnailUrl || "").trim();
+  const primaryImage = thumb || imageUrls[0] || "";
 
   const origPrice =
     product.originalPrice == null
@@ -65,7 +71,8 @@ function toProductItem(
       stripHtml(product.fullDescription || "") ||
       `${product.name} custom packaging manufactured by Packaging Hype.`,
     fullDescription: product.fullDescription || undefined,
-    imageUrl: imageUrls[0] || "",
+    imageUrl: primaryImage,
+    thumbnailUrl: thumb || primaryImage,
     imageUrls,
     startingPrice: origPrice ?? price,
     originalPrice: origPrice ?? price,
@@ -76,6 +83,17 @@ function toProductItem(
     leadTime: product.leadTimeDays || "8-10 Business Days",
     materials: product.materialsAvailable,
     finishes: product.finishesAvailable,
+    cms: {
+      thumbnailAlt: product.thumbnailAlt || undefined,
+      thumbnailTitle: product.thumbnailTitle || undefined,
+      thumbnailSubDescription: product.thumbnailSubDescription || undefined,
+      pageScrollEnabled: false,
+      faqs: [],
+      specs: [],
+      navbarEnabled: true,
+      featureEnabled: true,
+      seoEnabled: true,
+    },
   };
 }
 
@@ -152,12 +170,19 @@ function mapCategoryWithFallbackImage(category: {
   imageUrl: string | null;
   _count?: { products: number };
   products?: {
-    product: { images: { imageUrl: string }[] };
+    product: {
+      thumbnailUrl?: string | null;
+      images: { imageUrl: string }[];
+    };
   }[];
 }): CategoryItem {
   const item = toCategoryItem(category);
   if (!item.imageUrl) {
-    item.imageUrl = category.products?.[0]?.product.images[0]?.imageUrl || undefined;
+    const p = category.products?.[0]?.product;
+    item.imageUrl =
+      (p?.thumbnailUrl || "").trim() ||
+      p?.images[0]?.imageUrl ||
+      undefined;
   }
   return item;
 }

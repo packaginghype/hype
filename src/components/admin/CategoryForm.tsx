@@ -452,6 +452,12 @@ export function CategoryForm({
 
   const currentGroup = (values.group || group) as CategoryGroupKey;
   const currentMeta = CATEGORY_GROUP_META[currentGroup] || CATEGORY_GROUP_META.categories;
+  const categoryFolder =
+    currentGroup === "industries"
+      ? "IndustryImages"
+      : currentGroup === "materials"
+        ? "MaterialImages"
+        : "CatagoryImages";
 
   return (
     <form onSubmit={onSubmit} className="admin-surface w-full max-w-none space-y-5 pb-24">
@@ -583,7 +589,7 @@ export function CategoryForm({
           onChange={(url) => patch({ bannerImageUrl: url })}
           recommended={CATEGORY_BANNER_IMAGE.recommended}
           hint={CATEGORY_BANNER_IMAGE.hint}
-          folder="packaginghype/categories/banner"
+          folder={categoryFolder}
           defaultSlug={values.slug ? `${values.slug}-banner` : ""}
         />
         <div className="grid gap-4 sm:grid-cols-2">
@@ -614,7 +620,7 @@ export function CategoryForm({
             onChange={(url) => patch({ imageUrl: url })}
             recommended={CATEGORY_THUMBNAIL_IMAGE.recommended}
             hint={CATEGORY_THUMBNAIL_IMAGE.hint}
-            folder="packaginghype/categories/thumb"
+            folder={categoryFolder}
             defaultSlug={values.slug || ""}
           />
           <div className="grid gap-4 sm:grid-cols-2">
@@ -684,7 +690,7 @@ export function CategoryForm({
               onChange={(url) => patch({ pageScrollImageUrl: url })}
               recommended={CATEGORY_CONTENT_IMAGE.recommended}
               hint={CATEGORY_CONTENT_IMAGE.hint}
-              folder="packaginghype/categories/scroll"
+              folder={categoryFolder}
               defaultSlug={values.slug ? `${values.slug}-scroll` : ""}
             />
             <div className="grid gap-4 sm:grid-cols-2">
@@ -756,7 +762,7 @@ export function CategoryForm({
               onChange={(url) => patch({ faqsImageUrl: url })}
               recommended={CATEGORY_FAQ_IMAGE.recommended}
               hint={CATEGORY_FAQ_IMAGE.hint}
-              folder="packaginghype/categories/faqs"
+              folder={categoryFolder}
               defaultSlug={values.slug ? `${values.slug}-faq` : ""}
             />
             <div>

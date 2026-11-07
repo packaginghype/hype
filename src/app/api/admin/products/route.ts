@@ -112,5 +112,23 @@ export async function POST(request: Request) {
   revalidateCatalog();
   revalidatePath(`/product/${product.slug}`);
 
+  // Revalidate category pages where this product is listed
+  try {
+    const attachedCats = await prisma.category.findMany({
+      where: { id: { in: categoryIds } },
+      select: { slug: true },
+    });
+    for (const cat of attachedCats) {
+      if (cat.slug) {
+        revalidatePath(`/${cat.slug}`, "page");
+        revalidatePath(`/${cat.slug}`);
+        revalidatePath(`/category/${cat.slug}`, "page");
+        revalidatePath(`/categories/${cat.slug}`, "page");
+      }
+    }
+  } catch (err) {
+    console.error("Failed to revalidate attached categories", err);
+  }
+
   return NextResponse.json({ product }, { status: 201 });
 }

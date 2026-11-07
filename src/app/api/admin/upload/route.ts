@@ -48,7 +48,7 @@ export async function POST(request: Request) {
   try {
     const form = await request.formData();
     const file = form.get("file");
-    const folder = String(form.get("folder") || "packaginghype/products")
+    const folder = String(form.get("folder") || "ProductImages")
       .replace(/^\/+|\/+$/g, "")
       .replace(/\/+/g, "/");
     const kind = String(form.get("kind") || "image");
@@ -147,7 +147,7 @@ export async function PATCH(request: Request) {
     const folder =
       typeof body?.folder === "string"
         ? body.folder
-        : "packaginghype/products";
+        : "ProductImages";
     const resourceType: "image" | "video" =
       body?.resourceType === "video" ? "video" : "image";
 

@@ -8,7 +8,7 @@ export function CategoryProductCard({ product }: { product: ProductItem }) {
       href={`/product/${product.slug}`}
       title={product.name}
       imageUrl={product.imageUrl}
-      imageAlt={product.name}
+      imageAlt={product.cms?.thumbnailAlt || product.name}
       variant="product"
     />
   );

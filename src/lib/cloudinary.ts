@@ -133,15 +133,17 @@ export async function renameCloudinaryAsset(options: {
         publicId: target.public_id,
       };
     }
-    throw new Error(
-      "Image file is missing on Cloudinary. Upload the image again, set the image name, then save."
-    );
   }
 
-  // Prefer copy so the old public_id keeps working until the form is saved.
-  // Rename would 404 the previous /media URL immediately.
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME || "xujsn9ij";
+  const uploadSource =
+    source?.secure_url ||
+    (options.url.startsWith("http")
+      ? options.url
+      : `https://res.cloudinary.com/${cloudName}/${resourceType}/upload/${fromId}`);
+
   try {
-    const result = await cloudinary.uploader.upload(source.secure_url, {
+    const result = await cloudinary.uploader.upload(uploadSource, {
       folder,
       public_id: name,
       resource_type: resourceType,
@@ -150,11 +152,12 @@ export async function renameCloudinaryAsset(options: {
       unique_filename: false,
       use_filename: false,
     });
-    return verifiedMediaUrl(
-      typeof result?.public_id === "string" ? result.public_id : toId,
-      resourceType,
-      typeof result?.secure_url === "string" ? result.secure_url : undefined
-    );
+    if (result && typeof result.secure_url === "string") {
+      return {
+        url: toMediaUrl(result.secure_url, { format: result.format }),
+        publicId: result.public_id || toId,
+      };
+    }
   } catch (copyErr) {
     try {
       const result = await cloudinary.uploader.rename(fromId, toId, {
@@ -162,16 +165,20 @@ export async function renameCloudinaryAsset(options: {
         overwrite: true,
         invalidate: true,
       });
-      return verifiedMediaUrl(
-        typeof result?.public_id === "string" ? result.public_id : toId,
-        resourceType,
-        typeof result?.secure_url === "string" ? result.secure_url : undefined
-      );
+      if (result && typeof result.secure_url === "string") {
+        return {
+          url: toMediaUrl(result.secure_url, { format: result.format }),
+          publicId: result.public_id || toId,
+        };
+      }
     } catch {
       throw new Error(cloudinaryErrorMessage(copyErr));
     }
   }
+
+  return verifiedMediaUrl(toId, resourceType);
 }
+
 
 /**
  * Deletes a single Cloudinary asset by its URL.

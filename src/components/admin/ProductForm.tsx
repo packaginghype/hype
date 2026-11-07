@@ -20,7 +20,7 @@ import {
 import { mediaBasename, mediaExtension } from "@/lib/media-url";
 import { slugify } from "@/lib/utils";
 
-const GALLERY_FOLDER = "packaginghype/products/gallery";
+const GALLERY_FOLDER = "ProductImages";
 
 function mediaFilenameSlug(url: string): string {
   return slugify(mediaBasename(url));
@@ -47,9 +47,12 @@ function GalleryImageSlugField({
 
   const imageName = slugify(name.replace(/\.[a-z0-9]{2,5}$/i, ""));
   const currentExt = mediaExtension(url) || "webp";
-  // Exact basename only — "testing" must NOT match URL ".../testing1-1"
+  const currentPathWithoutExt = url
+    ? url.split("?")[0].replace(/\.[a-z0-9]{2,5}$/i, "").replace(/^\/+/, "/")
+    : "";
+  const targetPathWithoutExt = `/media/${GALLERY_FOLDER}/${imageName}`;
   const alreadyNamed =
-    Boolean(imageName) && mediaBasename(url) === imageName;
+    Boolean(imageName) && currentPathWithoutExt === targetPathWithoutExt;
 
   async function applyName(nextName = imageName) {
     const cleanName = slugify(nextName.replace(/\.[a-z0-9]{2,5}$/i, ""));
@@ -1037,7 +1040,7 @@ export function ProductForm({
             onChange={(url) => patch({ videoUrl: url })}
             recommended="MP4 only, max 5MB (vertical 9:16 recommended)"
             kind="video"
-            folder="packaginghype/products/video"
+            folder="ProductImages"
             defaultSlug={values.slug ? `${values.slug}-video` : ""}
           />
           <MediaUploadField
@@ -1045,7 +1048,7 @@ export function ProductForm({
             value={values.videoThumbnailUrl || ""}
             onChange={(url) => patch({ videoThumbnailUrl: url })}
             recommended="Vertical 9:16 or 1:1 · webp, png, jpg, jpeg · max 1MB"
-            folder="packaginghype/products/video-thumb"
+            folder="ProductImages"
             defaultSlug={values.slug ? `${values.slug}-video-thumb` : ""}
           />
         </div>
@@ -1069,7 +1072,7 @@ export function ProductForm({
             onChange={(url) => patch({ thumbnailUrl: url })}
             recommended={CARD_IMAGE.recommended}
             hint={CARD_IMAGE.hint}
-            folder="packaginghype/products/thumb"
+            folder="ProductImages"
             defaultSlug={values.slug || ""}
           />
           <div>
@@ -1292,7 +1295,7 @@ export function ProductForm({
               onChange={(url) => patch({ pageScrollImageUrl: url })}
               recommended={PRODUCT_CONTENT_IMAGE.recommended}
               hint={PRODUCT_CONTENT_IMAGE.hint}
-              folder="packaginghype/products/scroll"
+              folder="ProductImages"
               defaultSlug={values.slug ? `${values.slug}-scroll` : ""}
             />
             <div className="grid gap-4 sm:grid-cols-2">
@@ -1358,7 +1361,7 @@ export function ProductForm({
               onChange={(url) => patch({ faqsImageUrl: url })}
               recommended={PRODUCT_FAQ_IMAGE.recommended}
               hint={PRODUCT_FAQ_IMAGE.hint}
-              folder="packaginghype/products/faqs"
+              folder="ProductImages"
               defaultSlug={values.slug ? `${values.slug}-faq` : ""}
             />
             <div>
@@ -1456,7 +1459,7 @@ export function ProductForm({
           }}
           recommended={PRODUCT_MERCHANT_IMAGE.recommended}
           hint={PRODUCT_MERCHANT_IMAGE.hint}
-          folder="packaginghype/products/merchant"
+          folder="ProductImages"
           defaultSlug={values.slug ? `${values.slug}-merchant` : ""}
         />
         <div>

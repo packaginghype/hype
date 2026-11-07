@@ -150,13 +150,13 @@ export async function PUT(request: Request, { params }: Params) {
   });
   const newGalleryUrls = images.map((img) => img.imageUrl);
 
-  // Never fail the save because Cloudinary cleanup failed
-  try {
-    await deleteRemovedCloudinaryAssets(oldTopLevelUrls, newTopLevelUrls);
-    await deleteRemovedCloudinaryAssets(oldGalleryUrls, newGalleryUrls);
-  } catch (err) {
+  // Cloudinary cleanup runs asynchronously in background so response returns instantly
+  void Promise.all([
+    deleteRemovedCloudinaryAssets(oldTopLevelUrls, newTopLevelUrls),
+    deleteRemovedCloudinaryAssets(oldGalleryUrls, newGalleryUrls),
+  ]).catch((err) => {
     console.error("Cloudinary cleanup after product save failed", err);
-  }
+  });
 
   await logAdminActivity(session, {
     action: "UPDATE",
@@ -170,6 +170,24 @@ export async function PUT(request: Request, { params }: Params) {
   revalidatePath(`/product/${product.slug}`);
   if (existing?.slug && existing.slug !== product.slug) {
     revalidatePath(`/product/${existing.slug}`);
+  }
+
+  // Revalidate category pages where this product is listed
+  try {
+    const attachedCats = await prisma.category.findMany({
+      where: { id: { in: categoryIds } },
+      select: { slug: true },
+    });
+    for (const cat of attachedCats) {
+      if (cat.slug) {
+        revalidatePath(`/${cat.slug}`, "page");
+        revalidatePath(`/${cat.slug}`);
+        revalidatePath(`/category/${cat.slug}`, "page");
+        revalidatePath(`/categories/${cat.slug}`, "page");
+      }
+    }
+  } catch (err) {
+    console.error("Failed to revalidate attached categories", err);
   }
   return NextResponse.json({ product });
 }

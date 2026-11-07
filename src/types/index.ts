@@ -64,6 +64,7 @@ export interface ProductItem {
   description: string;
   fullDescription?: string;
   imageUrl: string;
+  thumbnailUrl?: string;
   imageUrls?: string[];
   startingPrice?: number | null;
   originalPrice?: number | null;

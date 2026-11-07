@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import type { ProductItem } from "@/types";
 
 const VISIBLE = 4;
-const THUMB_GAP_PX = 10;
+const THUMB_GAP_PX = 6;
 /** Whole lines only — never clip mid-glyph */
 const DESC_LINE_CLAMP = "line-clamp-7";
 
@@ -110,9 +110,9 @@ export default function ProductHero({
 
   return (
     <div>
-      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:items-stretch lg:gap-8">
+      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2 lg:items-stretch lg:gap-3.5 xl:gap-4">
         {/* Left: title, longer description, quote form stretched to gallery bottom */}
-        <div className="flex min-h-0 min-w-0 flex-col">
+        <div className="flex min-h-0 min-w-0 flex-col justify-between">
           <Breadcrumbs variant="slash" items={breadcrumbs} />
 
           <h1 className="mt-2 text-left text-[1.65rem] font-extrabold leading-tight tracking-tight text-[#111111] sm:mt-4 sm:text-[1.9rem] lg:text-[2.05rem]">
@@ -183,7 +183,7 @@ export default function ProductHero({
 
           <div
             id="product-quote"
-            className="mt-4 scroll-mt-28 sm:mt-auto sm:pt-6"
+            className="mt-4 scroll-mt-28 lg:mt-auto lg:pt-6"
           >
             <CategoryQuoteForm
               productName={product.name}
@@ -205,9 +205,9 @@ export default function ProductHero({
           </div>
         </div>
 
-        {/* Right: main image + thumbnails — sets the stretch height for the form */}
-        <div className="flex min-w-0 flex-col gap-2.5 sm:gap-3.5">
-          <div className="group relative aspect-[4/3] w-full flex-1 overflow-hidden rounded-[8px] bg-white sm:min-h-[280px] sm:rounded-[10px] lg:min-h-[320px]">
+        {/* Right: main image + thumbnails */}
+        <div className="flex min-w-0 flex-col gap-1 sm:gap-1.5">
+          <div className="group relative aspect-[4/3] w-full overflow-hidden rounded-[8px] bg-white sm:rounded-[10px]">
             {images.map((src, index) => (
               <div
                 key={`${src}-main-${index}`}

@@ -32,7 +32,7 @@ export function ImageUploadField({
   onChange,
   recommended,
   hint = "Max 1MB · JPG, PNG, WEBP",
-  folder = "packaginghype/categories",
+  folder = "CatagoryImages",
   accept = "image/jpeg,image/png,image/webp,image/gif",
   className,
   defaultSlug = "",
@@ -62,14 +62,18 @@ export function ImageUploadField({
 
   const cleanFolder = folder.replace(/^\/+|\/+$/g, "");
   const imageName = slugify(name.replace(/\.[a-z0-9]{2,5}$/i, ""));
-  const currentBase = mediaBasename(value);
   const currentExt = mediaExtension(value) || "webp";
   const targetPath = imageName
     ? `/media/${cleanFolder}/${imageName}.${currentExt}`
     : `/media/${cleanFolder}/[image-name].${currentExt}`;
-  // Exact basename only — "testing" must NOT match "testing1-1"
+
+  // Compare full path (folder + name) so folder changes like packaginghype/products/thumb -> ProductImages trigger Apply
+  const currentPathWithoutExt = value
+    ? value.split("?")[0].replace(/\.[a-z0-9]{2,5}$/i, "").replace(/^\/+/, "/")
+    : "";
+  const targetPathWithoutExt = `/media/${cleanFolder}/${imageName}`;
   const alreadyNamed =
-    Boolean(value) && Boolean(imageName) && currentBase === imageName;
+    Boolean(value) && Boolean(imageName) && currentPathWithoutExt === targetPathWithoutExt;
 
   async function applyImageName(nextName = imageName) {
     const cleanName = slugify(nextName.replace(/\.[a-z0-9]{2,5}$/i, ""));
@@ -98,7 +102,7 @@ export function ImageUploadField({
         return false;
       }
       onChange(data.url);
-      setStatus("Image name set on Cloudinary — click Update to save in database.");
+      setStatus("Image name applied successfully! Click Update to save.");
       return true;
     } catch {
       setError("Could not set image name. Try again.");
