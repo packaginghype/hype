@@ -333,38 +333,6 @@ export function BlogForm({
             placeholder="Enter Short Description"
           />
         </div>
-
-        <div className="grid gap-4 sm:grid-cols-3">
-          <div>
-            <FieldLabel>Author</FieldLabel>
-            <input
-              value={values.author || ""}
-              onChange={(e) => patch({ author: e.target.value })}
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <FieldLabel>Publish Date</FieldLabel>
-            <input
-              type="date"
-              value={values.publishedDate || ""}
-              onChange={(e) => patch({ publishedDate: e.target.value })}
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <FieldLabel>Read Time</FieldLabel>
-            <input
-              value={values.readTime || ""}
-              onChange={(e) => patch({ readTime: e.target.value })}
-              className={inputClass}
-              placeholder="e.g. 5 min read"
-            />
-            <p className="mt-1 text-[11px] text-[#6B7280]">
-              Leave empty to auto-estimate from content.
-            </p>
-          </div>
-        </div>
       </Section>
 
       <Section title="Description">

@@ -1,11 +1,8 @@
 import { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/ui/Container";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { RichText } from "@/components/ui/RichText";
-import { BlogShareButtons } from "@/components/blog/BlogShareButtons";
 import { BlogReadingProgress } from "@/components/blog/BlogReadingProgress";
 import { BlogTableOfContents } from "@/components/blog/BlogTableOfContents";
 import { BlogFaqSection } from "@/components/blog/BlogFaqSection";
@@ -14,9 +11,7 @@ import { FaqAccentHeading } from "@/components/ui/FAQAccordion";
 import { JsonLdScript } from "@/components/seo/JsonLdScript";
 import { PageFadeIn } from "@/components/ui/PageFadeIn";
 import { SafeImage } from "@/components/ui/SafeImage";
-import { Calendar, Clock, ArrowLeft, BookOpen } from "lucide-react";
 import {
-  formatBlogDate,
   getBlogBySlug,
   getPublishedBlogs,
   getBlogFallbackImage,
@@ -69,13 +64,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-/** Rough word-count → reading-time estimate */
-function readingTime(html: string): string {
-  const words = html.replace(/<[^>]*>/g, " ").split(/\s+/).filter(Boolean).length;
-  const mins = Math.max(1, Math.round(words / 200));
-  return `${mins} min read`;
-}
-
 export default async function BlogDetailPage({ params }: Props) {
   const { slug } = await params;
   const post = await getBlogBySlug(slug);
@@ -103,8 +91,6 @@ export default async function BlogDetailPage({ params }: Props) {
     post.bannerImageUrl ||
     post.featuredImage ||
     getBlogFallbackImage(post.slug);
-  const estRead =
-    post.readTime?.trim() || readingTime(post.content || "");
   const videoEmbed = toVideoEmbedUrl(post.videoUrl);
   const faqItems = (post.faqs || [])
     .map((f) => ({
@@ -170,30 +156,6 @@ export default async function BlogDetailPage({ params }: Props) {
 
         {/* ── Main Article Body + Table of Contents Layout ──────────── */}
         <Container className="max-w-6xl pt-8 sm:pt-10 pb-12 sm:pb-16">
-          {/* Article Meta Bar (Author, Date, Reading time, Share) */}
-          <div className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 pb-5">
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-[#4A5568]">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#172455] text-xs font-bold text-white shadow-sm">
-                  PH
-                </div>
-                <span className="font-semibold text-[#172455]">{post.author}</span>
-              </div>
-              <span className="text-gray-300">•</span>
-              <div className="flex items-center gap-1.5 text-xs text-[#6B7280]">
-                <Calendar className="h-3.5 w-3.5 text-gray-400" />
-                <time dateTime={new Date(post.publishedDate).toISOString()}>
-                  {formatBlogDate(post.publishedDate)}
-                </time>
-              </div>
-              <span className="text-gray-300">•</span>
-              <div className="flex items-center gap-1.5 text-xs text-[#6B7280]">
-                <Clock className="h-3.5 w-3.5 text-gray-400" />
-                <span>{estRead}</span>
-              </div>
-            </div>
-            <BlogShareButtons title={post.title} />
-          </div>
           <div className="grid items-start gap-10 lg:grid-cols-12 lg:gap-12">
             {/* Article Content Column */}
             <div
@@ -240,42 +202,6 @@ export default async function BlogDetailPage({ params }: Props) {
                   </div>
                 </section>
               ) : null}
-
-              {/* Author Bio & Actions */}
-              <div className="mt-14 border-t border-gray-100 pt-8">
-                <div className="flex flex-col gap-6 rounded-2xl border border-gray-100 bg-[#FAFAFA] p-6 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#172455] text-sm font-bold text-white shadow-sm">
-                      <BookOpen className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-[#172455]">
-                        {post.author}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        Packaging Hype Editorial Team • Industry Packaging
-                        Insights &amp; Trends
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <Link
-                      href="/quote"
-                      className="inline-flex items-center justify-center rounded-lg bg-[#FF5548] px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-[#e04337]"
-                    >
-                      Get Custom Quote
-                    </Link>
-                    <Link
-                      href="/blog"
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-xs font-bold text-[#172455] transition-colors hover:border-[#172455]"
-                    >
-                      <ArrowLeft className="h-3.5 w-3.5" />
-                      All Articles
-                    </Link>
-                  </div>
-                </div>
-              </div>
             </div>
 
             {/* Table of Contents Sticky Sidebar */}
