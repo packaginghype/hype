@@ -223,8 +223,8 @@ export function CategoryDetailPage({
         <section className="bg-white pt-4 pb-10 sm:pt-6 sm:pb-12 lg:pt-6 lg:pb-14">
           <Container className={contentWidth}>
             <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-2 lg:gap-10 lg:h-[480px] xl:h-[520px]">
-              {/* Left Column — 1200 × 900 px (4:3) */}
-              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[16px] border border-[#E5E7EB] bg-white shadow-sm sm:rounded-[20px] lg:h-full">
+              {/* Left Column — 900 × 900 px (1:1) */}
+              <div className="relative aspect-square w-full overflow-hidden rounded-[16px] border border-[#E5E7EB] bg-white shadow-sm sm:rounded-[20px] lg:h-full">
                 {cms?.pageScrollImageUrl ||
                   about.imageUrl ||
                   products[0]?.imageUrl ? (

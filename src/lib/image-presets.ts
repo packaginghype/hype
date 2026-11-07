@@ -21,12 +21,12 @@ export const CARD_IMAGE = {
   height: 900,
 } as const;
 
-/** No 3: Product page content section image — 1200 × 900 px (4:3) */
+/** No 3: Product page content section image — 900 × 900 px (1:1) */
 export const PRODUCT_CONTENT_IMAGE = {
-  recommended: "1200 × 900 px (4:3)",
-  hint: "Max 2MB · JPG, PNG, WEBP · upload at 1200×900",
-  aspectClass: "aspect-[4/3]",
-  width: 1200,
+  recommended: "900 × 900 px (1:1)",
+  hint: "Max 2MB · JPG, PNG, WEBP · upload at 900×900",
+  aspectClass: "aspect-square",
+  width: 900,
   height: 900,
 } as const;
 
@@ -64,12 +64,12 @@ export const CATEGORY_THUMBNAIL_IMAGE = {
   height: 900,
 } as const;
 
-/** Category content section image — 1200 × 900 px (4:3) */
+/** Category content section image — 900 × 900 px (1:1) */
 export const CATEGORY_CONTENT_IMAGE = {
-  recommended: "1200 × 900 px (4:3)",
-  hint: "Max 2MB · JPG, PNG, WEBP · upload at 1200×900",
-  aspectClass: "aspect-[4/3]",
-  width: 1200,
+  recommended: "900 × 900 px (1:1)",
+  hint: "Max 2MB · JPG, PNG, WEBP · upload at 900×900",
+  aspectClass: "aspect-square",
+  width: 900,
   height: 900,
 } as const;
 

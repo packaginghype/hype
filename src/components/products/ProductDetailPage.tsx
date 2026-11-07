@@ -131,8 +131,8 @@ export default function ProductDetailPage({
         <section className="bg-white py-6 sm:py-12 lg:py-16">
           <Container className={contentWidth}>
             <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2 lg:gap-10 lg:h-[480px] xl:h-[520px]">
-              {/* Left Column — Designated Image Frame (1200 × 900 px, 4:3) */}
-              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[16px] border border-[#E5E7EB] bg-white shadow-sm sm:rounded-[20px] lg:h-full">
+              {/* Left Column — Designated Image Frame (900 × 900 px, 1:1) */}
+              <div className="relative aspect-square w-full overflow-hidden rounded-[16px] border border-[#E5E7EB] bg-white shadow-sm sm:rounded-[20px] lg:h-full">
                 {scrollImage ? (
                   <SafeImage
                     src={scrollImage}

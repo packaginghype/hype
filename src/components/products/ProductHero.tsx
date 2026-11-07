@@ -12,7 +12,7 @@ import type { ProductItem } from "@/types";
 const VISIBLE = 4;
 const THUMB_GAP_PX = 6;
 /** Whole lines only — never clip mid-glyph */
-const DESC_LINE_CLAMP = "line-clamp-7";
+const DESC_LINE_CLAMP = "line-clamp-[9]";
 
 type Crumb = { label: string; href?: string };
 
@@ -72,7 +72,9 @@ export default function ProductHero({
     const check = () => {
       const inner = descRef.current;
       if (!inner) return;
-      setIsOverflowing(inner.scrollHeight - inner.clientHeight > 1);
+      // Only show "See More" when there is genuinely hidden content
+      // (a full line height ~24px minimum to avoid pixel-rounding false positives)
+      setIsOverflowing(inner.scrollHeight - inner.clientHeight >= 40);
     };
     check();
     const id = requestAnimationFrame(check);
@@ -112,37 +114,39 @@ export default function ProductHero({
     <div>
       <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2 lg:items-stretch lg:gap-3.5 xl:gap-4">
         {/* Left: title, longer description, quote form stretched to gallery bottom */}
-        <div className="flex min-h-0 min-w-0 flex-col justify-between">
-          <Breadcrumbs variant="slash" items={breadcrumbs} />
+        <div className="flex h-full min-h-0 min-w-0 flex-col">
+          <div>
+            <Breadcrumbs variant="slash" items={breadcrumbs} />
 
-          <h1 className="mt-2 text-left text-[1.65rem] font-extrabold leading-tight tracking-tight text-[#111111] sm:mt-4 sm:text-[1.9rem] lg:text-[2.05rem]">
-            {product.name}
-          </h1>
+            <h1 className="mt-2 text-left text-[1.65rem] font-extrabold leading-tight tracking-tight text-[#111111] sm:mt-4 sm:text-[1.9rem] lg:text-[2.05rem]">
+              {product.name}
+            </h1>
 
-          {product.description ? (
-            <div className="relative mt-2.5 shrink-0 sm:mt-3">
-              <div
-                ref={descRef}
-                className={cn(
-                  DESC_LINE_CLAMP,
-                  "text-left text-[14px] leading-[1.7] text-[#444] sm:text-[14.5px]",
-                  "[&_p]:mb-0 [&_p+p]:mt-[0.85em]"
-                )}
-              >
-                <RichText html={product.description} />
-              </div>
-
-              {isOverflowing ? (
-                <button
-                  type="button"
-                  onClick={() => setDescOpen(true)}
-                  className="absolute bottom-0 right-0 z-[1] cursor-pointer bg-white pl-1 text-[13px] font-semibold leading-[1.7] text-[#FF5548] before:absolute before:inset-y-0 before:right-full before:w-12 before:bg-gradient-to-r before:from-transparent before:to-white hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5548]/40"
+            {product.description ? (
+              <div className="relative mt-2.5 shrink-0 sm:mt-3">
+                <div
+                  ref={descRef}
+                  className={cn(
+                    DESC_LINE_CLAMP,
+                    "text-left text-[14px] leading-[1.7] text-[#444] sm:text-[14.5px]",
+                    "[&_p]:mb-0 [&_p+p]:mt-[0.85em]"
+                  )}
                 >
-                  … See More
-                </button>
-              ) : null}
-            </div>
-          ) : null}
+                  <RichText html={product.description} />
+                </div>
+
+                {isOverflowing ? (
+                  <button
+                    type="button"
+                    onClick={() => setDescOpen(true)}
+                    className="absolute bottom-0 right-0 z-[1] cursor-pointer bg-white pl-1 text-[13px] font-semibold leading-[1.7] text-[#FF5548] before:absolute before:inset-y-0 before:right-full before:w-12 before:bg-gradient-to-r before:from-transparent before:to-white hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5548]/40"
+                  >
+                    … See More
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
 
           {descOpen && product.description ? (
             <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-8">
@@ -183,7 +187,7 @@ export default function ProductHero({
 
           <div
             id="product-quote"
-            className="mt-4 scroll-mt-28 lg:mt-auto lg:pt-6"
+            className="mt-4 scroll-mt-28 lg:mt-auto"
           >
             <CategoryQuoteForm
               productName={product.name}
